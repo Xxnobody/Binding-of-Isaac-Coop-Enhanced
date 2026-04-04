@@ -65,15 +65,15 @@ Due to how some treasure rooms are layed out, the item pedestals may end up havi
 ## Required Mods
 Some mods are required to get the full experience, some are just required.
 #### Repentogon (https://steamcommunity.com/sharedfiles/filedetails/?id=3127536138)
-	- API extender.
-	- Isaac modding API is limited WITH Repentogon, so it's neccessary.
+- API extender.
+- Isaac modding API is limited WITH Repentogon, so it's neccessary.
 #### CustomHealthAPI (https://steamcommunity.com/sharedfiles/filedetails/?id=3699546779)
-	- Techinically you need a mod that uses CustomHealthAPI. Mods like Repentance Plus (https://steamcommunity.com/sharedfiles/filedetails/?id=2627014611) or Restored Hearts (https://steamcommunity.com/sharedfiles/filedetails/?id=3476266920) come with it prepackaged.
-	- Alternatively (and recommendedly) you can use my standalone version (see optional dependencies), which fixes some issues with the API and gives it additional features that this mod utilizes.
+- Techinically you need a mod that uses CustomHealthAPI. Mods like Repentance Plus (https://steamcommunity.com/sharedfiles/filedetails/?id=2627014611) or Restored Hearts (https://steamcommunity.com/sharedfiles/filedetails/?id=3476266920) come with it prepackaged.
+- Alternatively (and recommendedly) you can use my standalone version (see optional dependencies), which fixes some issues with the API and gives it additional features that this mod utilizes.
 #### Enhanced Boss Bars (https://steamcommunity.com/sharedfiles/filedetails/?id=2635267643)
-	- Needed to display boss hp bars
+- Needed to display boss hp bars
 #### MinimapAPI (https://steamcommunity.com/sharedfiles/filedetails/?id=1978904635)
-	- Needed to display minimap
+- Needed to display minimap
 
 ## Acknowledgements
 _Kilburn
