@@ -51,6 +51,13 @@ Here are each modules features. Each module can be totally disabled by the main 
 	['coop players print all']: Prints data to the console about each player (including twins) that can be used for all coop commands.
 	['coop players print main']: Prints data to the console about each player (including twins) that can be used for all coop commands.
 
+## Built-in Mod Support
+
+
+## Known Incompatibilites
+Most mods that don't ad HUD elements, change Coop Ghosts, or alter Treasure Rooms are compatible. Otherwise compatability is dubious. Here's a list of known Incompatible mods (that won't get compatibility).
+- Visible Lost Health and Visible Holy Mantles (IDK what IS compatible with these)
+
 ## Mod Support
 I've attempted to make the mod as future proof and compatible as possible, adding various API implementations and avoiding hard-coded values where I could. Many mods have built-in support but many more do not. A lot of other mods won't need support added for this mod, but many large mods most likely will. Isaac modding is a headache at the best of times and the API lacks a lot of features, so compatibility will usually have to added by this mod or the other. I'm open to adding compatibility to many mods where possible, but it's easier to accomplish this when other mods use global variables. Some mods cannot be made compatible just due to the way they're written unfortunately.
 
