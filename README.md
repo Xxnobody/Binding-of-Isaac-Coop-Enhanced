@@ -65,29 +65,29 @@ Due to how some treasure rooms are layed out, the item pedestals may end up havi
 ## Required Mods
 Some mods are required to get the full experience, some are just required.
 #### Repentogon (https://steamcommunity.com/sharedfiles/filedetails/?id=3127536138)
-	* API extender.
-	* Isaac modding API is limited WITH Repentogon, so it's neccessary.
+	- API extender.
+	- Isaac modding API is limited WITH Repentogon, so it's neccessary.
 #### CustomHealthAPI (https://steamcommunity.com/sharedfiles/filedetails/?id=3699546779)
-	* Techinically you need a mod that uses CustomHealthAPI. Mods like Repentance Plus (https://steamcommunity.com/sharedfiles/filedetails/?id=2627014611) or Restored Hearts (https://steamcommunity.com/sharedfiles/filedetails/?id=3476266920) come with it prepackaged.
-	*Alternatively (and recommendedly) you can use my standalone version (see optional dependencies), which fixes some issues with the API and gives it additional features that this mod utilizes.
+	- Techinically you need a mod that uses CustomHealthAPI. Mods like Repentance Plus (https://steamcommunity.com/sharedfiles/filedetails/?id=2627014611) or Restored Hearts (https://steamcommunity.com/sharedfiles/filedetails/?id=3476266920) come with it prepackaged.
+	- Alternatively (and recommendedly) you can use my standalone version (see optional dependencies), which fixes some issues with the API and gives it additional features that this mod utilizes.
 #### Enhanced Boss Bars (https://steamcommunity.com/sharedfiles/filedetails/?id=2635267643)
-	* Needed to display boss hp bars
+	- Needed to display boss hp bars
 #### MinimapAPI (https://steamcommunity.com/sharedfiles/filedetails/?id=1978904635)
-	* Needed to display minimap
+	- Needed to display minimap
 
 ## Acknowledgements
 _Kilburn
-* Lead developer of Antibirth
-* Code from reHUD, which was used for screen positioning.
-
-Kona (https://steamcommunity.com/id/Konoca)
-*  Co-op HUD + (https://steamcommunity.com/sharedfiles/filedetails/?id=3229942849) was used in several ways to aid in development.
-
-Srokks (https://steamcommunity.com/id/srokks)
-*  coopHUD *WIP* (https://steamcommunity.com/sharedfiles/filedetails/?id=2731267631) was used to aid in development.
+- Lead developer of Antibirth
+- Code from reHUD, which was used for screen positioning.
 
 wofsauge (https://steamcommunity.com/id/Wofsauge, https://github.com/wofsauge) 
-* TBoI Lua API Documentation (https://wofsauge.github.io/IsaacDocs/rep/index.html)
+- TBoI Lua API Documentation (https://wofsauge.github.io/IsaacDocs/rep/index.html)
+
+Kona (https://steamcommunity.com/id/Konoca)
+- Co-op HUD+ (https://steamcommunity.com/sharedfiles/filedetails/?id=3229942849) was used in several ways to aid in development.
+
+Srokks (https://steamcommunity.com/id/srokks)
+- coopHUD *WIP* (https://steamcommunity.com/sharedfiles/filedetails/?id=2731267631) was used to aid in development.
 
 ## Issues
 All issues should either be reported here in the Issues tab, or by posting on the Steam Page. Please include:
