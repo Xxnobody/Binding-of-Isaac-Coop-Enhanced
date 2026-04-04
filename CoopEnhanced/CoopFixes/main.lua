@@ -40,6 +40,7 @@ function CoopFixes.JoinFix(_)
 	local level = Game():GetLevel();
 	local isStartingRoom = (level:GetStage() == LevelStage.STAGE1_1 and level:GetCurrentRoomIndex() == level:GetStartingRoomIndex());
 	local max_visits = CoopEnhanced.Config.CoopFixes.join.max;
+	if max_visits == 0 then max_visits = level:GetCurrentRoomDesc().VisitedCount + 1; end
 	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.FIXES_PRE_JOIN_EXECUTE, max_visits); -- Execute Pre Join Callbacks (max_visits(int))
 	if isStartingRoom and level:GetCurrentRoomDesc().VisitedCount <= max_visits then
 		Game():SetStateFlag(GameStateFlag.STATE_BOSSPOOL_SWITCHED, false); -- In Rep, this instead prevents true coop from starting

@@ -69,6 +69,7 @@ ModConfigMenu.AddSetting(
 	CoopFixes.MCM.category,
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0,
 		CurrentSetting = function() return CoopEnhanced.Config.CoopFixes.join.max; end,
 		Display = function() return 'Maximim Visits: ' .. CoopEnhanced.Config.CoopFixes.join.max; end,
 		OnChange = function(n) CoopEnhanced.Config.CoopFixes.join.max = n; end,
