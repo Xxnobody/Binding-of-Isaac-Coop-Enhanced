@@ -48,27 +48,27 @@ function CoopHUD.Reflourished()
 		local function RenderTimer(player_entity)
 			local player_data = CoopHUD.getDataFromEntity(player_entity);
 			if not mod.Config.CoopHUD.mods.REFLOURISHED.excited_timer.enabled or not player_data then return; end
-			local index = player_entity.ControllerIndex;
-			local cooldown = playerTimers[index];
+			local controller_index = player_entity.ControllerIndex;
+			local cooldown = playerTimers[controller_index];
 			local seconds = math.ceil((cooldown / 30 % 30));
 			
 			local config = mod.Config.CoopHUD.mods.REFLOURISHED.excited_timer;
 			
-			local isMapDown = Utils.IsPlayerMapDown[player_data.Player.Index];
+			local isMapDown = CoopHUD.IsPlayerMapDown[controller_index];
 			
 			local isVisible = config.display == 3 and (seconds <= 9 or seconds > 26) or (config.display == 0 or (config.display == 1 and isMapDown) or (config.display == 2 and not isMapDown));
 			if not isVisible then return; end
 			
 			local showSeconds = IsaacReflourished:GetSettingsValue("ExcitedTimerShowSeconds") == 2;
 			local displayPos = IsaacReflourished:GetSettingsValue("ExcitedTimerDisplayPos");
-			fadeAlpha[index] = fadeAlpha[index] or 0;
+			fadeAlpha[controller_index] = fadeAlpha[controller_index] or 0;
 
 			if config.display == 3 then
-				fadeAlpha[index] =  Utils.IsPlayerMapDown[player_entity.ControllerIndex] and math.min(config.opacity, fadeAlpha[index] + config.fade_speed) or math.max(0, fadeAlpha[index] - config.fade_speed);
+				fadeAlpha[controller_index] =  CoopHUD.IsPlayerMapDown[controller_index] and math.min(config.opacity, fadeAlpha[controller_index] + config.fade_speed) or math.max(0, fadeAlpha[controller_index] - config.fade_speed);
 			else
-				fadeAlpha[index] = config.opacity;
+				fadeAlpha[controller_index] = config.opacity;
 			end
-			if fadeAlpha[index] <= 0 then return; end
+			if fadeAlpha[controller_index] <= 0 then return; end
 
 			local pos = (config.anchor == 0 or not player_data) and Isaac.WorldToScreen(player_entity.Position) + config.offset + Vector(-1, -41) or player_data.Edge.indexed + ((config.offset + CoopHUD.Positions.Trinket[1] + Vector(16,0)) * player_data.Edge.multipliers)
 			if displayPos and displayPos == 2 then
@@ -84,10 +84,10 @@ function CoopHUD.Reflourished()
 
 			timer.Scale = config.scale;
 			timer:SetFrame("Default", timerFrame);
-			timer.Color = Color(1, 1, 1, fadeAlpha[index]);  -- set icon transparency
+			timer.Color = Color(1, 1, 1, fadeAlpha[controller_index]);  -- set icon transparency
 			timer:Render(pos);
 
-			local color = KColor(1, 1, 1, fadeAlpha[index] * 0.8);  -- slightly lower alpha for text
+			local color = KColor(1, 1, 1, fadeAlpha[controller_index] * 0.8);  -- slightly lower alpha for text
 			if showSeconds then
 				mod.Fonts.CoopHUD.timer:DrawStringScaled(tostring(seconds), pos.X + 5, pos.Y + 2, 0.75, 0.75, color, 0, false);
 			end
@@ -137,9 +137,9 @@ function CoopHUD.Reflourished()
 		mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Countdown);
 
 		local function CleanTable(_,player_entity)
-			local index = player_entity.ControllerIndex;
-			if playerTimers[index] then playerTimers[index] = nil; end
-			if fadeAlpha[index] then fadeAlpha[index] = nil; end
+			local controller_index = player_entity.ControllerIndex;
+			if playerTimers[controller_index] then playerTimers[controller_index] = nil; end
+			if fadeAlpha[controller_index] then fadeAlpha[controller_index] = nil; end
 		end
 		mod:AddCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, CleanTable, EntityType.ENTITY_PLAYER);
 	end

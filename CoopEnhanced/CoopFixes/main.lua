@@ -4,6 +4,8 @@ local CoopFixes = CoopEnhanced.CoopFixes;
 local game = Game();
 local Utils = mod.Utils;
 
+local json = require("json");
+
 -- Saving and Loading
 function CoopEnhanced.CoopFixes.gameStart(isCont, data)
 	CoopFixes.DATA = {PLAYERS = {}};
@@ -11,6 +13,7 @@ function CoopEnhanced.CoopFixes.gameStart(isCont, data)
 	
 	if isCont and data and data.CoopFixes then
 		CoopFixes.DATA.Players = data.CoopFixes.players;
+		--CoopFixes.BackupAllPlayers(true);
 		if mod.Config.CoopFixes.rejoin then mod:AddCallback(ModCallbacks.MC_POST_UPDATE, CoopFixes.RejoinFix); end
 	end
 end
@@ -54,7 +57,7 @@ mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CoopFixes.JoinFix);
 --Rejoin Fix
 -- Fixes Characters changing type on rejoin when controller order changes
 function CoopFixes.RejoinFix() --Check if Controller Index is set wildly low/high (e.g. 4294967295 instead of 1)
-	if game:GetFrameCount() % 30 ~= 0 then return; end -- Check only every 30 frames or every second
+	if game:GetFrameCount() % 10 ~= 0 then return; end -- Check only every 10 frames or thrice a second
 	if CustomHealthAPI and mod.Config.CoopFixes.rejoin then 
 		for i = 1, game:GetNumPlayers() do
 			local player_entity = Isaac.GetPlayer(i - 1);
@@ -71,14 +74,17 @@ function CoopFixes.FixPlayers()
 	for i = 1, game:GetNumPlayers(), 1 do
 		local player_entity = Isaac.GetPlayer(i - 1);
 		local player_id = Utils.GetPlayerID(player_entity);
-		local player_data = CoopFixes.DATA.Players[player_id];
-		if not player_data then mod.Debug("Player Index " .. i .. " doesn't exist! Cannot load their rejoin data.",CoopFixes.Name); return; end
+		if not CoopFixes.DATA.Players[player_id] or not CoopFixes.DATA.Players[player_id].Data then mod.Debug("Player (" .. i .. ") ID: " .. player_id .. " doesn't exist! Cannot load their rejoin data.",CoopFixes.Name); return; end
+		local player_data = CoopFixes.DATA.Players[player_id].Data;
 		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.FIXES_PRE_REJOIN_EXECUTE, i, player_data, player_entity); -- Execute Pre Fix Player data Callbacks (player_index, player_data(table), player_entity(EntityPlayer))
 		-- Character type
-		if player_data and player_entity:GetPlayerType() ~= player_data.Type then
-			mod.Debug("Player (" .. i .. ") has changed character(s) to " .. Utils.getCharacterByType(player_entity:GetPlayerType()) .. " since last load, reseting to original character type " .. mod.CharacterNames[player_data.Type],CoopFixes.Name);
-			CustomHealthAPI.Helper.ChangePlayerType(player_entity, player_data.Type);
-			CustomHealthAPI.Helper.LoadHealthOfPlayerFromBackup(player_entity, player_data.Health);
+		if player_data.Type and player_entity:GetPlayerType() ~= player_data.Type then
+			mod.Debug("Player (" .. i .. ") has changed character(s) to " .. player_entity:GetName() .. " since last load, reseting to original character type " .. (Utils.getCharacterByType(player_data.Type).Name or "nil"),CoopFixes.Name);
+			if CustomHealthAPI then CustomHealthAPI.Helper.ChangePlayerType(player_entity, player_data.Type); else player_entity:ChangePlayerType(player_data.Type); end
+		end
+		-- Character Health
+		if player_data.Health then
+			CustomHealthAPI.Helper.LoadPlayerHealthFromBackup(player_entity, player_data.Health);
 		end
 		-- Active slots
 		for slot,active in pairs(player_data.Actives) do
@@ -98,10 +104,11 @@ function CoopFixes.FixPlayers()
 			if player_data.Charge.Poop > 0 and player_entity:GetPoopMana() ~= player_data.Charge.Poop then player_entity:AddPoopMana(player_data.Charge.Poop - player_entity:GetPoopMana()); end
 		end
 		--Pocket slots
-		for slot,pocket in pairs(player_data.Pockets) do
+		for slot,pocket in ipairs(player_data.Pockets) do
 			local pocket_item = player_entity:GetPocketItem(slot);
 			local pocket_item_slot = pocket_item:GetType() == PocketItemType.ACTIVE_ITEM and player_entity:GetActiveItemDesc((pocket_item:GetSlot() - 1)) or pocket_item:GetSlot();
-			if pocket and pocket.Slot and ((pocket_item:GetType() ~= pocket.Type and pocket.Type == -1 and pocket_item:GetSlot() ~= 0) or (pocket.Type == PocketItemType.ACTIVE_ITEM) or pocket_item_slot ~= pocket.Slot) then
+			local pocket_item_type = (pocket_item_slot == 0 and -1 or pocket_item:GetType());
+			if pocket and pocket.Slot and (pocket_item_type ~= pocket.Type or pocket_item_slot ~= pocket.Slot) then
 				mod.Debug("Player (" .. i .. ") has changed pocket item in slot " .. slot .. " since last load, reseting to original item.",CoopFixes.Name);
 				if pocket.Type <= PocketItemType.PILL then player_entity:SetPill(slot,pocket.Slot);
 				elseif pocket.Type <= PocketItemType.CARD then player_entity:SetCard(slot,pocket.Slot);
@@ -158,7 +165,7 @@ function CoopFixes.BackupAllPlayers(save_floor)
 	end
 end
 function CoopFixes.BackupPlayer(player_index,player_entity,save_floor)
-	if not player_entity or not CustomHealthAPI or not mod.Config.CoopFixes.rejoin then return; end
+	if not player_entity or not mod.Config.CoopFixes.rejoin then return; end
 	
 	local player_id = Utils.GetPlayerID(player_entity);
 	if CoopFixes.DATA.Players == nil then CoopFixes.DATA.Players = {}; end
@@ -184,7 +191,7 @@ function CoopFixes.BackupPlayer(player_index,player_entity,save_floor)
 		end
 	end
 	
-	local health = CustomHealthAPI.Library.GetHealthBackup(player_entity) or CoopFixes.DATA.Players[player_id].Health;
+	local health = CustomHealthAPI and CustomHealthAPI.Library.GetHealthBackup(player_entity) or nil;
 	
 	local player_backups = CoopFixes.DATA.Players[player_id].Backups or {};
 	local player_data = {Floor = game:GetLevel():GetName(), Actives = actives, Pockets = pockets, Type = player_entity:GetPlayerType(), Charge = {Blood = player_entity:GetBloodCharge(), Poop = player_entity:GetPoopMana(), Soul = player_entity:GetSoulCharge()}, Health = health};
@@ -194,6 +201,7 @@ function CoopFixes.BackupPlayer(player_index,player_entity,save_floor)
 	CoopFixes.DATA.Players[player_id] = {Backups = player_backups, Data = player_data};
 	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.FIXES_POST_REJOIN_BACKUP_SAVE, player_index, player_data, player_entity); -- Execute Post Backup data saving Callbacks (player_index, player_data(table), player_entity(EntityPlayer))
 	mod.Debug("Player (" .. player_index .. ") has been backed up:",CoopFixes.Name);
+	mod.Debug("[" .. player_id .. "]",CoopFixes.Name);
 	mod.Debug(CoopFixes.DATA.Players[player_id],"");
 end
 

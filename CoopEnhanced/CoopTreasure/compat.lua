@@ -354,5 +354,27 @@ local function ModCompat()
 			room_data.Safe.Enable = false;
 		end;
 	end
+	if CCO and CCO.ZodiacPlanetariums then
+		local function PlanetariumZodiaks(room_data)
+			if not room_data or game:GetRoom():GetType() ~= RoomType.ROOM_PLANETARIUM then return; end
+			local item_config = Isaac.GetItemConfig();
+			local rng = RNG(game:GetRoom():GetSpawnSeed());
+			local zodiac_items = {};
+			
+			for i,item in pairs(CCO.ZodiacPlanetariums.Items) do table.insert(zodiac_items,item.ID); end
+			for ii,player_items in pairs(room_data.Treasure.Items) do
+				if player_items[2] then
+					local pedestal_entity = player_items[2].Pointer and player_items[2].Pointer.Ref and player_items[2].Pointer.Ref:ToPickup() or nil;
+					if pedestal_entity then
+						player_items[2].SubType = zodiac_items[rng:RandomInt(1, #zodiac_items)];
+						pedestal_entity.SubType = player_items[2].SubType;
+						pedestal_entity.OptionsPickupIndex = ii;
+						pedestal_entity:ReloadGraphics();
+					end
+				end
+			end
+		end
+		mod.Registry.AddCallback(mod.Callbacks.TREASURE_POST_ROOM_SETUP, PlanetariumZodiaks);
+	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_MODS_LOADED, ModCompat);

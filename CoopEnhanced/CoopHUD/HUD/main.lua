@@ -73,8 +73,8 @@ function CoopHUD.RenderPlayers(screen_size, screen_center)
 				end
 			else
 				player_index = i - num_twins;
-				Utils.IsMapDown = Utils.IsMapDown or Input.IsActionPressed(ButtonAction.ACTION_MAP, player_entity.ControllerIndex);
-				Utils.IsPlayerMapDown[player_entity.ControllerIndex] = Input.IsActionPressed(ButtonAction.ACTION_MAP, player_entity.ControllerIndex);
+				CoopHUD.IsMapDown = CoopHUD.IsMapDown or Input.IsActionPressed(ButtonAction.ACTION_MAP, player_entity.ControllerIndex);
+				CoopHUD.IsPlayerMapDown[player_entity.ControllerIndex] = Input.IsActionPressed(ButtonAction.ACTION_MAP, player_entity.ControllerIndex);
 				if not game:IsPaused() and Input.IsActionTriggered(ButtonAction.ACTION_DROP, player_entity.ControllerIndex) then
 					local player_data = mod.CoopHUD.DATA.Players[index];
 					if player_data then CoopHUD.Item.Inventory.Shift(player_data); end
@@ -132,7 +132,7 @@ function CoopHUD.RenderBanners(screen_size, screen_center)
 	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_BANNER_RENDER, mod.CoopHUD.DATA.Banner);
 	
 	local frame = CoopHUD.DATA.Banner.Sprite:GetFrame();
-	if frame < CoopHUD.DATA.Banner.Sprite:GetCurrentAnimationData():GetLength() / 2 or (CoopHUD.DATA.Banner.Type == CoopHUD.Banner.FLOOR and not Utils.IsMapDown) or game:GetFrameCount() > CoopHUD.DATA.Banner.Timer then
+	if frame < CoopHUD.DATA.Banner.Sprite:GetCurrentAnimationData():GetLength() / 2 or (CoopHUD.DATA.Banner.Type == CoopHUD.Banner.FLOOR and not CoopHUD.IsMapDown) or game:GetFrameCount() > CoopHUD.DATA.Banner.Timer then
 		CoopHUD.DATA.Banner.Sprite:Update();
 	end
 	
@@ -183,7 +183,7 @@ end
 
 function CoopHUD.RenderTimer(screen_size, screen_center)
 	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_TIMER_RENDER, mod.CoopHUD.DATA.Timer);
-	mod.CoopHUD.DATA.Timer.Visible = mod.Config.CoopHUD.misc.timer.display == 0 or (mod.Config.CoopHUD.misc.timer.display == 1 and Utils.IsMapDown or (mod.Config.CoopHUD.misc.timer.display == 2 and not Utils.IsMapDown)) or false;
+	mod.CoopHUD.DATA.Timer.Visible = mod.Config.CoopHUD.misc.timer.display == 0 or (mod.Config.CoopHUD.misc.timer.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.timer.display == 2 and not CoopHUD.IsMapDown)) or false;
 	
 	if mod.CoopHUD.DATA.Timer.Visible then
 		if CoopHUD.Refresh then

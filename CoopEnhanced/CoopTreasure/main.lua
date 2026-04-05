@@ -308,6 +308,7 @@ function CoopTreasure:onRoom()
 			if room_data.Safe.Enable and room_data.Safe.Mode > 0 then item_pos = Utils.GetSafeSpawnPosition(game:GetPlayer().Position, item_pos, safe_args); end -- Safe Pos Check
 			local new_pedestal_entity = game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, item_pos, Vector.Zero, nil, pedestal_entity.SubType, math.max(1,room:GetSpawnSeed())):ToPickup(); -- Spawn new one to remove extra items from coop (e.g. Boss Item Pedestals)
 			pedestal_entity:Remove();
+			if room_data.MoreOptions.Enabled then new_pedestal_entity.OptionsPickupIndex = 1; end
 			if room_data.Assign > 1 and players[1]:GetPlayerType() == PlayerType.PLAYER_KEEPER_B then new_pedestal_entity.Price = 15; new_pedestal_entity.ShopItemId = -1; elseif isDevilDeal then new_pedestal_entity.Price = Utils.GetDevilPrice(players[1],nil,new_pedestal_entity.SubType); else new_pedestal_entity.Price = room_data.Treasure.Prices[1] or 0; end
 			local pedestal_data = {Pointer = EntityPtr(new_pedestal_entity), Position = item_pos, Price = new_pedestal_entity.Price, IsBlind = new_pedestal_entity:IsBlind()};
 			table.insert(room_data.Treasure.Items[1],pedestal_data);
@@ -337,28 +338,11 @@ function CoopTreasure:onRoom()
 			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_PEDESTAL, i, pedestal_entity, pedestal_data); -- Execute Post Pedestal updates for player 1 Callbacks (player_index, pedestal_entity(EntityPickup), pedestal_data(table))
 		end
 	end
-	if (room_type == RoomType.ROOM_PLANETARIUM and CCO and CCO.ZodiacPlanetariums) or (room_type == RoomType.ROOM_LIBRARY and LibraryExpanded) then -- Mod Compat, have to reset Pedestal OptionsPickupIndex and positions
-		local function RelinkPedestals()
-			for i,pedestal_entity in pairs(Isaac.FindByType(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, -1)) do
-				pedestal_entity = pedestal_entity:ToPickup();
-				for ii, player_items in pairs(room_data.Treasure.Items) do
-					for _, item in pairs(player_items) do
-						if EntityPtr(pedestal_entity) == item.Pointer then
-							pedestal_entity.OptionsPickupIndex = ii;
-							pedestal_entity.Position = item.Position;
-						end
-					end
-				end
-			end
-			mod:RemoveCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, RelinkPedestals);
-		end
-		mod:AddPriorityCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, CallbackPriority.LATE, RelinkPedestals);
-	end
 	
 	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_ROOM_SETUP,room_data); -- Execute Post Room Data Setup (room_data(table))
 	CoopTreasure.DATA[room_ID] = room_data;
 end
-mod:AddPriorityCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.Priorities[1], CoopTreasure.onRoom);
+mod:AddPriorityCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.Priorities[4], CoopTreasure.onRoom);
 
 function CoopTreasure:onFloor()
 	CoopTreasure.DATA = {}; -- Clear Previous FLoor data since its no longer needed and would cause issues on the new one

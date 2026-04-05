@@ -300,9 +300,6 @@ function Pocket.Render(player_number);
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
 	local pockets = player_data.Inventory.Pocket;
 	
-	local isVisible = mod.Config.CoopHUD.pocket.display == 0 or (mod.Config.CoopHUD.pocket.display == 1 and Utils.IsMapDown or (mod.Config.CoopHUD.pocket.display == 2 and not Utils.IsMapDown or false));
-	if not isVisible then return; end
-	
 	for slot = PillCardSlot.QUATERNARY, PillCardSlot.PRIMARY, -1 do
 		local d = pockets[slot] and pockets[slot].Data or nil;
 		if d and d.Item and pockets[slot].Sprite then 

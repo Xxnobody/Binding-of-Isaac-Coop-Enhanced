@@ -263,6 +263,7 @@ local function displayBanner(_ , name, description, isSticky, IsCurse)
 	if name == CoopHUD.DATA.Banner.Name then return; end
 	local banner_type = isSticky and CoopHUD.Banner.FLOOR or CoopHUD.Banner.ITEM;
 	CoopEnhanced.CoopHUD.createBanner(name, description, banner_type, IsCurse);
+	return false;
 end
 mod:AddCallback(ModCallbacks.MC_PRE_ITEM_TEXT_DISPLAY, displayBanner);
 
@@ -318,8 +319,8 @@ local function onRender()
 	
 	local screen_size, screen_center = Utils.GetScreenSize(), Utils.GetScreenCenter();
 	
-	Utils.IsMapDown = false;
-	Utils.IsPlayerMapDown = {};
+	CoopHUD.IsMapDown = false;
+	CoopHUD.IsPlayerMapDown = {};
 	
 	if CoopHUD.Refresh then
 		-- mAPI
@@ -344,7 +345,7 @@ local function onRender()
 	end
 	
 	-- EID 
-	if EID then EID.isHidden = mod.Config.CoopHUD.mods.EID.display == 3 or (mod.Config.CoopHUD.mods.EID.display == 2 and not Utils.IsMapDown or (mod.Config.CoopHUD.mods.EID.display == 1 and Utils.IsMapDown or false)); end
+	if EID then EID.isHidden = mod.Config.CoopHUD.mods.EID.display == 3 or (mod.Config.CoopHUD.mods.EID.display == 2 and not CoopHUD.IsMapDown or (mod.Config.CoopHUD.mods.EID.display == 1 and CoopHUD.IsMapDown or false)); end
 	
 	-- Render the various HUD elements
 	CoopHUD.RenderPlayers(screen_size, screen_center);

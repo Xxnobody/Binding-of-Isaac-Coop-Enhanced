@@ -125,7 +125,6 @@ function CoopHUD.ClockPickups()
 					local text_value = math.floor(dig.value % 10);
 					
 					local digit_pos = pickup_data.Data.Text.Pos + Vector((dig.wight * (ii - 1)),0);
-					print(digit_pos);
 						
 					if proc > 0 then
 						pixel3:Render(pickup_data.Data.Pos + (Vector(-2,-11) * pickup_data.Data.Scale));

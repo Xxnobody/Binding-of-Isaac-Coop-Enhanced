@@ -14,16 +14,18 @@ function Player.Render(player_number, screen_size, screen_center)
 	
 	local player = player_data.Player;
 	local player_entity = player.Entity.Ref:ToPlayer();
+	local isPlayerMapDown = CoopHUD.IsPlayerMapDown[player.Controller];
 	local isTwin = player_number < 0;
 	local isKeeper = Utils.IsKeeper(player_entity);
 	local isBaby = Utils.IsBaby(player_entity);
 	local isTemporary = Utils.IsTemporary(isTwin, player_entity);
 	local extra_scale = isTwin and mod.Config.CoopHUD.players.twins.scale or Vector.One;
+	
 	if CoopHUD.Refresh then
 		if not isTemporary and not isBaby then -- Don't render anything except Health for strawmen or similar player types		
 			-- Stats
-			mod.CoopHUD.DATA.Players[player_number].Stats.Visible = (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.stats.ghosts) and (mod.Config.CoopHUD.stats.display == 0 or (mod.Config.CoopHUD.stats.display == 1 and Utils.IsPlayerMapDown[math.abs(player_number)] or (mod.Config.CoopHUD.stats.display == 2 and not Utils.IsPlayerMapDown[math.abs(player_number)]))) or false;
-			if player_number == 1 then mod.CoopHUD.Stats.Deals.Visible = (mod.Config.CoopHUD.stats.deals.display == 0 and mod.CoopHUD.DATA.Players[player_number].Stats.Visible or true) or mod.Config.CoopHUD.stats.deals.display == 1 or (mod.Config.CoopHUD.stats.deals.display == 2 and Utils.IsPlayerMapDown[math.abs(player_number)]) or false; end
+			mod.CoopHUD.DATA.Players[player_number].Stats.Visible = (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.stats.ghosts) and (mod.Config.CoopHUD.stats.display == 0 or (mod.Config.CoopHUD.stats.display == 1 and isPlayerMapDown or (mod.Config.CoopHUD.stats.display == 2 and not isPlayerMapDown))) or false;
+			if player_number == 1 then mod.CoopHUD.Stats.Deals.Visible = (mod.Config.CoopHUD.stats.deals.display == 0 and mod.CoopHUD.DATA.Players[player_number].Stats.Visible or true) or mod.Config.CoopHUD.stats.deals.display == 1 or (mod.Config.CoopHUD.stats.deals.display == 2 and isPlayerMapDown) or false; end
 			
 			if mod.CoopHUD.DATA.Players[player_number].Stats.Visible or (player_number == 1 and mod.CoopHUD.Stats.Deals.Visible) then
 				local stats = Stats.GetStats(player_entity, player_number);
@@ -162,10 +164,11 @@ function Player.Render(player_number, screen_size, screen_center)
 			-- Pocket Items
 			local pocket_items, pocket_total = Item.Pocket.GetItems(player_entity);
 			mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Total = pocket_total;
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Visible = mod.Config.CoopHUD.pocket.display == 0 or (mod.Config.CoopHUD.pocket.display == 1 and isPlayerMapDown or (mod.Config.CoopHUD.pocket.display == 2 and not isPlayerMapDown or false));
 			for slot = PillCardSlot.PRIMARY, PillCardSlot.QUATERNARY, 1 do
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Data = {};
 				local item = pocket_items[slot];
-				if item and item.ID ~= CollectibleType.COLLECTIBLE_NULL and item.Type > -1 then
+				if mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Visible and item and item.ID ~= CollectibleType.COLLECTIBLE_NULL and item.Type > -1 then
 					local item_scale = mod.Config.CoopHUD.pocket[slot].scale * extra_scale;
 					local bar_scale = mod.Config.CoopHUD.pocket.chargebar.scale * extra_scale;
 					local item_size = 14 * item_scale.X;
@@ -179,7 +182,6 @@ function Player.Render(player_number, screen_size, screen_center)
 					
 					local bar_pos = item.Pos + ((mod.Config.CoopHUD.pocket.chargebar.offset + Vector(item_size + (bar_flip < 0 and -bar_size or 0), 0)) * Vector(bar_flip, player_data.Edge.multipliers.Y));
 					local color = mod.Config.CoopHUD.pocket.colors and Utils.ConvertColorToColorize(player.Color,mod.Config.CoopHUD.pocket[slot].opacity) or Color.Default;
-
 					local data = {Slot = slot, Item = item, Bar = {Display = mod.Config.CoopHUD.pocket.chargebar.display, Flip = (bar_flip < 0), Pos = bar_pos, Scale = bar_scale, Color = color}, Scale = item_scale, Color = color};
 					
 					if item.Type == PocketItemType.ACTIVE_ITEM then
@@ -191,8 +193,8 @@ function Player.Render(player_number, screen_size, screen_center)
 					local blood_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY_B and (player_entity:GetBloodCharge() + current_charge) or 0;
 						data.Bar.Charge = {Current = current_charge, Max = max_charge, Blood = blood_charge, Soul = soul_charge, Extra = extra_charge, Partial = partial_charge};
 					end
-					
-					local isTextVisible = mod.Config.CoopHUD.pocket[slot].text.display == 0 or (mod.Config.CoopHUD.pocket[slot].text.display == 1 and Utils.IsMapDown or (mod.Config.CoopHUD.pocket[slot].text.display == 2 and not Utils.IsMapDown or false));
+						
+					local isTextVisible = mod.Config.CoopHUD.pocket[slot].text.display == 0 or (mod.Config.CoopHUD.pocket[slot].text.display == 1 and isPlayerMapDown or (mod.Config.CoopHUD.pocket[slot].text.display == 2 and not isPlayerMapDown or false));
 					if isTextVisible then
 						local text_scale = mod.Config.CoopHUD.pocket[slot].text.scale * extra_scale;
 						local text_pos = item.Pos + ((mod.Config.CoopHUD.pocket[slot].text.offset + Vector(item_size + (6 * text_scale.X) + (bar_flip > 0 and bar_size * player_data.Edge.multipliers.X or 0), -(mod.Fonts.CoopHUD.pocket:GetBaselineHeight(item.Name) / 1.5) * text_scale.Y)) * player_data.Edge.multipliers);
@@ -226,7 +228,7 @@ function Player.Render(player_number, screen_size, screen_center)
 			
 			-- Special/Crafting Inventory
 			local GetInfo = Item.Inventory.GetInfo[player.Type];
-			mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Visible = GetInfo and (mod.Config.CoopHUD.inventory.special.display == 0 or (mod.Config.CoopHUD.inventory.special.display == 1 and Utils.IsPlayerMapDown[player.Index] or (mod.Config.CoopHUD.inventory.special.display == 2 and not Utils.IsPlayerMapDown[player.Index] or false)));
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Visible = GetInfo and (mod.Config.CoopHUD.inventory.special.display == 0 or (mod.Config.CoopHUD.inventory.special.display == 1 and isPlayerMapDown or (mod.Config.CoopHUD.inventory.special.display == 2 and not isPlayerMapDown or false)));
 			mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Data = {};
 			if mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Visible then
 				local max_slots, row_size, inventory = GetInfo(player_data);
@@ -259,7 +261,7 @@ function Player.Render(player_number, screen_size, screen_center)
 			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Data = {};
 			if not isTwin then
 				-- Collectible/Passive Items
-				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible = mod.Config.CoopHUD.inventory.items.display == 0 or (mod.Config.CoopHUD.inventory.items.display == 1 and Utils.IsPlayerMapDown[player.Index] or (mod.Config.CoopHUD.inventory.items.display == 2 and not Utils.IsPlayerMapDown[player.Index] or false));
+				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible = mod.Config.CoopHUD.inventory.items.display == 0 or (mod.Config.CoopHUD.inventory.items.display == 1 and CoopHUD.isPlayerMapDown or (mod.Config.CoopHUD.inventory.items.display == 2 and not isPlayerMapDown or false));
 				if mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible then
 					local anchor = mod.Config.CoopHUD.inventory.items.anchor;
 					local edge = anchor == 0 and player_data.Edge.indexed.X or (anchor == 1 and screen_size.Max.X - mod.Config.CoopHUD.offset.X or mod.Config.CoopHUD.offset.X);

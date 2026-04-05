@@ -237,7 +237,7 @@ function Utils.getCharacterByType(player_type)
 	for i,character in pairs(mod.CharactersModded) do
 		if character.Type == player_type then return character, #mod.Characters + i; end
 	end
-	return nil,-1;
+	return {},-1;
 end
 function Utils.getCharacterByName(player_name)
 	for i,character in pairs(mod.Characters) do
@@ -246,12 +246,12 @@ function Utils.getCharacterByName(player_name)
 	for i,character in pairs(CharactersModded) do
 		if character.Name == player_name then return  character, #mod.Characters + i; end
 	end
-	return nil,-1;
+	return {},-1;
 end
 function Utils.GetPlayerID(player_entity) -- Taken from CustomHealthAPI
 	if not player_entity then return "nil"; end
 	local rng = player_entity:GetPlayerType() == PlayerType.PLAYER_LAZARUS2_B and player_entity:GetCollectibleRNG(2) or player_entity:GetCollectibleRNG(1);
-	return tostring(rng:GetSeed());
+	return ("UUID-" .. tostring(rng:GetSeed()));
 end
 
 function Utils.getPlayerIndex(player_entity)
@@ -358,6 +358,9 @@ end
 function Utils.IsBaby(player_entity)
 	return player_entity.BabySkin > BabySubType.BABY_UNASSIGNED;
 end
+function Utils.IsIllusion(player_entity)
+	return IllusionMod and IllusionMod.GetData(player_entity).IsIllusion;
+end
 function Utils.IsLost(player_entity)
 	local player_type = player_entity:GetPlayerType();
 	return player_type == PlayerType.PLAYER_THELOST or player_type == PlayerType.PLAYER_THELOST_B;
@@ -372,7 +375,7 @@ function Utils.IsKeeper(player_entity)
 end
 function Utils.IsTemporary(isTwin, player_entity)
 	local player_type = player_entity:GetPlayerType()
-	return isTwin and (Utils.IsForgotten(player_entity) or Utils.IsKeeper(player_entity) or (IllusionMod and IllusionMod.GetData(player_entity).IsIllusion));
+	return isTwin and (Utils.IsForgotten(player_entity) or Utils.IsKeeper(player_entity) or Utils.IsIllusion(player_entity));
 end
 function Utils.IsTainted(player_entity)
 	local player_type = player_entity:GetPlayerType();

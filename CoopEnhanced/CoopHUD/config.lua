@@ -289,7 +289,7 @@ function mod.CoopHUD.ResetConfig()
 				colors = true,
 				dead = false,
 				offset = Vector(0,0),
-				space = Vector(16,16),
+				space = Vector(20,20),
 				scale = Vector(0.5,0.5),
 				opacity = 0.5,
 				max = 6
