@@ -15,13 +15,19 @@ function CoopLabels.RenderLabels(_)
 	end
 	
 	local player_sync = mod.Config.CoopLabels.player_sync;
+	local num_twins = 0;
 	for i = 1, game:GetNumPlayers(), 1 do
 		local player_entity = Isaac.GetPlayer(i - 1);
 		if (game:GetFrameCount() % 30) == 0 then -- Only update data once per second
 			if not CoopLabels.DATA[i] then CoopLabels.DATA[i] = {}; end
 			CoopLabels.DATA[i].Data = {};
-			
-			local player_index = mod.Twins[i] and mod.Twins[i] or i;
+			local player_index = i;
+			if mod.Twins[i] then
+				player_index = mod.Twins[i];
+				num_twins = num_twins + 1;
+			else
+				player_index = i - num_twins;
+			end
 			local player_config = player_sync == "Global" and mod.Config.players[player_index] or (mod.Config[player_sync] and mod.Config[player_sync].players[player_index] or mod.Config.CoopLabels.players[player_index]);
 			if player_config == nil then goto continue; end
 			

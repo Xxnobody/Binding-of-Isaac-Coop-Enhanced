@@ -1,46 +1,50 @@
 local mod = CoopEnhanced;
 local CoopLabels = CoopEnhanced.CoopLabels;
+
 local Utils = mod.Utils;
 
-function mod.CoopLabels.ResetConfig()
-	mod.Config.CoopLabels = {
-		CMD = "labels",
-		players = {
-			[1] = {
-				color = Utils.GetColorIndexByName("Red"),
-				name = "",
-				type = 0
-			},
-			[2] = {
-				color = Utils.GetColorIndexByName("Blue"),
-				name = "",
-				type = 0
-			},
-			[3] = {
-				color = Utils.GetColorIndexByName("Green"),
-				name = "",
-				type = 0
-			},
-			[4] = {
-				color = Utils.GetColorIndexByName("Yellow"),
-				name = "",
-				type = 0
-			}
+mod.CoopLabels.DefaultConfig = {
+	CMD = "labels",
+	
+	players = {
+		[1] = {
+			color = Utils.GetColorIndexByName("Red"),
+			name = "",
+			type = 0
 		},
-		display = 2,
-		player_sync = "Global",
-		opacity = 1,
-		offset = Vector(0,0),
-		head_offset = Vector(0,0),
-		text_offset = Vector(0,0),
-		scale = Vector(1,1),
-		text_scale = Vector(1,1),
-		head_scale = Vector(1,1),
-		scale_sync = false,
-		tear_colors = false,
-		player_colors = false,
-		fonts = {labels = 'terminus',}
-	};
+		[2] = {
+			color = Utils.GetColorIndexByName("Blue"),
+			name = "",
+			type = 0
+		},
+		[3] = {
+			color = Utils.GetColorIndexByName("Green"),
+			name = "",
+			type = 0
+		},
+		[4] = {
+			color = Utils.GetColorIndexByName("Yellow"),
+			name = "",
+			type = 0
+		}
+	},
+	display = 2,
+	player_sync = "Global",
+	opacity = 1,
+	offset = Vector(0,0),
+	head_offset = Vector(0,0),
+	text_offset = Vector(0,0),
+	scale = Vector(1,1),
+	text_scale = Vector(1,1),
+	head_scale = Vector(1,1),
+	scale_sync = false,
+	tear_colors = false,
+	player_colors = false,
+	fonts = {labels = 'terminus',}
+};
+	
+function mod.CoopLabels.ResetConfig()
+	mod.Config.CoopLabels = Utils.cloneTable(mod.CoopLabels.DefaultConfig);
 end
 if mod.Config.CoopLabels == nil then CoopLabels.ResetConfig(); end
 

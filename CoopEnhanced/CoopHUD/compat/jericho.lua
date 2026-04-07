@@ -27,14 +27,14 @@ function CoopHUD.Jericho()
 
 
 	local iconSprite = Sprite("gfx/ui/mapitemicons2.anm2", true)
-	local function JerichoCurseIcon(screen_size, _)
+	local function JerichoCurseIcon(screen_dimensions, _)
 		if not PlayerManager.AnyoneIsPlayerType(_JERICHO_MOD.Character.JERICHO) then return end
 
 		local level = game:GetLevel()
 		local curse = level:GetCurses()
 		if curse == LevelCurse.CURSE_NONE then return end
 
-		iconSprite:Render(Vector(screen_size.X-15, 74))
+		iconSprite:Render(Vector(screen_dimensions.X-15, 74))
 
 		for curseIndex, curseName in pairs(_JERICHO_MOD.CurseBlessing) do
 			if curse & curseName > 0 then

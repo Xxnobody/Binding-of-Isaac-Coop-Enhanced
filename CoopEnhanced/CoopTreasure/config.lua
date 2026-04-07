@@ -1,74 +1,77 @@
 local mod = CoopEnhanced;
 local CoopTreasure = CoopEnhanced.CoopTreasure;
+
 local Utils = mod.Utils;
 
-function CoopEnhanced.CoopTreasure.ResetConfig()
-	mod.Config.CoopTreasure = {
-		CMD = "treasure",
-		players = {
-			[1] = {
-				color = Utils.GetColorIndexByName("Red"),
-				name = "",
-				type = 0
-			},
-			[2] = {
-				color = Utils.GetColorIndexByName("Blue"),
-				name = "",
-				type = 0
-			},
-			[3] = {
-				color = Utils.GetColorIndexByName("Green"),
-				name = "",
-				type = 0
-			},
-			[4] = {
-				color = Utils.GetColorIndexByName("Yellow"),
-				name = "",
-				type = 0
-			}
+mod.CoopTreasure.DefaultConfig = {
+	CMD = "treasure",
+	players = {
+		[1] = {
+			color = Utils.GetColorIndexByName("Red"),
+			name = "",
+			type = 0
 		},
-		player_sync = "Global",
-		dead = false,
-		clean = false,
-		single = false,
-		extras = 0,
-		safe = 1,
-		radius = 0,
-		max = 1,
-		modes = {
-			normal = 3,
-			greed = 3,
+		[2] = {
+			color = Utils.GetColorIndexByName("Blue"),
+			name = "",
+			type = 0
 		},
-		assign = {
-			global = 0,
-			type = 0,
-			display = 3,
+		[3] = {
+			color = Utils.GetColorIndexByName("Green"),
+			name = "",
+			type = 0
+		},
+		[4] = {
+			color = Utils.GetColorIndexByName("Yellow"),
+			name = "",
+			type = 0
+		}
+	},
+	player_sync = "Global",
+	dead = false,
+	clean = false,
+	single = false,
+	extras = 0,
+	safe = 1,
+	radius = 0,
+	max = 1,
+	modes = {
+		normal = 3,
+		greed = 3,
+	},
+	assign = {
+		global = 0,
+		type = 0,
+		display = 3,
+		offset = Vector(0,0),
+		scale = Vector(1,1),
+		head = {
+			scale = Vector(0.5,0.5),
 			offset = Vector(0,0),
-			scale = Vector(1,1),
-			head = {
-				scale = Vector(0.5,0.5),
-				offset = Vector(0,0),
-				opacity = 1,
-			},
-			text = {
-				scale = Vector(1,1),
-				offset = Vector(0,0),
-				opacity = 1,
-			},
-			rooms = {
-				Treasure = 1,
-				Silver = 0,
-				Library = 0,
-				Planetarium = 0,
-				Angel = 0,
-				Devil = 0,
-				Secret = 0,
-				SuperSecret = 0,
-				UltraSecret = 0
-			},
+			opacity = 1,
 		},
-		fonts = {treasure = 'luaminioutlined',}
-	};
+		text = {
+			scale = Vector(1,1),
+			offset = Vector(0,0),
+			opacity = 1,
+		},
+		rooms = {
+			Treasure = 1,
+			Silver = 0,
+			Library = 0,
+			Planetarium = 0,
+			Angel = 0,
+			Devil = 0,
+			Secret = 0,
+			SuperSecret = 0,
+			UltraSecret = 0
+		},
+	},
+	fonts = {treasure = 'luaminioutlined',}
+};
+
+function CoopEnhanced.CoopTreasure.ResetConfig()
+	mod.Config.CoopTreasure = Utils.cloneTable(mod.CoopTreasure.DefaultConfig);
 end
 if mod.Config.CoopTreasure == nil then mod.CoopTreasure.ResetConfig(); end
 

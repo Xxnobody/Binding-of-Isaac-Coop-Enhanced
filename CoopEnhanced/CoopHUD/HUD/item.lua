@@ -335,7 +335,7 @@ function Inventory.Render(player_number)
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
 	local sprite_func = Inventory.GetSprite[player_data.Player.Type];
 	
-	if player_data.Inventory.Special.Visible and sprite_func then
+	if sprite_func then
 		local sprite = player_data.Inventory.Special.Sprite;
 		local extra_func = Inventory.ExtraFunctions[player_data.Player.Type];
 		
@@ -347,7 +347,7 @@ function Inventory.Render(player_number)
 	end
 	
 	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_PASSIVE_RENDER, mod.CoopHUD.DATA.Players[player_number].Inventory.Passive); -- Execute Pre Passives Render Callbacks (passives_data(table))
-	if player_data.Inventory.Passive.Visible and #player_data.Inventory.Passive.Data > 0 then
+	if player_data.Inventory.Passive and player_data.Inventory.Passive.Data and #player_data.Inventory.Passive.Data > 0 then
 		for i,data in pairs(player_data.Inventory.Passive.Data) do
 			mod.CoopHUD.Item.Inventory.Sprite:ReplaceSpritesheet(1, data.Item);
 			mod.CoopHUD.Item.Inventory.Sprite:LoadGraphics();

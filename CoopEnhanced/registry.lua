@@ -10,15 +10,24 @@ local Utils = mod.Utils;
 -- Registers Modules using a key and function. Keys must also match folder structure or errors will happen.
 
 local function GetConfig(cmd)
+	if cmd == "config" then return mod.Config; end
 	for key,value in pairs(mod.Registry.Modules) do
 		if mod.Config[key].CMD == cmd then return mod.Config[key]; end
 	end
-	return nil;
+	return {};
+end
+local function GetDefaultConfig(cmd)
+	if cmd == "config" then return mod.DefaultConfig; end
+	for key,value in pairs(mod.Registry.Modules) do
+		if mod.Config[key].CMD == cmd then return mod[key].DefaultConfig; end
+	end
+	return {};
 end
 
 local function SetName(params)
 	local config = GetConfig(params[1]);
 	local player_index = tonumber(params[2]);
+	local player_name = tonumber(params[3]);
 	if config == nil or not player_index or player_index < 1 or player_index > 4 or player_name == nil then print('Incorrect arguments for name command.'); return; end
 	
 	config.players[player_index].name = player_name;
@@ -213,8 +222,7 @@ mod.Registry.Commands = {
 					end
 				end
 			end,
-		},
-		["name"] = SetName
+		}
 	},
 	["changeplayer"] = function(params) -- Change Player type
 		local player_type = params[2] and tonumber(params[2]) or -1;
@@ -241,18 +249,40 @@ mod.Registry.Commands = {
 	["revive"] = function(params) -- Revive a dead player (Coop Ghost)
 		local player_index = params[2] and tonumber(params[2]) or 1;
 		local revive_cost = params[3] and tonumber(params[3]) or 0;
+		local reviver_index = params[4] and tonumber(params[4]) or 1;
 		local player_entity = Isaac.GetPlayer(player_index - 1);
 		if not player_entity then print("Incorrect arguments for command. ('revive <player_index> <cost>')"); return; end
 		if player_entity and player_entity:IsCoopGhost() then
 			if revive_cost > 0 then -- Cost in coins
-				if Isaac.GetPlayer():GetNumCoins() >= revive_cost then
-					Isaac.GetPlayer():AddCoins(-revive_cost);
+				if Isaac.GetPlayer(reviver_index):GetNumCoins() >= revive_cost then
+					Isaac.GetPlayer(reviver_index):AddCoins(-revive_cost);
 					player_entity:ReviveCoopGhost();
 				else
 					print("Not enough money to revive!");
 				end
 			elseif revive_cost < 0 then -- Cost in health
-				
+				if not params[4] or params[4]:len() == 0 then 
+					for i = 1, game:GetNumPlayers(), 1 do
+						local reviver_entity = Isaac.GetPlayer(i - 1);
+						local red_health = CustomHealthAPI.Helper.GetTotalRedHP(reviver_entity) / 2;
+						if red_health >= revive_cost then
+							reviver_entity:AddMaxHearts(-revive_cost * 2);
+							player_entity:ReviveCoopGhost();
+							return;
+						end
+					end
+					print("No one has enough red health to revive!");
+				else
+					local reviver_entity = Isaac.GetPlayer(reviver_index - 1);
+					local red_health = CustomHealthAPI.Helper.GetTotalRedHP(reviver_entity) / 2;
+					if red_health >= revive_cost then
+						reviver_entity:AddMaxHearts(-revive_cost * 2);
+						player_entity:ReviveCoopGhost();
+						return;
+					else
+						print("Player (" .. reviver_index .. ") does not have enough red health to revive!");
+					end
+				end
 			else
 				player_entity:ReviveCoopGhost();
 			end
@@ -425,10 +455,11 @@ mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, params)
 	elseif cmd == "changeplayer" or cmd == "removeplayer" or cmd == "revive" or cmd == "controller" then
 		table.insert(args,1,cmd); -- Shift args over by 1 with cmd as arg
 	elseif cmd ~= mod.Config.commands.CMD then return; end
-	
-	if args[1] == nil or args[1] == "Auto" then print("Incorrect arguments for command. (" .. (args[1] or "nil") .. ")"); return; end
+	if args[1] == "config" then table.insert(args,1,args[1]); -- Shift args over by 1
+	elseif args[1] == nil or args[1] == "Auto" then print("Incorrect arguments for command. (" .. (args[1] or "nil") .. ")"); return; end
 	if args[2] == "config" then
 		local config = GetConfig(args[1]);
+		local default_config = GetDefaultConfig(args[1]);
 		for i = 3, #args, 1 do
 			if config == nil then print("Config value for '" .. (args[(i - 1)] or "nil") .. "' not found!"); return;
 			elseif type(config) == "userdata" and config.X then
@@ -443,7 +474,8 @@ mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, params)
 				local config_type = type(config[(tonumber(args[i]) or args[i])]);
 				local new_value = args[(i + 1)];
 				local value = nil;
-				if config_type == "number" then value = tonumber(new_value);
+				if new_value == "reset" then value = default_config[args[i]];
+				elseif config_type == "number" then value = tonumber(new_value);
 				elseif config_type == "boolean" then if new_value == "true" then value = true; elseif new_value == "false" then value = false; end
 				elseif config_type == "string" then if (new_value:len() > 0 and string.find(new_value, "'") and string.find(new_value, "'", new_value:len() - 1)) then value = string.sub(new_value,2,new_value:len() - 1); end end
 				
@@ -454,6 +486,7 @@ mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, params)
 				end
 			end
 			config = config[(tonumber(args[i]) or args[i])];
+			default_config = default_config[(tonumber(args[i]) or args[i])];
 		end
 	else
 		local command = mod.Registry.Commands[args[1]];

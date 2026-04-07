@@ -16,7 +16,7 @@ function Misc.GetPickup(pickup_type)
 	return nil;
 end
 
-function Misc.GetPickups(screen_size, screen_center)
+function Misc.GetPickups(screen_dimensions)
 	if not mod.CoopHUD.Misc.Pickups then mod.CoopHUD.Misc.Pickups = {}; end
 	
 	local pickups = {};
@@ -69,10 +69,10 @@ function Misc.GetPickups(screen_size, screen_center)
 			end
 		end
 		local other_data = mod.CoopHUD.Stats.Deals.Anchor == anchor and mod.CoopHUD.Stats.Deals.Visible and mod.CoopHUD.Stats.Deals.Data[1] or nil;
-		pos.X = (screen_center.X - (total_width / 1.5));
-		pos.Y = (other_data and (other_data.Pos.Y + (anchor == 0 and (-size * scale.X) or (size * mod.Config.CoopHUD.stats.scale.Y)))) or ((anchor == 0 and (screen_size.Max.Y - size) or 0) + (offset.Y * edge_multipliers.Y));
+		pos.X = (screen_dimensions.Center.X - (total_width / 1.5));
+		pos.Y = (other_data and (other_data.Pos.Y + (anchor == 0 and (-size * scale.X) or (size * mod.Config.CoopHUD.stats.scale.Y)))) or ((anchor == 0 and (screen_dimensions.Max.Y - size) or 0) + (offset.Y * edge_multipliers.Y));
 	else
-		pos.X = pos.X + (anchor == 2 and (screen_size.Max.X - (pos.X + (size + 5) or 0)) + (offset.X * edge_multipliers.X));
+		pos.X = pos.X + (anchor == 2 and (screen_dimensions.Max.X - (pos.X + (size + 5) or 0)) + (offset.X * edge_multipliers.X));
 	end
 	pos = pos + ((mod.Config.CoopHUD.misc.pickups.offset) * edge_multipliers);
 	
@@ -95,7 +95,7 @@ function Misc.GetPickups(screen_size, screen_center)
 	mod.CoopHUD.Misc.Pickups.Total = pickups_total;
 end
 
-function Misc.GetWave(screen_size, screen_center)
+function Misc.GetWave(screen_dimensions)
 	if not mod.CoopHUD.Misc.Wave then mod.CoopHUD.Misc.Wave = {[1] = {}}; end
 	mod.CoopHUD.Misc.Wave[1].Data = {};
 		
@@ -143,7 +143,7 @@ function Misc.GetWave(screen_size, screen_center)
 	local text_height = mod.Fonts.CoopHUD.misc:GetBaselineHeight(text.Value) * text.Scale.Y;
 	
 	text.Scale = mod.Config.CoopHUD.misc.wave.text_scale;
-	text.Pos.X = anchor == 2 and (screen_size.Max.X - (text_width / 1.5)) or (anchor == 3 and (text_width / 1.1) or (screen_center.X + (4 * text.Scale.X)));
+	text.Pos.X = anchor == 2 and (screen_dimensions.Max.X - (text_width / 1.5)) or (anchor == 3 and (text_width / 1.1) or (screen_dimensions.Center.X + (4 * text.Scale.X)));
 	
 	if anchor < 2 then
 		local other_data = (mod.Config.CoopHUD.misc.pickups.anchor == anchor and mod.CoopHUD.Misc.Pickups.Visible and CoopHUD.Misc.Pickups[1].Data) or (CoopHUD.Stats.Deals.Anchor == anchor and mod.CoopHUD.Stats.Deals.Visible and CoopHUD.Stats.Deals.Data[1] or nil);
@@ -152,10 +152,10 @@ function Misc.GetWave(screen_size, screen_center)
 			local other_height = (other_data.Text.Font:GetBaselineHeight("0") + 2) * (other_data.Text.Scale and other_data.Text.Scale.Y or other_data.Scale.Y);
 			text.Pos.Y = other_data.Text.Pos.Y + (anchor == 0 and -size or other_height);
 		else
-			text.Pos.Y = (anchor == 0 and screen_size.Max.Y - size or 2) + (offset.Y * edge_multipliers.Y);
+			text.Pos.Y = (anchor == 0 and screen_dimensions.Max.Y - size or 2) + (offset.Y * edge_multipliers.Y);
 		end
 	else
-		text.Pos.X = ((edge_multipliers.X < 0 and (screen_size.Max.X - (text_width / 2)) or text_width) + (offset.X * edge_multipliers.X));
+		text.Pos.X = ((edge_multipliers.X < 0 and (screen_dimensions.Max.X - (text_width / 2)) or text_width) + (offset.X * edge_multipliers.X));
 		text.Pos.Y = CoopHUD.Positions.Difficulty.Y + (text_height * 1.5);
 	end
 	pos = text.Pos + Vector((-text_width - 8) * scale.X,(text_height / -1.45) * scale.Y);
@@ -167,7 +167,7 @@ function Misc.GetWave(screen_size, screen_center)
 	mod.CoopHUD.Misc.Wave[1] = {Sprite = sprite, Data = {Pos = pos, Text = text, Scale = scale, Type = wave_type, Wave = {Current = wave, Max = max_waves}}};
 end
 
-function Misc.GetDifficulty(screen_size, screen_center)
+function Misc.GetDifficulty(screen_dimensions)
 	if not mod.CoopHUD.Misc.Difficulty then mod.CoopHUD.Misc.Difficulty = {[1] = {}}; end
 	mod.CoopHUD.Misc.Difficulty[1].Data = {};
 	
@@ -199,11 +199,11 @@ function Misc.GetDifficulty(screen_size, screen_center)
 		if other_data then
 			pos.X = other_data.Pos.X - size;
 		else
-			pos.X = screen_center.X - (size / 2);
+			pos.X = screen_dimensions.Center.X - (size / 2);
 		end
-		pos.Y = offset.Y + (anchor == 0 and screen_size.Max.Y - size or 0);
+		pos.Y = offset.Y + (anchor == 0 and screen_dimensions.Max.Y - size or 0);
 	else
-		pos.X = pos.X + ((anchor == 2 and (screen_size.Max.X - (pos.X + (size * 2))) or 0) + (offset.X * edge_multipliers.X));
+		pos.X = pos.X + ((anchor == 2 and (screen_dimensions.Max.X - (pos.X + (size * 2))) or 0) + (offset.X * edge_multipliers.X));
 	end
 	pos = pos + ((mod.Config.CoopHUD.misc.difficulty.offset) * edge_multipliers);
 	
@@ -211,7 +211,7 @@ function Misc.GetDifficulty(screen_size, screen_center)
 	mod.CoopHUD.Misc.Difficulty[1] = {Sprite = sprite, Data = {Pos = pos, Scale = scale}};
 end
 
-function Misc.GetExtra(screen_size, screen_center)
+function Misc.GetExtra(screen_dimensions)
 	if not mod.CoopHUD.Misc.Extra then mod.CoopHUD.Misc.Extra = {[1] = {},[2] = {}}; end
 	mod.CoopHUD.Misc.Extra[1].Data = {};
 	mod.CoopHUD.Misc.Extra[2].Data = {};
@@ -238,11 +238,11 @@ function Misc.GetExtra(screen_size, screen_center)
 			diff_offset = 0;
 			pos.X = (other_data.Text.Pos.X + (6 + other_data.Text.Font:GetStringWidth(other_data.Text.Value)) * (other_data.Text.Scale and other_data.Text.Scale.X or other_data.Scale.X));
 		else
-			pos.X = screen_center.X - (size / 2);
+			pos.X = screen_dimensions.Center.X - (size / 2);
 		end
-		pos.Y = (anchor == 0 and screen_size.Max.Y - size or 0) + (offset.Y * edge_multipliers.Y);
+		pos.Y = (anchor == 0 and screen_dimensions.Max.Y - size or 0) + (offset.Y * edge_multipliers.Y);
 	else
-		pos.X = pos.X + ((anchor == 2 and (screen_size.Max.X - (pos.X + (size * 2))) or 0) + (offset.X * edge_multipliers.X));
+		pos.X = pos.X + ((anchor == 2 and (screen_dimensions.Max.X - (pos.X + (size * 2))) or 0) + (offset.X * edge_multipliers.X));
 	end
 	pos = pos + ((mod.Config.CoopHUD.misc.extra.offset) * edge_multipliers) + Vector(diff_offset,0);
 	mod.CoopHUD.Misc.Difficulty[1].Data.Pos.X = mod.CoopHUD.Misc.Difficulty[1].Data.Pos.X - diff_offset;
@@ -295,12 +295,12 @@ function Misc.GetSprite(sprite, frame, anim)
 	return sprite;
 end
 
-function Misc.Render(screen_size, screen_center)
+function Misc.Render(screen_dimensions)
 	if CoopHUD.Refresh then
-		Misc.GetPickups(screen_size, screen_center);
-		Misc.GetWave(screen_size, screen_center);
-		Misc.GetDifficulty(screen_size, screen_center);
-		Misc.GetExtra(screen_size, screen_center);
+		Misc.GetPickups(screen_dimensions);
+		Misc.GetWave(screen_dimensions);
+		Misc.GetDifficulty(screen_dimensions);
+		Misc.GetExtra(screen_dimensions);
 		
 		mod.CoopHUD.Misc.Data = {};
 		if mod.CoopHUD.Misc.Pickups.Visible then mod.CoopHUD.Misc.Data["Pickups"] = mod.CoopHUD.Misc.Pickups; end

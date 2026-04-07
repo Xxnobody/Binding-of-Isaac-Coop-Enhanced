@@ -1,18 +1,23 @@
 local mod = CoopEnhanced;
 local CoopExtras = CoopEnhanced.CoopExtras;
 
+local Utils = mod.Utils;
+
+mod.CoopExtras.DefaultConfig = {
+	CMD = "extras",
+	
+	item_prices = true,
+	greed_revive = true,
+	ghost_flight = {
+		enabled = true,
+		pickups = true,
+		chests = true,
+		interact = 0,
+	},
+};
+	
 function mod.CoopExtras.ResetConfig()
-	mod.Config.CoopExtras = {
-		CMD = "extras",
-		item_prices = true,
-		greed_revive = true,
-		ghost_flight = {
-			enabled = true,
-			pickups = true,
-			chests = true,
-			interact = 0,
-		},
-	};
+	mod.Config.CoopExtras = Utils.cloneTable(mod.CoopExtras.DefaultConfig);
 end
 if mod.Config.CoopExtras == nil then CoopExtras.ResetConfig(); end
 

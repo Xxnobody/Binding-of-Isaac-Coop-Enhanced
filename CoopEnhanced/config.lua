@@ -1,7 +1,7 @@
 local mod = CoopEnhanced;
 local Utils = mod.Utils;
 
-mod.Config = {
+mod.DefaultConfig = {
 	debug = false,
 	commands = {
 		CMD = "coop",
@@ -38,6 +38,7 @@ mod.Config = {
 		}
 	}
 };
+mod.Config = Utils.cloneTable(mod.DefaultConfig);
 
 if ModConfigMenu == nil then return; end
 
@@ -53,7 +54,7 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.modules.CoopHUD; end,
 		Display = function() return 'Enhanced HUD: ' .. (mod.Config.modules.CoopHUD and 'on' or 'off'); end,
 		OnChange = function(b) mod.Config.modules.CoopHUD = b; end,
-		Info = {'A reformatted HUD with many features and settings to make your Co-op games awesome!.'},
+		Info = {'A reformatted HUD with many features and settings to make your Co-op games awesome!'},
 	}
 );
 ModConfigMenu.AddSetting(

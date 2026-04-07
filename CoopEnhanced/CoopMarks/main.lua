@@ -13,7 +13,8 @@ local json = require("json");
 function CoopMarks.onPause(_)
 	if not mod.Config.modules.CoopMarks or (Isaac:GetFrameCount() % 30) ~= 0 or mod.Challenge.ID ~= Challenge.CHALLENGE_NULL then return; end
 	local player_sync = mod.Config.CoopMarks.player_sync;
-	local mark_pos = Utils.GetScreenCenter() + ((Vector(60, -50) + mod.Config.CoopMarks.offset) * Vector(1 / mod.Config.CoopMarks.scale.X, 1 / mod.Config.CoopMarks.scale.Y));
+	local screen_dimensions = Utils.GetScreenDimensions();
+	local mark_pos = screen_dimensions.Center + ((Vector(60, -50) + mod.Config.CoopMarks.offset) * Vector(1 / mod.Config.CoopMarks.scale.X, 1 / mod.Config.CoopMarks.scale.Y));
 	for i,player_entity in ipairs(Utils.getMainPlayers()) do
 		local player_type = player_entity:GetPlayerType();
 		local completion_marks = Isaac.GetCompletionMarks(player_type);
@@ -37,7 +38,7 @@ function CoopMarks.onPause(_)
 		CoopMarks.DATA[i].Total = 0;
 		CoopMarks.DATA[i].Color = Utils.ConvertColorToFont(player_color, mod.Config.CoopMarks.opacity);
 		CoopMarks.DATA[i].Pos = (i == 1 and nil or mark_pos + (Vector(0,(i - 1) * 80) + mod.Config.CoopMarks.rel_offset) * mod.Config.CoopMarks.scale.Y);
-		CoopMarks.DATA[i].Text = {Value = (player_config.type == 0 and "P" .. i or (player_config.type == 1 and ((isTainted and "T. " or "") .. player_entity:GetName()) or player_config.name)), Pos = (i == 1 and Utils.GetScreenCenter() + Vector(-36, -110) or CoopMarks.DATA[i].Pos + Vector(18 * mod.Config.CoopMarks.text_scale.X, -16 * mod.Config.CoopMarks.text_scale.Y)), Scale = (i == 1 and Vector(1.5,1.5) or mod.Config.CoopMarks.text_scale)};
+		CoopMarks.DATA[i].Text = {Value = (player_config.type == 0 and "P" .. i or (player_config.type == 1 and ((isTainted and "T. " or "") .. player_entity:GetName()) or player_config.name)), Pos = (i == 1 and screen_dimensions.Center + Vector(-36, -110) or CoopMarks.DATA[i].Pos + Vector(18 * mod.Config.CoopMarks.text_scale.X, -16 * mod.Config.CoopMarks.text_scale.Y)), Scale = (i == 1 and Vector(1.5,1.5) or mod.Config.CoopMarks.text_scale)};
 		CoopMarks.DATA[i].Sprite = sprite;
 		CoopMarks.DATA[i].Text.Pos.X = CoopMarks.DATA[i].Text.Pos.X - ((mod.Fonts.CoopMarks.mark:GetStringWidth(CoopMarks.DATA[i].Text.Value) / 2) * CoopMarks.DATA[i].Text.Scale.X);
 		

@@ -1,19 +1,24 @@
 local mod = CoopEnhanced;
 local CoopFixes = CoopEnhanced.CoopFixes;
 
+local Utils = mod.Utils;
+
+mod.CoopFixes.DefaultConfig = {
+	CMD = "fixes",
+	
+	fullscreen = {
+		enable = false,
+		pos = Vector(0,0)
+	},
+	join = {
+		enable = true,
+		max = 2
+	},
+	rejoin = true,
+};
+	
 function mod.CoopFixes.ResetConfig()
-	mod.Config.CoopFixes = {
-		CMD = "fixes",
-		fullscreen = {
-			enable = false,
-			pos = Vector(0,0)
-		},
-		join = {
-			enable = true,
-			max = 2
-		},
-		rejoin = true,
-	};
+	mod.Config.CoopFixes = Utils.cloneTable(mod.CoopFixes.DefaultConfig);
 end
 if mod.Config.CoopFixes == nil then mod.CoopFixes.ResetConfig(); end
 

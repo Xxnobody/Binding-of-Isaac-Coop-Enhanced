@@ -217,12 +217,12 @@ CoopHUD.Item.Inventory.ExtraFunctions = { -- taken from coopHUD+ (Konoca)
 		local result = GetResult();
 		local sprite = player_data.Inventory.Special.Sprite;
 		if result or mod.Config.CoopHUD.inventory.special.result_display then 
-			local result_pos = player_data.Inventory.Special.Data[#player_data.Inventory.Special.Data].Pos + ((Vector((16 * mod.Config.CoopHUD.inventory.special.scale.X) + (8 * mod.Config.CoopHUD.inventory.special.result_scale.X), (mod.Config.CoopHUD.inventory.special.space.Y / -2) + (3 * mod.Config.CoopHUD.inventory.special.result_scale.Y)) + mod.Config.CoopHUD.inventory.special.result_offset) * player_data.Edge.multipliers);
+			local result_pos = player_data.Inventory.Special.Data[#player_data.Inventory.Special.Data].Pos + ((Vector((16 * mod.Config.CoopHUD.inventory.special.scale.X) + (8 * mod.Config.CoopHUD.inventory.special.result_scale.X), (mod.Config.CoopHUD.inventory.special.space.Y / -2) + (3 * mod.Config.CoopHUD.inventory.special.result_scale.Y)) + mod.Config.CoopHUD.inventory.special.result_offset) * player_data.Edge.Multipliers);
 			
 			sprite.Color = Color(1, 1, 1, mod.Config.CoopHUD.inventory.special.result_opacity);
 			sprite.Scale = mod.Config.CoopHUD.inventory.special.result_scale;
 			
-			sprite.FlipX = player_data.Edge.multipliers.X < 0;
+			sprite.FlipX = player_data.Edge.Multipliers.X < 0;
 			sprite:SetFrame('Result', 0);
 			
 			sprite:LoadGraphics();

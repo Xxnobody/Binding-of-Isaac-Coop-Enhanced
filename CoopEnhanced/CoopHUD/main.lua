@@ -193,10 +193,10 @@ function CoopEnhanced.CoopHUD.InitNewPlayers()
 		local controller_index = (i - 1);
 		if CoopHUD.DATA.Joining.Total < 4 and CoopEnhanced.CoopHUD.getDataFromController(controller_index) == nil then
 			if CoopHUD.DATA.Joining[i] == nil and Input.IsActionPressed(ButtonAction.ACTION_JOINMULTIPLAYER, controller_index) then
-				local screen_size = Utils.GetScreenSize();
+				local screen_dimensions = Utils.GetScreenDimensions();
 				local joining = {Index = (mod.Players.Total + CoopHUD.DATA.Joining.Total + 1), Controller = controller_index, Selected = 1, Move = 0};
 				
-				joining.Pos = Vector((joining.Index % 2) == 0 and (screen_size.Max.X - (CoopHUD.Positions.Coop.X + mod.Config.CoopHUD.mirrored_extra_offset.X + 8)) or CoopHUD.Positions.Coop.X, joining.Index > 2 and (screen_size.Max.Y - (CoopHUD.Positions.Coop.Y + mod.Config.CoopHUD.offset.Y + mod.Config.CoopHUD.mirrored_extra_offset.Y + 4)) or CoopHUD.Positions.Coop.Y);
+				joining.Pos = Vector((joining.Index % 2) == 0 and (screen_dimensions.Max.X - (CoopHUD.Positions.Coop.X + mod.Config.CoopHUD.players.mirrored_offset.X + 8)) or CoopHUD.Positions.Coop.X, joining.Index > 2 and (screen_dimensions.Max.Y - (CoopHUD.Positions.Coop.Y + mod.Config.CoopHUD.offset.Y + mod.Config.CoopHUD.players.mirrored_offset.Y + 4)) or CoopHUD.Positions.Coop.Y);
 				joining.Sprites = CoopHUD.getCoopMenuSprites(joining);
 				CoopHUD.DATA.Joining[i] = joining;
 				CoopHUD.DATA.Joining.Total = (CoopHUD.DATA.Joining.Total or 0) + 1;
@@ -233,7 +233,7 @@ require(mod.Directory .. 'CoopHUD.HUD.stats');
 require(mod.Directory .. 'CoopHUD.HUD.item');
 require(mod.Directory .. 'CoopHUD.HUD.player');
 require(mod.Directory .. 'CoopHUD.HUD.misc');
-require(mod.Directory .. 'CoopHUD.HUD.main');
+require(mod.Directory .. 'CoopHUD.HUD.render');
 
 -- Callbacks
 local function addCollectible(_, collectible_type, _, _, _, _, player_entity)
@@ -271,11 +271,11 @@ mod:AddCallback(ModCallbacks.MC_PRE_ITEM_TEXT_DISPLAY, displayBanner);
 local hotkey_timer = 0;
 local function onRender()
 	-- Renderer Checks
-	if not mod.Config.modules.CoopHUD or game:GetSeeds():HasSeedEffect(SeedEffect.SEED_NO_HUD) or (not Isaac:CanStartTrueCoop() and mod.Config.CoopHUD.coop_only and not PlayerManager.IsCoopPlay()) then -- Check if HUD can be rendered at all
+	if not mod.Config.modules.CoopHUD or game:GetSeeds():HasSeedEffect(SeedEffect.SEED_NO_HUD) or (not Isaac:CanStartTrueCoop() and mod.Config.CoopHUD.toggle_hud.coop_only and not PlayerManager.IsCoopPlay()) then -- Check if HUD can be rendered at all
 		CoopHUD.IsVisible = false;
 		CoopHUD.Refresh = false;
 		return;
-	elseif (mod.Config.CoopHUD.coop_only and not PlayerManager.IsCoopPlay()) or (not mod.Config.CoopHUD.pause_display and Utils.IsPauseMenuOpen()) then -- Check for Coop play and pause screens
+	elseif (mod.Config.CoopHUD.toggle_hud.coop_only and not PlayerManager.IsCoopPlay()) or (not mod.Config.CoopHUD.toggle_hud.pause_display and Utils.IsPauseMenuOpen()) then -- Check for Coop play and pause screens
 		return;
 	elseif mod.Fonts.CoopHUD == nil then
 		mod.Debug("Fonts not loaded properly due to an unknown error. HUD must abort!",CoopHUD.Name);
@@ -317,8 +317,6 @@ local function onRender()
 	if not CoopHUD.IsVisible then return; end
 	hud:SetVisible(false);
 	
-	local screen_size, screen_center = Utils.GetScreenSize(), Utils.GetScreenCenter();
-	
 	CoopHUD.IsMapDown = false;
 	CoopHUD.IsPlayerMapDown = {};
 	
@@ -347,11 +345,13 @@ local function onRender()
 	-- EID 
 	if EID then EID.isHidden = mod.Config.CoopHUD.mods.EID.display == 3 or (mod.Config.CoopHUD.mods.EID.display == 2 and not CoopHUD.IsMapDown or (mod.Config.CoopHUD.mods.EID.display == 1 and CoopHUD.IsMapDown or false)); end
 	
+	local screen_dimensions = Utils.GetScreenDimensions();
+	
 	-- Render the various HUD elements
-	CoopHUD.RenderPlayers(screen_size, screen_center);
-	CoopHUD.Misc.Render(screen_size, screen_center);
-	CoopHUD.RenderBanners(screen_size, screen_center);
-	CoopHUD.RenderTimer(screen_size, screen_center);
+	CoopHUD.RenderPlayers(screen_dimensions);
+	CoopHUD.Misc.Render(screen_dimensions);
+	CoopHUD.RenderBanners(screen_dimensions);
+	CoopHUD.RenderTimer(screen_dimensions);
 end
 
 local callbacks = {

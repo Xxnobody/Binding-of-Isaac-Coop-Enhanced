@@ -70,7 +70,7 @@ function CoopHUD.Reflourished()
 			end
 			if fadeAlpha[controller_index] <= 0 then return; end
 
-			local pos = (config.anchor == 0 or not player_data) and Isaac.WorldToScreen(player_entity.Position) + config.offset + Vector(-1, -41) or player_data.Edge.indexed + ((config.offset + CoopHUD.Positions.Trinket[1] + Vector(16,0)) * player_data.Edge.multipliers)
+			local pos = (config.anchor == 0 or not player_data) and Isaac.WorldToScreen(player_entity.Position) + config.offset + Vector(-1, -41) or player_data.Edge.Pos + ((config.offset + CoopHUD.Positions.Trinket[1] + Vector(16,0)) * player_data.Edge.Multipliers)
 			if displayPos and displayPos == 2 then
 				pos = pos + Vector(-13, 45);
 			end

@@ -8,9 +8,9 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.categories.general,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopHUD.pause_display; end,
-		Display = function() return 'Enable HUD on pause: ' .. (mod.Config.CoopHUD.pause_display and 'on' or 'off'); end,
-		OnChange = function(b) CoopHUD.isVisible = (b and Utils.IsPauseMenuOpen()) mod.Config.CoopHUD.pause_display = b; end,
+		CurrentSetting = function() return mod.Config.CoopHUD.toggle_hud.pause_display; end,
+		Display = function() return 'Enable HUD on pause: ' .. (mod.Config.CoopHUD.toggle_hud.pause_display and 'on' or 'off'); end,
+		OnChange = function(b) CoopHUD.isVisible = (b and Utils.IsPauseMenuOpen()) mod.Config.CoopHUD.toggle_hud.pause_display = b; end,
 		Info = {'Sets whether the HUD renders when a pause menu is loaded. Useful for tweaking HUD values.'},
 	}
 );
@@ -19,9 +19,9 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.categories.general,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopHUD.coop_only; end,
-		Display = function() return 'Coop Only HUD: ' .. (mod.Config.CoopHUD.coop_only and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopHUD.coop_only = b; end,
+		CurrentSetting = function() return mod.Config.CoopHUD.toggle_hud.coop_only; end,
+		Display = function() return 'Coop Only HUD: ' .. (mod.Config.CoopHUD.toggle_hud.coop_only and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.toggle_hud.coop_only = b; end,
 		Info = {'HUD only appears during Coop games.'},
 	}
 );
@@ -45,27 +45,6 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopHUD.offset.Y; end,
 		Display = function() return 'HUD Y Offset: ' .. (mod.Config.CoopHUD.offset.Y); end,
 		OnChange = function(n) mod.Config.CoopHUD.offset.Y = n; end,
-	}
-);
-ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.general);
-ModConfigMenu.AddSetting(
-	CoopHUD.MCM.title,
-	CoopHUD.MCM.categories.general,
-	{
-		Type = ModConfigMenu.OptionType.NUMBER,
-		CurrentSetting = function() return mod.Config.CoopHUD.mirrored_extra_offset.X; end,
-		Display = function() return 'P2&4 Additional Offset (X): ' .. mod.Config.CoopHUD.mirrored_extra_offset.X; end,
-		OnChange = function(n) mod.Config.CoopHUD.mirrored_extra_offset.X = n; end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopHUD.MCM.title,
-	CoopHUD.MCM.categories.general,
-	{
-		Type = ModConfigMenu.OptionType.NUMBER,
-		CurrentSetting = function() return mod.Config.CoopHUD.mirrored_extra_offset.Y; end,
-		Display = function() return 'P3&4 Addtional Offset (Y): ' .. mod.Config.CoopHUD.mirrored_extra_offset.Y; end,
-		OnChange = function(n) mod.Config.CoopHUD.mirrored_extra_offset.Y = n; end,
 	}
 );
 

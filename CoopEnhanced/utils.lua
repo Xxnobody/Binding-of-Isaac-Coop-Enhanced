@@ -8,17 +8,17 @@ function Utils.VectorFrom(num)
 	return Vector(num,num);
 end
 
-function Utils.GetScreenSize() -- Taken from reHUD, credit to Wofsauge and _Kilburn -- Taken from reHUD, credit to Wofsauge and _Kilburn
+function Utils.GetScreenDimensions() -- Taken from reHUD, credit to Wofsauge and _Kilburn
 	local room = game:GetRoom();
 	local pos = room:WorldToScreenPosition(Vector(0,0)) - room:GetRenderScrollOffset() - game.ScreenShakeOffset;
 
 	local rx = pos.X + 60 * 26 / 40;
 	local ry = pos.Y + 140 * (26 / 40);
 
-	return {Max = Vector(rx*2 + 13*26, ry*2 + 7*26), Min = mod.Config.CoopHUD.offset};
-end
-function Utils.GetScreenCenter()
-	return Utils.GetScreenSize().Max / 2;
+	local screen_dimensions = {Max = Vector(rx*2 + 13*26, ry*2 + 7*26), Min = Vector.Zero};
+	screen_dimensions.Center = screen_dimensions.Max / 2;
+	
+	return screen_dimensions;
 end
 
 function Utils.encodeData(data)-- Taken from CoopHUD+, credit to Kona
@@ -102,7 +102,7 @@ function Utils.cloneTable(tbl)
 	local new_tbl = {};
 	if type(tbl) == "table" then
 		for k, v in pairs(tbl) do
-			if type(v) == "table" then
+			if type(v) == "table" or type(v) == "userdata" then
 				new_tbl[k] = Utils.cloneTable(v);
 			else
 				new_tbl[k] = v;

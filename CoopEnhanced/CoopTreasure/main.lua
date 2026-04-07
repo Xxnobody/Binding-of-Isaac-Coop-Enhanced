@@ -303,14 +303,16 @@ function CoopTreasure:onRoom()
 		if i > room_data.Spawn.Maximum then
 			pedestal_entity:Remove();
 		else
+			local isBlind = pedestal_entity:IsBlind();
 			item_pos = item_pos + (i > 1 and (room_data.MoreOptions.Offset / (math.min(room_data.Spawn.Maximum,#orig_peds) >= 3 and 2 or 1)) or Vector.Zero);
 			CoopTreasure.ClearGridSpace(item_pos, room_data.Spawn.Radius); -- Clear grid entities from around pedestals
 			if room_data.Safe.Enable and room_data.Safe.Mode > 0 then item_pos = Utils.GetSafeSpawnPosition(game:GetPlayer().Position, item_pos, safe_args); end -- Safe Pos Check
 			local new_pedestal_entity = game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, item_pos, Vector.Zero, nil, pedestal_entity.SubType, math.max(1,room:GetSpawnSeed())):ToPickup(); -- Spawn new one to remove extra items from coop (e.g. Boss Item Pedestals)
-			pedestal_entity:Remove();
+			new_pedestal_entity:SetForceBlind(isBlind); -- Set blind (usually alt floor treasure)
 			if room_data.MoreOptions.Enabled then new_pedestal_entity.OptionsPickupIndex = 1; end
 			if room_data.Assign > 1 and players[1]:GetPlayerType() == PlayerType.PLAYER_KEEPER_B then new_pedestal_entity.Price = 15; new_pedestal_entity.ShopItemId = -1; elseif isDevilDeal then new_pedestal_entity.Price = Utils.GetDevilPrice(players[1],nil,new_pedestal_entity.SubType); else new_pedestal_entity.Price = room_data.Treasure.Prices[1] or 0; end
-			local pedestal_data = {Pointer = EntityPtr(new_pedestal_entity), Position = item_pos, Price = new_pedestal_entity.Price, IsBlind = new_pedestal_entity:IsBlind()};
+			pedestal_entity:Remove();
+			local pedestal_data = {Pointer = EntityPtr(new_pedestal_entity), Position = item_pos, Price = new_pedestal_entity.Price, IsBlind = isBlind};
 			table.insert(room_data.Treasure.Items[1],pedestal_data);
 			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_PEDESTAL, 1, new_pedestal_entity, pedestal_data); -- Execute Post Pedestal updates for player 1 Callbacks (player_index, new_pedestal_entity(EntityPickup), pedestal_data(table))
 		end

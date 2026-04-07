@@ -1,42 +1,46 @@
 local mod = CoopEnhanced;
 local CoopMarks = CoopEnhanced.CoopMarks;
+
 local Utils = mod.Utils;
 
-function mod.CoopMarks.ResetConfig()
-	mod.Config.CoopMarks = {
-		CMD = "marks",
-		players = {
-			[1] = {
-				color = Utils.GetColorIndexByName("Red"),
-				name = "",
-				type = 0
-			},
-			[2] = {
-				color = Utils.GetColorIndexByName("Blue"),
-				name = "",
-				type = 0
-			},
-			[3] = {
-				color = Utils.GetColorIndexByName("Green"),
-				name = "",
-				type = 0
-			},
-			[4] = {
-				color = Utils.GetColorIndexByName("Yellow"),
-				name = "",
-				type = 0
-			}
+mod.CoopMarks.DefaultConfig = {
+	CMD = "marks",
+
+	players = {
+		[1] = {
+			color = Utils.GetColorIndexByName("Red"),
+			name = "",
+			type = 0
 		},
-		coop_only = false,
-		colors = false,
-		player_sync = "Global",
-		opacity = 1,
-		offset = Vector(0,0),
-		rel_offset = Vector(0,0),
-		scale = Vector(0.5,0.5),
-		text_scale = Vector(1,1),
-		fonts = {mark = 'luaminioutlined',}
-	};
+		[2] = {
+			color = Utils.GetColorIndexByName("Blue"),
+			name = "",
+			type = 0
+		},
+		[3] = {
+			color = Utils.GetColorIndexByName("Green"),
+			name = "",
+			type = 0
+		},
+		[4] = {
+			color = Utils.GetColorIndexByName("Yellow"),
+			name = "",
+			type = 0
+		}
+	},
+	coop_only = false,
+	colors = false,
+	player_sync = "Global",
+	opacity = 1,
+	offset = Vector(0,0),
+	rel_offset = Vector(0,0),
+	scale = Vector(0.5,0.5),
+	text_scale = Vector(1,1),
+	fonts = {mark = 'luaminioutlined',}
+};
+	
+function mod.CoopMarks.ResetConfig()
+	mod.Config.CoopMarks = Utils.cloneTable(mod.CoopMarks.DefaultConfig);
 end
 if mod.Config.CoopMarks == nil then CoopMarks.ResetConfig(); end
 

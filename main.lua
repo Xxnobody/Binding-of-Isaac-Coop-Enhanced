@@ -74,7 +74,7 @@ local function onUpdate()
 	-- Functions ran every second
 	if CoopEnhanced.FrameCount == 1 then
 		CoopEnhanced.Twins = {};
-		CoopEnhanced.Players = {Alive = 0, Total = 0, Types = {}};
+		CoopEnhanced.Players = {Alive = 0, Total = 0, Types = {},Unlocked = {}};
 		if Game():GetNumPlayers() < 1 then return; end
 		local players = {}
 		for i = 1, Game():GetNumPlayers(), 1 do
@@ -87,7 +87,7 @@ local function onUpdate()
 				players[player_index] = i;
 				CoopEnhanced.Twins[i] = false;
 				CoopEnhanced.Players.Total = CoopEnhanced.Players.Total + 1; -- Total MAIN characters, excluding Twins/Strawmen
-				if not player_entity:IsDead() then CoopEnhanced.Players.Alive = CoopEnhanced.Players.Alive + 1; end -- Total ALIVE main characters
+				if not player_entity:IsDead() and not player_entity:IsCoopGhost()  then CoopEnhanced.Players.Alive = CoopEnhanced.Players.Alive + 1; end -- Total ALIVE main characters
 			end
 			
 		end

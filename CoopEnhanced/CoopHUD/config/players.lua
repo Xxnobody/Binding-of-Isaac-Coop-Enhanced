@@ -20,6 +20,26 @@ ModConfigMenu.AddSetting(
 		Info = {'Choose which config this uses for Player Color/Names.'},
 	}
 );
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.players,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.players.mirrored_offset.X; end,
+		Display = function() return 'P2 & P4 Additional Offset (X): ' .. mod.Config.CoopHUD.players.mirrored_offset.X; end,
+		OnChange = function(n) mod.Config.CoopHUD.players.mirrored_offset.X = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.players,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.players.mirrored_offset.Y; end,
+		Display = function() return 'P3 & P4 Addtional Offset (Y): ' .. mod.Config.CoopHUD.players.mirrored_offset.Y; end,
+		OnChange = function(n) mod.Config.CoopHUD.players.mirrored_offset.Y = n; end,
+	}
+);
 
 ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.players);
 ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.players, 'Twins');
