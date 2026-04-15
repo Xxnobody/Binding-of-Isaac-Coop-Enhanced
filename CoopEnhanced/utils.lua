@@ -115,7 +115,7 @@ function Utils.cloneTable(tbl)
 	end
 	return new_tbl;
 end
-function Utils.shiftArray(tbl,step)
+function Utils.shiftTable(tbl,step)
 	if step == 0 then return; end
 	local start_index = step > 0 and 1 or #tbl;
 	local end_index = step > 0 and #tbl or 1;
@@ -126,9 +126,31 @@ function Utils.shiftArray(tbl,step)
 	end
 	return new_tbl;
 end
-
+function Utils.printTable(var, level)
+	local output = "";
+	level = level or 0;
+	level = level + 1;
+	if type(var) == "table" then
+		output = output .. "{";
+		for key, value in pairs(var) do
+			output = output .. "\n" .. string.rep("\t", level) .. string.format("[%s] = ", key) .. Utils.printTable(value, level) .. ",";
+		end
+		output = output .. "\n" .. string.rep("\t", level - 1) .. "}";
+	elseif type(var) == "userdata" then
+		if var.X then output = output .. "Vector(" .. var.X .. "," .. var.Y .. ")"; end
+	elseif type(var) == "function" then
+		output = output .. "function()";
+	else
+		output = output .. var;
+	end
+	level = level - 1;
+	if level ~= 0 then
+		return output;
+	end
+	print(output);
+end
 function Utils.CleanupName(name)
-	return string.gsub(name,"%w+",{KEY_ = "",KP_ = "",Key_ = "",Kp_ = ""}):lower():gsub("(%a)([%w_']*)",function(f,r) return f:upper()..r:lower(); end);
+	return string.gsub(name,"_"," "):lower():gsub("(%a)([%w_']*)",function(f,r) return f:upper()..r:lower(); end);
 end
 
 -- Game Utilities
@@ -140,6 +162,17 @@ function Utils.IsMCMenuOpen()
 end
 function Utils.IsDSSMenuOpen()
 	return DeadSeaScrollsMenu and DeadSeaScrollsMenu.IsOpen();
+end
+
+function Utils.getHealthTypes()
+	if not CustomHealthAPI then return mod.HealthTypes; end
+	local health_types = {};
+	for name,info in pairs(CustomHealthAPI.PersistentData.HealthDefinitions) do
+		local total = info.MaxHP and info.MaxHP > 0 and info.MaxHP or (info.AnimationName ~= nil and (type(info.AnimationName) == "table" and #info.AnimationName > 0 and #info.AnimationName or 1) or (info.AnimationNames ~= nil and (type(info.AnimationNames) == "table" and #info.AnimationNames > 0 and #info.AnimationNames or 1)));
+		table.insert(health_types,{Name = name, Total = total, Order = (info.SortOrder or 0)});
+	end
+	table.sort(health_types,function (a,b) return a.Order < b.Order end);
+	return health_types;
 end
 
 function Utils.cloneSprite(sprite,sprite_data)
@@ -198,7 +231,7 @@ function Utils.ConvertFontToColor(kcolor,opacity)
 end
 function Utils.GetColorByName(color_name)
 	for _, color in pairs(mod.Colors) do
-		if color.Name == color_name then return color.Value; end
+		if color.Name:lower() == color_name:lower() then return color.Value; end
 	end
 	return Color.Default;
 end
@@ -211,7 +244,7 @@ end
 
 -- Player/Character Utils
 local random_player = {Name = "Random", Type = PlayerType.PLAYER_POSSESSOR, Achievement = nil, Sprite = {Anm2 = mod.Animations.Coop, Animation = "Main", Frame = 0,Sheets = {[1] = mod.Images.Blank}}};
-function Utils.getUnlockedCharacters()
+function Utils.getUnlockedCharacters(no_mods,no_random)
 	local characters = {mod.Characters[1]};
 	local last_achievement = 0;
 	for i,character in pairs(mod.Characters) do
@@ -220,13 +253,15 @@ function Utils.getUnlockedCharacters()
 		end
 		last_achievement = character.Achievement;
 	end
-	for i,character in pairs(mod.CharactersModded) do
-		if not character.Achievement or (character.Achievement > 0 and character.Achievement ~= last_achievement and Isaac.GetPersistentGameData():Unlocked(character.Achievement)) then
-			table.insert(characters,character);
+	if not no_mods then
+		for i,character in pairs(mod.CharactersModded) do
+			if not character.Achievement or (character.Achievement > 0 and character.Achievement ~= last_achievement and Isaac.GetPersistentGameData():Unlocked(character.Achievement)) then
+				table.insert(characters,character);
+			end
+			last_achievement = character.Achievement;
 		end
-		last_achievement = character.Achievement;
 	end
-	if #characters > 1 then table.insert(characters,random_player); end
+	if not no_random and #characters > 1 then table.insert(characters,random_player); end
 	return characters;
 end
 
@@ -254,14 +289,6 @@ function Utils.GetPlayerID(player_entity) -- Taken from CustomHealthAPI
 	return ("UUID-" .. tostring(rng:GetSeed()));
 end
 
-function Utils.getPlayerIndex(player_entity)
-	if player_entity == nil then return; end
-	for i = 1, game:GetNumPlayers(), 1 do
-		local player = Isaac.GetPlayer(i - 1);
-		if Utils.GetPlayerID(player_entity) == Utils.GetPlayerID(player) then return i; end
-	end
-	return nil;
-end
 function Utils.getMainPlayers()
 	local players = {};
 	for i = 1, game:GetNumPlayers(), 1 do
@@ -282,18 +309,34 @@ function Utils.getMainPlayerIndex(player_entity)
 end
 function Utils.getMainTwin(player_entity)
 	if player_entity == nil then return; end
-	local player_ID = Utils.GetPlayerID(player_entity);
 	for i = 1, game:GetNumPlayers(), 1 do
 		if mod.Twins[i] then return Isaac.GetPlayer(i - 1), i; end
 	end
 	return nil,0;
+end
+function Utils.isMainTwin(player_entity)
+	if player_entity == nil then return; end
+	for i = 1, game:GetNumPlayers(), 1 do
+		local player = Isaac.GetPlayer(i - 1);
+		if mod.Twins[i] and Utils.GetPlayerID(player) == Utils.GetPlayerID(player_entity) then return true; end
+	end
+	return false;
+end
+function Utils.getPlayerTwins(player_entity)
+	if player_entity == nil then return; end
+	local player_twins = {};
+	local player_index = Utils.getMainPlayerIndex(player_entity);
+	for i = 1, game:GetNumPlayers(), 1 do
+		if mod.Twins[i] == player_index then table.insert(player_twins,Isaac.GetPlayer(i - 1)); end
+	end
+	return player_twins;
 end
 function Utils.getMainPlayerByController(controller_index)
 	local players = Utils.getMainPlayers();
 	for i = 1, #players, 1 do
 		if players[i].ControllerIndex == controller_index then return players[i], i; end
 	end
-	return {};
+	return nil,0;
 end
 function Utils.getPlayersByController(controller_index)
 	local players = {};
@@ -373,31 +416,25 @@ function Utils.IsKeeper(player_entity)
 	local player_type = player_entity:GetPlayerType();
 	return player_type == PlayerType.PLAYER_KEEPER or player_type == PlayerType.PLAYER_KEEPER_B;
 end
-function Utils.IsTemporary(isTwin, player_entity)
+function Utils.IsTemporary(player_entity)
 	local player_type = player_entity:GetPlayerType()
-	return isTwin and (Utils.IsForgotten(player_entity) or Utils.IsKeeper(player_entity) or Utils.IsIllusion(player_entity));
+	return Utils.isMainTwin(player_entity) and (Utils.IsForgotten(player_entity) or Utils.IsKeeper(player_entity) or Utils.IsIllusion(player_entity));
 end
 function Utils.IsTainted(player_entity)
 	local player_type = player_entity:GetPlayerType();
-	return player_type >= PlayerType.PLAYER_ISAAC_B and player_type <= PlayerType.PLAYER_THESOUL_B;
+	local player_config = EntityConfig.GetPlayer(player_type);
+	return player_config and player_config:IsTainted();
 end
 function Utils.HasInventory(player_entity)
 	local player_type = player_entity:GetPlayerType();
 	return player_type == PlayerType.PLAYER_ISAAC_B or player_type == PlayerType.PLAYER_CAIN_B or player_type == PlayerType.PLAYER_BLUEBABY_B;
 end
-function Utils.AnyoneIsNotTaintedBlueBaby()
-	for i,player_type in pairs(mod.Players.Types) do
-		if player_type ~= PlayerType.PLAYER_BLUEBABY_B then return true; end
+function Utils.AnyoneIsNotPlayerType(player_type)
+	for i,ptype in pairs(mod.Players.Types) do
+		if player_type ~= ptype then return true; end
 	end
 	return false;
 end
-function Utils.FirstPlayerNotTaintedBlueBaby()
-	for i,player_entity in pairs(PlayerManager.GetPlayers()) do
-		if player_type ~= PlayerType.PLAYER_BLUEBABY_B then return player_entity; end
-	end
-	return nil;
-end
-
 function Utils.GetDevilPrice(player_entity,player_health,collectible_type)
 	local price = 0;
 	player_health = player_health or CustomHealthAPI and CustomHealthAPI.PersistentData.OverriddenFunctions.GetHearts(player_entity) or player_entity:GetHearts();
@@ -405,7 +442,7 @@ function Utils.GetDevilPrice(player_entity,player_health,collectible_type)
 	if player_entity:HasTrinket(TrinketType.TRINKET_YOUR_SOUL) or Utils.IsLost(player_entity) then price = PickupPrice.PRICE_SOUL;
 	elseif player_entity:GetPlayerType() == PlayerType.PLAYER_KEEPER or player_entity:GetPlayerType() == PlayerType.PLAYER_KEEPER_B then 
 		price = (15 * devil_price) / (PlayerManager.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
-	elseif player_health < 1 then price = PickupPrice.PRICE_THREE_SOULHEARTS; else
+	elseif player_health < 1 and not CustomHealthAPI.Helper.PlayerIsSoulHeartOnly(player_entity,true) then price = PickupPrice.PRICE_THREE_SOULHEARTS; else
 		if devil_price == 1 then
 			if player_entity:GetPlayerType() == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_ONE_SOUL_HEART;
 			else price = PickupPrice.PRICE_ONE_HEART; end
@@ -418,10 +455,15 @@ function Utils.GetDevilPrice(player_entity,player_health,collectible_type)
 	return price;
 end
 
-function Utils.CanPayDevilPrice(player_entity,devil_price)
-	player_health = {Red = (player_entity:GetHearts() / 2), Soul = (player_entity:GetSoulHearts() / 2)};
-	
-	if devil_price == PickupPrice.PRICE_ONE_HEART and player_health.Red > 0 or (devil_price == PickupPrice.PRICE_TWO_HEARTS and player_health.Red > 1 or (devil_price == PickupPrice.PRICE_THREE_SOULHEARTS and player_health.Soul > 2 or (devil_price == PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS and (player_health.Red > 1 and player_health.Soul > 1) or (devil_price == PickupPrice.PRICE_ONE_SOUL_HEART and player_health.Soul > 0 or (devil_price == PickupPrice.PRICE_TWO_SOUL_HEARTS and player_health.Soul > 1 or (devil_price == PickupPrice.PRICE_ONE_HEART_AND_ONE_SOUL_HEART and (player_health.Red > 0 and player_health.Soul > 0) or (devil_price == PickupPrice.PRICE_SOUL or devil_price == PickupPrice.PRICE_SPIKES))))))) then return true; else return false; end
+function Utils.CanPayPrice(player_entity,price)
+	if price > 0 then
+		if player_entity:HasTrinket(TrinketType.TRINKET_STORE_CREDIT) or player_entity:GetNumCoins() >= price then return true; else return false; end
+	elseif price < 0 then
+		player_health = {Red = (player_entity:GetHearts() / 2), Soul = (player_entity:GetSoulHearts() / 2)};
+		
+		if devil_price == PickupPrice.PRICE_ONE_HEART and player_health.Red > 0 or (devil_price == PickupPrice.PRICE_TWO_HEARTS and player_health.Red > 1 or (devil_price == PickupPrice.PRICE_THREE_SOULHEARTS and player_health.Soul > 2 or (devil_price == PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS and (player_health.Red > 1 and player_health.Soul > 1) or (devil_price == PickupPrice.PRICE_ONE_SOUL_HEART and player_health.Soul > 0 or (devil_price == PickupPrice.PRICE_TWO_SOUL_HEARTS and player_health.Soul > 1 or (devil_price == PickupPrice.PRICE_ONE_HEART_AND_ONE_SOUL_HEART and (player_health.Red > 0 and player_health.Soul > 0) or (devil_price == PickupPrice.PRICE_SOUL or devil_price == PickupPrice.PRICE_SPIKES))))))) then return true; else return false; end
+	end
+	return true;
 end
 
 -- Font Utils
@@ -489,10 +531,10 @@ function Utils.CheckGridIndex(room,grid_index)
 	return true;
 end
 
-function Utils.GetGridTile(index) -- Get Room Grid Row / Column by index. Returns Vector
+function Utils.GetGridTile(grid_index) -- Get Room Grid Row / Column by grid_index. Returns table array
 	local room = Game():GetRoom();
-	if room == nil or index == nil then return nil; end
-	return Vector((index % room:GetGridWidth()),math.floor(index / room:GetGridWidth()));
+	if room == nil or grid_index == nil then return nil; end
+	return {(grid_index % room:GetGridWidth()),math.floor(grid_index / room:GetGridWidth())};
 end
 
 function Utils.GetSafeSpawnEntity(spawn_pos)
@@ -516,7 +558,7 @@ end
 
 function Utils.GetSafeSpawnPosition(start_pos, target_pos, grid_steps) -- Vector, Vector, Steps int[] [X,Y,Initial] Searches in a grid pattern (-1,1,2) -> Looks down 1 tile, then left 1, then down 1, etc
 	local room = game:GetRoom();
-	local room_boundary = {Utils.GetGridTile(room:GetGridIndex(room:GetTopLeftPos())).X,Utils.GetGridTile(room:GetGridIndex(room:GetBottomRightPos())).X};
+	local room_boundary = {Utils.GetGridTile(room:GetGridIndex(room:GetTopLeftPos()))[1],Utils.GetGridTile(room:GetGridIndex(room:GetBottomRightPos()))[1]};
 	local index = room:GetGridIndex(target_pos);
 	local end_index = grid_steps[1] > 0 and room:GetGridSize() or 0;
 	local step = grid_steps[3] and grid_steps[3] == 1 and Vector(grid_steps[1],0) or Vector(0,grid_steps[2]);
@@ -526,6 +568,7 @@ function Utils.GetSafeSpawnPosition(start_pos, target_pos, grid_steps) -- Vector
 		if pathfinder_entity:GetPathfinder():HasPathToPos(start_pos,true) and Utils.CheckGridIndex(room,index) then break; end -- Checks if it is behind Pits or unbreakable obstacles or is on top of an entity
 		
 		local tile = Utils.GetGridTile(index);
+		tile = Vector(tile[1],tile[2]);
 		tile = tile + step;
 		step = step.X == 0 and Vector(grid_steps[1],0) or Vector(0,grid_steps[2]);
 		if tile.X < room_boundary[1] or tile.X > room_boundary[2] or i == max_attempts then -- Failed to find safe position

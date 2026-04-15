@@ -85,7 +85,7 @@ local function ModCompat()
 		roomConfigs[LEV[9]] = function(room,room_data) -- pit splits sides, set vertical, disable safe pos
 			room_data.Positions[1] = room:GetGridPosition(32);
 			room_data.Positions[2] = room:GetGridPosition(42);
-			if spawn_amount > 2 then
+			if room_data.Spawn.Total > 2 then
 				room_data.Positions[3] = room:GetGridPosition(25);
 				room_data.Positions[4] = room:GetGridPosition(28);
 				room_data.Spawn.Maximum = 1;
@@ -101,7 +101,7 @@ local function ModCompat()
 		roomConfigs[LEV[11]] = function(room,room_data) -- rocks blocking corner, set vertical, disable safe pos
 			room_data.Positions[1] = room:GetGridPosition(16);
 			room_data.Positions[2] = room:GetGridPosition(20);
-			if spawn_amount > 2 then
+			if room_data.Spawn.Total > 2 then
 				room_data.Positions[3] = room:GetGridPosition(46);
 				room_data.Positions[4] = room:GetGridPosition(50);
 				room_data.Spawn.Maximum = 1;
@@ -374,7 +374,7 @@ local function ModCompat()
 				end
 			end
 		end
-		mod.Registry.AddCallback(mod.Callbacks.TREASURE_POST_ROOM_SETUP, PlanetariumZodiaks);
+		mod.Registry:AddCallback(mod.Callbacks.TREASURE_POST_ROOM_SETUP, PlanetariumZodiaks);
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_MODS_LOADED, ModCompat);

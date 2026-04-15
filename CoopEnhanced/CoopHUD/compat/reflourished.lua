@@ -93,7 +93,7 @@ function CoopHUD.Reflourished()
 			end
 		end
 
-		mod.Registry.AddCallback(mod.Callbacks.HUD_POST_PLAYER_RENDER, function()
+		mod.Registry:AddCallback(mod.Callbacks.HUD_POST_PLAYER_RENDER, function()
 			if not anyPlayerHasExcited or RoomTransition.GetTransitionMode() ~= 0 then return; end
 			for _, player_entity in pairs(PlayerManager.GetPlayers()) do
 				if playerTimers[player_entity.ControllerIndex] then
@@ -149,7 +149,7 @@ function CoopHUD.Reflourished()
 		if save_data and save_data.Toggles and save_data.Toggles["ExcitedTimerEnabled"] then ExcitedTimer(); end
 		if mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.enabled then
 			if save_data and save_data.Toggles then save_data.Toggles["bossRushWaveCounterEnabled"] = false; end
-			mod.Registry.AddCallback(mod.Callbacks.HUD_POST_MISC_UPDATE, BossCounter);
+			mod.Registry:AddCallback(mod.Callbacks.HUD_POST_MISC_UPDATE, BossCounter);
 		end
 	end);
 end

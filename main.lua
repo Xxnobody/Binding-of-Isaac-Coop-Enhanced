@@ -18,34 +18,12 @@ CoopEnhanced.Registry = {Callbacks = {}, Commands = {}};
 CoopEnhanced.Callbacks = {NUM_CALLBACKS = 0};
 
 -- Functions
-local function printTable(var, level)
-	local output = "";
-	level = level or 0;
-	level = level + 1;
-	if type(var) == "table" then
-		output = output .. "{";
-		for key, value in pairs(var) do
-			output = output .. "\n" .. string.rep("\t", level) .. string.format("[%s] = ", key) .. printTable(value, level) .. ",";
-		end
-		output = output .. "\n" .. string.rep("\t", level - 1) .. "}";
-	elseif type(var) == "userdata" then
-		if var.X then output = output .. "Vector(" .. var.X .. "," .. var.Y .. ")"; end
-	else
-		output = output .. var;
-	end
-	level = level - 1;
-	if level ~= 0 then
-		return output;
-	end
-	print(output);
-end
-
 function CoopEnhanced.Debug(msg,module);
 	if not CoopEnhanced.Config.debug or not msg then return; end
 	module = module or "Co-op Enhanced";
 	if type(msg) == "table" then
 		print(module .. " Debug: ");
-		printTable(msg);
+		CoopEnhanced.Utils.printTable(msg);
 	else
 		print(module .. " Debug: " .. msg);
 	end
@@ -115,7 +93,7 @@ local function onGameStart(_, isCont)
 
 	CoopEnhanced.Utils.LoadFonts();
 	
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.LOAD_GAME_DATA,data);
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.LOAD_GAME_DATA,data);
 
 	CoopEnhanced.UnlocksAllowed = not Game():AchievementUnlocksDisallowed();
 	CoopEnhanced.Challenge = {ID = Isaac:GetChallenge(), IsDaily = (Game():GetChallengeParams():GetName() == DailyChallenge.GetChallengeParams():GetName()), Params = Game():GetChallengeParams()};
@@ -141,7 +119,7 @@ local function saveGame(doSave)
 	
 	data.Version = CoopEnhanced.Version;
 	data.Config = CoopEnhanced.Config;
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.SAVE_GAME_DATA,data);
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.SAVE_GAME_DATA,data);
 	
 	data = CoopEnhanced.Utils.encodeData(data);
 	local jsonString = json.encode(data);

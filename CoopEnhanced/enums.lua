@@ -150,18 +150,15 @@ mod.TrinketSlot = {
 	SECONDARY = 1,
 };
 mod.HealthTypes = {
-	[0] = "EMPTY_HEART",
-	[1] = "BROKEN_HEART",
-	[2] = "RED_HEART",
-	[3] = "EMPTY_COIN_HEART",
-	[4] = "BROKEN_COIN_HEART",
-	[5] = "COIN_HEART",
-	[6] = "ROTTEN_HEART",
-	[7] = "SOUL_HEART",
-	[8] = "BLACK_HEART",
-	[9] = "BONE_HEART",
-	[10] = "ETERNAL_HEART",
-	[11] = "GOLDEN_HEART",
+	[1] = {Name = "Empty Heart", Total = 2},
+	[2] = {Name = "Red Heart", Total = 2},
+	[3] = {Name = "Soul Heart", Total = 2},
+	[4] = {Name = "Black Heart", Total = 2},
+	[5] = {Name = "Bone Heart", Total = 1},
+	[6] = {Name = "Rotten Heart", Total = 1},
+	[7] = {Name = "Eternal Heart", Total = 1},
+	[8] = {Name = "Gold Heart", Total = 1},
+	[9] = {Name = "Broken Heart", Total = 1},
 };
 mod.StageTypes = {
 	["Special"] = 0,

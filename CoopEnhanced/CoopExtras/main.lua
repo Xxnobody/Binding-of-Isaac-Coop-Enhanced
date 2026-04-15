@@ -33,9 +33,9 @@ function CoopExtras.GreedRevive(_)
 	if mod.Config.CoopExtras.greed_revive and game:IsGreedMode() and room:GetType() == RoomType.ROOM_SHOP and game:GetLevel():GetCurrentRoomDesc().VisitedCount <= 1 and Game():GetLevel():GetStage() ~= LevelStage.STAGE1_GREED and Game():GetLevel():GetStage() ~= LevelStage.STAGE7_GREED then
 		local revive_pos = room:GetCenterPos() + Vector(0,mod.GridSize / 2);
 		revive_pos = Utils.GetSafeSpawnPosition(game:GetPlayer().Position, revive_pos, {0,1,2});
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GREED_REVIVE, revive_pos); -- Execute Pre Spawn Revive Machine Callbacks (revive_pos(Vector))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GREED_REVIVE, revive_pos); -- Execute Pre Spawn Revive Machine Callbacks (revive_pos(Vector))
 		local revive_machine = Isaac.Spawn(EntityType.ENTITY_SLOT, 19, -1, revive_pos, Vector.Zero, game:GetPlayer());
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_GREED_REVIVE, revive_machine); -- Execute Post Spawn Revive Machine Callbacks (revive_machine(Entity))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_GREED_REVIVE, revive_machine); -- Execute Post Spawn Revive Machine Callbacks (revive_machine(Entity))
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CoopExtras.GreedRevive);
@@ -56,7 +56,7 @@ function CoopExtras.CoopPrices(_,pickup)
 			local price = pickup.Price ~= 0 and ((room_type == RoomType.ROOM_DEVIL or room_type == RoomType.ROOM_BLACK_MARKET or (game:GetLevel():GetName() == "Dark Room" and game:GetLevel():GetCurrentRoomIndex() == game:GetLevel():GetStartingRoomIndex())) and PickupPrice.PRICE_ONE_HEART or pickup.Price) or pickup.Price;
 			room_data[pickup_id] = {Price = price, Last = nil, Item = pickup.SubType};
 		end
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_PRICE_DATA, room_data); -- Execute Pre item Pricing Callbacks (room_data(table))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_PRICE_DATA, room_data); -- Execute Pre item Pricing Callbacks (room_data(table))
 		if room_data[pickup_id].Price == nil then return; end -- Make sure that Couponed items and old replaced actives stay free
 		local price = room_data[pickup_id].Price + 0;
 		
@@ -80,7 +80,7 @@ function CoopExtras.CoopPrices(_,pickup)
 				price = Isaac.GetItemConfig():GetCollectible(pickup.SubType).ShopPrice / (PlayerManager.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
 			end
 		end
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_PRICE_DATA, price); -- Execute Post item Pricing Callbacks (price(int))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_PRICE_DATA, price); -- Execute Post item Pricing Callbacks (price(int))
 		if pickup.Price == 0 and (price ~= 0 and price == room_data[pickup_id].Last) or pickup.Touched then room_data[pickup_id].Price = nil; return; end
 		room_data[pickup_id].Last = price;
 		pickup.Price = price;
@@ -100,7 +100,7 @@ function CoopExtras:onGhostPickup(pickup_entity, entity)
 	local player_entity = entity:ToPlayer();
 	if not player_entity or not player_entity:IsCoopGhost() then return; end
 	
-	local canPickup = CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_PICKUP, player_entity, chest_type); -- Execute Pre Ghost Pickup Callbacks (player_entity(EntityPlayer), pickup_entity(EntityPickup)) Return true to allow pickup
+	local canPickup = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_PICKUP, player_entity, chest_type); -- Execute Pre Ghost Pickup Callbacks (player_entity(EntityPlayer), pickup_entity(EntityPickup)) Return true to allow pickup
 	if canPickup then return; end
 	if mod.Config.CoopExtras.ghost_flight.interact == 4 then return true; end
 	
@@ -115,7 +115,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, CoopExtras.onGhostPickup);
 
 function CoopExtras:onGhostChest(chest_type,player_entity)
 	if not player_entity or not player_entity:IsCoopGhost() then return; end
-	local canOpen = CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_CHEST, player_entity, chest_type); -- Execute Pre Ghost Chest Callbacks (player_entity(EntityPlayer), chest_type(PickupVariant)) Return true to allow opening
+	local canOpen = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_CHEST, player_entity, chest_type); -- Execute Pre Ghost Chest Callbacks (player_entity(EntityPlayer), chest_type(PickupVariant)) Return true to allow opening
 	if not canOpen and mod.Config.CoopExtras.ghost_flight.chests then return false; end
 end
 mod:AddCallback(ModCallbacks.MC_PRE_OPEN_CHEST, CoopExtras.onGhostChest);
@@ -123,7 +123,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_OPEN_CHEST, CoopExtras.onGhostChest);
 function CoopExtras:onGhostCollide(player_entity, entity)
 	local enemy_entity = entity:ToNPC();
 	if not player_entity:IsCoopGhost() or not enemy_entity then return; end
-	local canCollide = CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_PRICE_DATA, player_entity, enemy_entity); -- Execute Pre item Pricing Callbacks (player_entity(EntityPlayer), enemy_entity(EntityNPC))
+	local canCollide = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_PRICE_DATA, player_entity, enemy_entity); -- Execute Pre item Pricing Callbacks (player_entity(EntityPlayer), enemy_entity(EntityNPC))
 	if canCollide then return; end
 	if mod.Config.CoopExtras.ghost_flight.interact == 4 then return true; end
 	if enemy_entity:GetBossID() > 0 and mod.Config.CoopExtras.ghost_flight.interact >= 3 then return true; end

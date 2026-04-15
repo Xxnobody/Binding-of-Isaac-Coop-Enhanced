@@ -26,7 +26,7 @@ function CoopHUD.Epiphany()
 	end
 
 	local function EpiphanyLostHealth(hearts, pEntity, _)
-		if not CoopHUD.IsVisible or Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_THE_UNKNOWN > 0 then return end
+		if not CoopHUD.isVisible or Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_THE_UNKNOWN > 0 then return end
 		if pEntity:IsDead() or pEntity:IsCoopGhost() or pEntity:GetPlayerType() ~= Epiphany.PlayerType.LOST then return end
 
 		hearts[1].heart:Load("gfx/ui/lost_health_hud.anm2", true)
@@ -38,7 +38,7 @@ function CoopHUD.Epiphany()
 	end
 
 	local function EpiphanyKeeperHealth(hearts, pEntity, _)
-		if not CoopHUD.IsVisible or Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_THE_UNKNOWN > 0 then return end
+		if not CoopHUD.isVisible or Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_THE_UNKNOWN > 0 then return end
 		if pEntity:IsDead() or pEntity:IsCoopGhost() or pEntity:GetPlayerType() ~= Epiphany.PlayerType.KEEPER then return end
 
 		local function createSprite()

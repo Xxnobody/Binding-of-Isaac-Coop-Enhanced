@@ -118,32 +118,32 @@ end
 
 function Stats.GetStats(player_entity, player_number)
 	local stats = {};
-	stats[Stats.Stat.SPEED] = Stats.GetStat(player_entity.MoveSpeed, Stats.Stat.SPEED, false);
-	stats[Stats.Stat.FIRE_DELAY] = Stats.GetStat(30 / (player_entity.MaxFireDelay + 1), Stats.Stat.FIRE_DELAY, false);
-	stats[Stats.Stat.DAMAGE] = Stats.GetStat(player_entity.Damage, Stats.Stat.DAMAGE, false);
-	stats[Stats.Stat.RANGE] = Stats.GetStat(player_entity.TearRange / 40, Stats.Stat.RANGE, false);
-	stats[Stats.Stat.SHOT_SPEED] = Stats.GetStat(player_entity.ShotSpeed, Stats.Stat.SHOT_SPEED, false);
-	stats[Stats.Stat.LUCK] = Stats.GetStat(player_entity.Luck, Stats.Stat.LUCK, false);
+	stats[CoopHUD.StatType.SPEED] = Stats.GetStat(player_entity.MoveSpeed, CoopHUD.StatType.SPEED, false);
+	stats[CoopHUD.StatType.FIRE_DELAY] = Stats.GetStat(30 / (player_entity.MaxFireDelay + 1), CoopHUD.StatType.FIRE_DELAY, false);
+	stats[CoopHUD.StatType.DAMAGE] = Stats.GetStat(player_entity.Damage, CoopHUD.StatType.DAMAGE, false);
+	stats[CoopHUD.StatType.RANGE] = Stats.GetStat(player_entity.TearRange / 40, CoopHUD.StatType.RANGE, false);
+	stats[CoopHUD.StatType.SHOT_SPEED] = Stats.GetStat(player_entity.ShotSpeed, CoopHUD.StatType.SHOT_SPEED, false);
+	stats[CoopHUD.StatType.LUCK] = Stats.GetStat(player_entity.Luck, CoopHUD.StatType.LUCK, false);
 
 	if player_number == 1 then
 		local chances = Stats.GetDevilAngelChance()
 		if chances.duality then
-			stats[Stats.Stat.DEVIL] = Stats.GetStat(chances.devil * 100, Stats.Stat.DUALITY, true);
+			stats[CoopHUD.StatType.DEVIL] = Stats.GetStat(chances.devil * 100, CoopHUD.StatType.DUALITY, true);
 		else
-			stats[Stats.Stat.DEVIL] = Stats.GetStat(chances.devil * 100, Stats.Stat.DEVIL, true);
-			stats[Stats.Stat.ANGEL] = Stats.GetStat(chances.angel * 100, Stats.Stat.ANGEL, true);
+			stats[CoopHUD.StatType.DEVIL] = Stats.GetStat(chances.devil * 100, CoopHUD.StatType.DEVIL, true);
+			stats[CoopHUD.StatType.ANGEL] = Stats.GetStat(chances.angel * 100, CoopHUD.StatType.ANGEL, true);
 		end
-		stats[Stats.Stat.PLANETARIUM] = Stats.GetStat(game:GetLevel():GetPlanetariumChance() * 100, Stats.Stat.PLANETARIUM, true);
+		stats[CoopHUD.StatType.PLANETARIUM] = Stats.GetStat(game:GetLevel():GetPlanetariumChance() * 100, CoopHUD.StatType.PLANETARIUM, true);
 		if mod.Config.CoopHUD.stats.library_chance then
 			local library_chance = Stats.GetLibraryChance();
-			stats[Stats.Stat.LIBRARY] = Stats.GetStat(library_chance * 100, 0, true);
-			stats[Stats.Stat.LIBRARY].Sprite = Sprite("gfx/ui/ui_librarychance.anm2", true);
-			stats[Stats.Stat.LIBRARY].Scale = Vector(0.85,0.85);
+			stats[CoopHUD.StatType.LIBRARY] = Stats.GetStat(library_chance * 100, 0, true);
+			stats[CoopHUD.StatType.LIBRARY].Sprite = Sprite("gfx/ui/ui_librarychance.anm2", true);
+			stats[CoopHUD.StatType.LIBRARY].Scale = Vector(0.85,0.85);
 		end
 		if game:IsGreedMode() and mod.UnlocksAllowed and (mod.Config.CoopHUD.stats.greed_display or #Isaac.FindByType(EntityType.ENTITY_SLOT,SlotVariant.GREED_DONATION_MACHINE, -1) > 0) then
-			stats[Stats.Stat.GREED] = Stats.GetStat(player_entity:GetGreedDonationBreakChance(),mod.CoopHUD.Misc.GREED_MACHINE,true);
-			stats[Stats.Stat.GREED].Sprite = Sprite(mod.Animations.Misc, true);
-			stats[Stats.Stat.GREED].Scale = Vector(0.8,0.9);
+			stats[CoopHUD.StatType.GREED] = Stats.GetStat(player_entity:GetGreedDonationBreakChance(),CoopHUD.MiscType.GREED_MACHINE,true);
+			stats[CoopHUD.StatType.GREED].Sprite = Sprite(mod.Animations.Misc, true);
+			stats[CoopHUD.StatType.GREED].Scale = Vector(0.8,0.9);
 		end
 	end
 
@@ -165,14 +165,14 @@ end
 function Stats.Render(player_number)
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
 	local stats = player_data.Stats;
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_STATS_RENDER, mod.CoopHUD.DATA.Players[player_number].Stats); -- Execute Pre Stats Render Callbacks (stats_data(table))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_STATS_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Stats); -- Execute Pre Stats Render Callbacks (stats_data(table))
 	
 	if not stats.Visible and not mod.CoopHUD.Stats.Deals.Visible then return; end
 	
 	local updates = stats.Updates;
 	
 	for i,stat in pairs(stats.Data) do
-		if stat and stat.Sprite and ((stats.Visible and i < Stats.Stat.DEVIL) or (mod.CoopHUD.Stats.Deals.Visible and i >= Stats.Stat.DEVIL)) then
+		if stat and stat.Sprite and ((stats.Visible and i < CoopHUD.StatType.DEVIL) or (mod.CoopHUD.Stats.Deals.Visible and i >= CoopHUD.StatType.DEVIL)) then
 			
 			if stat.Render then
 				stat.Sprite.Scale = stat.Scale;

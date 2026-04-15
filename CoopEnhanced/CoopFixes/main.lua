@@ -44,7 +44,7 @@ function CoopFixes.JoinFix(_)
 	local isStartingRoom = (level:GetStage() == LevelStage.STAGE1_1 and level:GetCurrentRoomIndex() == level:GetStartingRoomIndex());
 	local max_visits = CoopEnhanced.Config.CoopFixes.join.max;
 	if max_visits == 0 then max_visits = level:GetCurrentRoomDesc().VisitedCount + 1; end
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.FIXES_PRE_JOIN_EXECUTE, max_visits); -- Execute Pre Join Callbacks (max_visits(int))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.FIXES_PRE_JOIN_EXECUTE, max_visits); -- Execute Pre Join Callbacks (max_visits(int))
 	if isStartingRoom and level:GetCurrentRoomDesc().VisitedCount <= max_visits then
 		Game():SetStateFlag(GameStateFlag.STATE_BOSSPOOL_SWITCHED, false); -- In Rep, this instead prevents true coop from starting
 	else
@@ -76,7 +76,7 @@ function CoopFixes.FixPlayers()
 		local player_id = Utils.GetPlayerID(player_entity);
 		if not CoopFixes.DATA.Players[player_id] or not CoopFixes.DATA.Players[player_id].Data then mod.Debug("Player (" .. i .. ") ID: " .. player_id .. " doesn't exist! Cannot load their rejoin data.",CoopFixes.Name); return; end
 		local player_data = CoopFixes.DATA.Players[player_id].Data;
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.FIXES_PRE_REJOIN_EXECUTE, i, player_data, player_entity); -- Execute Pre Fix Player data Callbacks (player_index, player_data(table), player_entity(EntityPlayer))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.FIXES_PRE_REJOIN_EXECUTE, i, player_data, player_entity); -- Execute Pre Fix Player data Callbacks (player_index, player_data(table), player_entity(EntityPlayer))
 		-- Character type
 		if player_data.Type and player_entity:GetPlayerType() ~= player_data.Type then
 			mod.Debug("Player (" .. i .. ") has changed character(s) to " .. player_entity:GetName() .. " since last load, reseting to original character type " .. (Utils.getCharacterByType(player_data.Type).Name or "nil"),CoopFixes.Name);
@@ -119,7 +119,7 @@ function CoopFixes.FixPlayers()
 				end
 			end
 		end
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.FIXES_POST_REJOIN_EXECUTE, i, player_entity); -- Execute Post Fix Player data Callbacks (player_index,  player_entity(EntityPlayer))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.FIXES_POST_REJOIN_EXECUTE, i, player_entity); -- Execute Post Fix Player data Callbacks (player_index,  player_entity(EntityPlayer))
 	end
 end
 
@@ -153,7 +153,7 @@ function CoopFixes.LoadBackup(player_index, level_stage)
 			return false;
 		end
 	end
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.FIXES_POST_REJOIN_BACKUP_LOAD, player_index, player_data, player_entity); -- Execute Post Backup data loading Callbacks (player_index, player_data(table), player_entity(EntityPlayer))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.FIXES_POST_REJOIN_BACKUP_LOAD, player_index, player_data, player_entity); -- Execute Post Backup data loading Callbacks (player_index, player_data(table), player_entity(EntityPlayer))
 	
 	CoopFixes.FixPlayers();
 	return true;
@@ -199,7 +199,7 @@ function CoopFixes.BackupPlayer(player_index,player_entity,save_floor)
 	if save_floor then player_backups[game:GetLevel():GetStage()] = player_data; end
 	
 	CoopFixes.DATA.Players[player_id] = {Backups = player_backups, Data = player_data};
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.FIXES_POST_REJOIN_BACKUP_SAVE, player_index, player_data, player_entity); -- Execute Post Backup data saving Callbacks (player_index, player_data(table), player_entity(EntityPlayer))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.FIXES_POST_REJOIN_BACKUP_SAVE, player_index, player_data, player_entity); -- Execute Post Backup data saving Callbacks (player_index, player_data(table), player_entity(EntityPlayer))
 	mod.Debug("Player (" .. player_index .. ") has been backed up:",CoopFixes.Name);
 	mod.Debug("[" .. player_id .. "]",CoopFixes.Name);
 	mod.Debug(CoopFixes.DATA.Players[player_id],"");

@@ -50,7 +50,7 @@ function CoopMarks.onPause(_)
 				if value > 0 then CoopMarks.DATA[i].Total = CoopMarks.DATA[i].Total + 1; end
 			end
 		end
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.MARKS_POST_DATA, i, CoopMarks.DATA[i]); -- Execute Post Player Marks Data update Callbacks (player_index, player_data(table))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.MARKS_POST_DATA, i, CoopMarks.DATA[i]); -- Execute Post Player Marks Data update Callbacks (player_index, player_data(table))
 		::continue::
 	end
 end
@@ -59,7 +59,7 @@ function CoopMarks.onRender()
 	if mod.Challenge.ID ~= Challenge.CHALLENGE_NULL or not game:IsPauseMenuOpen() or PauseMenu.GetState() ~= PauseMenuStates.OPEN or not pause:IsFinished() then return; end
 	for i = 1, mod.Players.Total, 1 do
 		local player_data = CoopMarks.DATA[i];
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.MARKS_PRE_RENDER, i, player_data); -- Execute Pre Marks Render Callbacks (player_index, player_data(table))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.MARKS_PRE_RENDER, i, player_data); -- Execute Pre Marks Render Callbacks (player_index, player_data(table))
 		if player_data and player_data.Total > 0 and (i > 1 or mod.Players.Total > 1 or not mod.Config.CoopMarks.coop_only) then -- Dont render if nothing has been completed, same as vanilla
 			if i > 1 then player_data.Sprite:Render(player_data.Pos); end
 			mod.Fonts.CoopMarks.mark:DrawStringScaled(

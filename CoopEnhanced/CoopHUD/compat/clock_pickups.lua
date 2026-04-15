@@ -160,7 +160,7 @@ function CoopHUD.ClockPickups()
 		end
 	end
 	
-	mod.Registry.AddCallback(mod.Callbacks.HUD_PRE_MISC_RENDER, AnimatePickups);
+	mod.Registry:AddCallback(mod.Callbacks.HUD_PRE_MISC_RENDER, AnimatePickups);
 	mod:AddCallback(ModCallbacks.MC_GET_SHADER_PARAMS, function()
 		IsShaderRenderState = true;
 	end)

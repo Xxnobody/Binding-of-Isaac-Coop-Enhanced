@@ -18,7 +18,7 @@ function Player.Render(player_number, screen_dimensions)
 	local isTwin = player_number < 0;
 	local isKeeper = Utils.IsKeeper(player_entity);
 	local isBaby = Utils.IsBaby(player_entity);
-	local isTemporary = Utils.IsTemporary(isTwin, player_entity);
+	local isTemporary = Utils.IsTemporary(player_entity);
 	local extra_scale = isTwin and mod.Config.CoopHUD.players.twins.scale or Vector.One;
 	
 	if CoopHUD.Refresh then
@@ -44,13 +44,13 @@ function Player.Render(player_number, screen_dimensions)
 				end
 					
 				if mod.CoopHUD.DATA.Players[player_number].Stats.Visible then
-					for slot = Stats.Stat.SPEED, Stats.Stat.LUCK, 1 do
+					for slot = CoopHUD.StatType.SPEED, CoopHUD.StatType.LUCK, 1 do
 						local stat = stats[slot];
 						if stat ~= nil then
 							stat.Sprite = stat.Sprite or Sprite(mod.Animations.Stats, true);
 							stat.Scale = (stat.Scale or Vector.One) * scale;
 							stat.Color = Utils.ColorOpacity((mod.Config.CoopHUD.stats.text.colors and player.Color or Color.Default),opacity);
-							if slot > Stats.Stat.SPEED then pos = pos + (mod.Config.CoopHUD.stats.rel_offset + Vector(0,seperation)) * edge_multipliers; end
+							if slot > CoopHUD.StatType.SPEED then pos = pos + (mod.Config.CoopHUD.stats.rel_offset + Vector(0,seperation)) * edge_multipliers; end
 							stat.Pos = Utils.cloneTable(pos);
 							stat.Render = not isTwin and player.Index < 3; -- Set whether the sprite image is rendered
 							stat.Edge = Vector(edge_multipliers.X, 1);
@@ -78,17 +78,17 @@ function Player.Render(player_number, screen_dimensions)
 					deals.Amount = 0;
 					deals.Data = {};
 					deals.Pos = Vector.Zero;
-					for i = Stats.Stat.DEVIL, Stats.Stat.NUMBER, 1 do if stats[i] ~= nil then deals.Amount = deals.Amount + 1; end end
+					for i = CoopHUD.StatType.DEVIL, CoopHUD.StatType.NUMBER, 1 do if stats[i] ~= nil then deals.Amount = deals.Amount + 1; end end
 					deals.Pos.X = deals.Anchor < 2 and (screen_dimensions.Center.X - (((seperation * 3) * deals.Amount) / 2)) or (deals.Anchor == 2 and screen_dimensions.Max.X - pos.X or pos.X);
 					deals.Pos.Y = deals.Anchor == 0 and screen_dimensions.Max.Y - size or deals.Anchor == 1 and -2 or 0;
 					
-					for slot = Stats.Stat.DEVIL, Stats.Stat.NUMBER, 1 do
+					for slot = CoopHUD.StatType.DEVIL, CoopHUD.StatType.NUMBER, 1 do
 						local stat = stats[slot];
 						if stat ~= nil then
 							stat.Sprite = stat.Sprite or Sprite(mod.Animations.Stats, true);
 							stat.Scale = (stat.Scale or Vector.One) * scale;
 							stat.Color = Utils.ColorOpacity((mod.Config.CoopHUD.stats.text.colors and (deals.Anchor == 3 and player.Color) or (deals.Anchor == 2 and mod.CoopHUD.DATA.Players[2] and mod.CoopHUD.DATA.Players[2].Player.Color) or Color.Default),opacity);
-							if slot == Stats.Stat.DEVIL then 
+							if slot == CoopHUD.StatType.DEVIL then 
 								if deals.Anchor == 2 then edge_multipliers.X = -1; end
 								pos = deals.Anchor < 2 and deals.Pos or (deals.Anchor == 2 and Vector(deals.Pos.X,pos.Y) or pos);
 							else
@@ -119,7 +119,7 @@ function Player.Render(player_number, screen_dimensions)
 					mod.CoopHUD.Stats.Deals = deals;
 				end
 			end
-			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_STATS_UPDATE, mod.CoopHUD.DATA.Players[player_number].Stats); -- Execute Post Stats data update Callbacks (stats_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_STATS_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Stats); -- Execute Post Stats data update Callbacks (stats_data(table))
 			
 			-- Active Items
 			for slot = ActiveSlot.SLOT_PRIMARY, ActiveSlot.SLOT_SECONDARY, 1 do
@@ -159,7 +159,7 @@ function Player.Render(player_number, screen_dimensions)
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].Sprite = Item.Active.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].Sprite, data, player_entity);
 				end
 			end
-			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_ACTIVE_UPDATE, mod.CoopHUD.DATA.Players[player_number].Inventory.Active); -- Execute Post Active Items data update Callbacks (actives_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_ACTIVE_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Active); -- Execute Post Active Items data update Callbacks (actives_data(table))
 			
 			-- Pocket Items
 			local pocket_items, pocket_total = Item.Pocket.GetItems(player_entity);
@@ -207,7 +207,7 @@ function Player.Render(player_number, screen_dimensions)
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Sprite = Item.Pocket.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Sprite, data, player_entity);
 				end
 			end
-			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_POCKET_UPDATE, mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket); -- Execute Post Pocket Items data update Callbacks (pockets_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_POCKET_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket); -- Execute Post Pocket Items data update Callbacks (pockets_data(table))
 			
 			-- Trinket Items
 			for slot = mod.TrinketSlot.PRIMARY, mod.TrinketSlot.SECONDARY, 1 do
@@ -224,7 +224,7 @@ function Player.Render(player_number, screen_dimensions)
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket[slot].Sprite = Item.Trinket.GetSprite(player_data.Inventory.Trinket[slot].Sprite, data);
 				end
 			end
-			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_TRINKET_UPDATE, mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket); -- Execute Post Trinket Items data update Callbacks (trinkets_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_TRINKET_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket); -- Execute Post Trinket Items data update Callbacks (trinkets_data(table))
 			
 			-- Special/Crafting Inventory
 			local GetInfo = Item.Inventory.GetInfo[player.Type];
@@ -256,7 +256,7 @@ function Player.Render(player_number, screen_dimensions)
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Total = total;
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Data = data;
 			end
-			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_INVENTORY_UPDATE, mod.CoopHUD.DATA.Players[player_number].Inventory.Special); -- Execute Post Inventory/Crafting data update Callbacks (inventory_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_INVENTORY_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Special); -- Execute Post Inventory/Crafting data update Callbacks (inventory_data(table))
 			
 			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Data = {};
 			if not isTwin then
@@ -289,7 +289,7 @@ function Player.Render(player_number, screen_dimensions)
 						mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Data = data;
 					end
 				end
-				CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_PASSIVE_UPDATE, mod.CoopHUD.DATA.Players[player_number].Inventory.Passive); -- Execute Post Inventory/Crafting data update Callbacks (passives_data(table))
+				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_PASSIVE_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Passive); -- Execute Post Inventory/Crafting data update Callbacks (passives_data(table))
 				
 				-- Player Heads
 				if mod.Config.CoopHUD.players.heads.display then
@@ -317,7 +317,7 @@ function Player.Render(player_number, screen_dimensions)
 					name_pos.X = math.max(2,name_pos.X) -- Prevent it from leaving the screen
 					mod.CoopHUD.DATA.Players[player_number].Label.Text = {Value = player_name, Pos = name_pos, Scale = (mod.Config.CoopHUD.players.names.scale * scale),  Color = Utils.ConvertColorToFont(player.Color, mod.Config.CoopHUD.players.names.opacity)};
 				end
-				CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_LABEL_UPDATE, mod.CoopHUD.DATA.Players[player_number].Label); -- Execute Post Label data update Callbacks (label_data(table))
+				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_LABEL_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Label); -- Execute Post Label data update Callbacks (label_data(table))
 			end
 		end
 		
@@ -337,11 +337,11 @@ function Player.Render(player_number, screen_dimensions)
 			end
 			mod.CoopHUD.DATA.Players[player_number].Health = {Pos = health_pos, Flip = flip, Scale = scale};
 		end
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_HEALTH_UPDATE, mod.CoopHUD.DATA.Players[player_number].Health); -- Execute Post Health data update Callbacks (health_data(table))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_HEALTH_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Health); -- Execute Post Health data update Callbacks (health_data(table))
 	end
 	
 	if not isTwin then
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_LABEL_RENDER, mod.CoopHUD.DATA.Players[player_number].Label); -- Execute Pre Label Render Callbacks (label_data(table))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_LABEL_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Label); -- Execute Pre Label Render Callbacks (label_data(table))
 		local label_data = mod.CoopHUD.DATA.Players[player_number].Label;
 		
 		-- Head Rendering
@@ -370,7 +370,7 @@ function Player.Render(player_number, screen_dimensions)
 	Item.Inventory.Render(player_number);
 
 	-- Health Bar rendering using CustomHealthAPI
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_HEALTH_RENDER, mod.CoopHUD.DATA.Players[player_number].Health); -- Execute Pre Health Render Callbacks (label_data(table))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_HEALTH_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Health); -- Execute Pre Health Render Callbacks (label_data(table))
 	local player_health = mod.CoopHUD.DATA.Players[player_number].Health;
 	if not player_health then return; end
 	if CustomHealthAPI then

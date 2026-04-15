@@ -25,7 +25,7 @@ local function setDefaultHUDNEW(bool) -- Not Working, Need more HUD api to truly
 	Game():GetHUD():GetPickupsHUDSprite():Update();
 	for k,v in pairs(SPRITES) do
 		for i = 0, #v:GetAllLayers() - 1, 1 do
-			v:GetLayer(i):SetVisible(CoopHUD.IsVisible);
+			v:GetLayer(i):SetVisible(CoopHUD.isVisible);
 			print(v:GetLayer(i):GetName());
 		end
 	end
@@ -104,7 +104,7 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 					Health = {}
 				};
 				CoopHUD.Item.Inventory.Reload(mod.CoopHUD.DATA.Players[index],player_entity);
-				CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PLAYER_INIT, index, mod.CoopHUD.DATA.Players[index]); -- Execute Post Player Register Callbacks (index(number),player_data(table))
+				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PLAYER_INIT, index, mod.CoopHUD.DATA.Players[index]); -- Execute Post Player Register Callbacks (index(number),player_data(table))
 			end
 			mod.CoopHUD.DATA.Players[index].Player = {Index = player_index,Config = player_config,Entity = EntityPtr(player_entity),Name = player_name,Type = player_entity:GetPlayerType(),Color = Colors[player_config.color].Value};
 			mod.CoopHUD.DATA.Players[index].Edge = edge;
@@ -112,11 +112,11 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 			mod.CoopHUD.DATA.Players[index].Controller = player_entity.ControllerIndex;
 			players[index] = true;
 			
-			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_PLAYER_RENDER, index, mod.CoopHUD.DATA.Players[index]); -- Execute Pre Player Render Callbacks (index(number),player_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_PLAYER_RENDER, index, mod.CoopHUD.DATA.Players[index]); -- Execute Pre Player Render Callbacks (index(number),player_data(table))
 			
 			Player.Render(index, screen_dimensions);
 			
-			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_PLAYER_RENDER, index, mod.CoopHUD.DATA.Players[index]); -- Execute Post Player Render Callbacks (index(number),player_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_PLAYER_RENDER, index, mod.CoopHUD.DATA.Players[index]); -- Execute Post Player Render Callbacks (index(number),player_data(table))
 			
 		end
 		-- Remove any players that no longer exist
@@ -128,11 +128,11 @@ end
 
 function CoopHUD.RenderBanners(screen_dimensions)
 	if not mod.Config.CoopHUD.banner.display or not CoopHUD.DATA.Banner.Type or not CoopHUD.DATA.Banner.Sprite then return; end
-	if CoopHUD.DATA.Banner.Type == CoopHUD.Banner.FORTUNE then return; end -- Temperary fix until an API to get Fortune text is available
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_BANNER_RENDER, mod.CoopHUD.DATA.Banner);
+	if CoopHUD.DATA.Banner.Type == CoopHUD.BannerType.FORTUNE then return; end -- Temperary fix until an API to get Fortune text is available
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_BANNER_RENDER, mod.CoopHUD.DATA.Banner);
 	
 	local frame = CoopHUD.DATA.Banner.Sprite:GetFrame();
-	if frame < CoopHUD.DATA.Banner.Sprite:GetCurrentAnimationData():GetLength() / 2 or (CoopHUD.DATA.Banner.Type == CoopHUD.Banner.FLOOR and not CoopHUD.IsMapDown) or game:GetFrameCount() > CoopHUD.DATA.Banner.Timer then
+	if frame < CoopHUD.DATA.Banner.Sprite:GetCurrentAnimationData():GetLength() / 2 or (CoopHUD.DATA.Banner.Type == CoopHUD.BannerType.FLOOR and not CoopHUD.IsMapDown) or game:GetFrameCount() > CoopHUD.DATA.Banner.Timer then
 		CoopHUD.DATA.Banner.Sprite:Update();
 	end
 	
@@ -145,7 +145,7 @@ function CoopHUD.RenderBanners(screen_dimensions)
 		CoopHUD.DATA.Banner.Pos = screen_dimensions.Center;
 		local anchor = mod.Config.CoopHUD.banner.anchor;
 		local edge_multiplier = anchor == 1 and 1 or -1;
-		if anchor > 0 then CoopHUD.DATA.Banner.Pos.Y = (anchor == 1 and mod.Config.CoopHUD.offset.Y or screen_dimensions.Max.Y - mod.Config.CoopHUD.offset.Y) + ((50 * mod.Config.CoopHUD.banner.scale.Y) * edge_multiplier); end
+		if anchor > 0 then CoopHUD.DATA.Banner.Pos.Y = (anchor == 1 and mod.Config.CoopHUD.offset.Y or screen_dimensions.Max.Y - mod.Config.CoopHUD.offset.Y) + ((65 * mod.Config.CoopHUD.banner.scale.Y) * edge_multiplier); end
 		CoopHUD.DATA.Banner.Pos = CoopHUD.DATA.Banner.Pos + Vector(mod.Config.CoopHUD.banner.offset.X,mod.Config.CoopHUD.banner.offset.Y * edge_multiplier);
 	end
 	
@@ -182,7 +182,7 @@ function CoopHUD.RenderBanners(screen_dimensions)
 end
 
 function CoopHUD.RenderTimer(screen_dimensions)
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_TIMER_RENDER, mod.CoopHUD.DATA.Timer);
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_TIMER_RENDER, mod.CoopHUD.DATA.Timer);
 	mod.CoopHUD.DATA.Timer.Visible = mod.Config.CoopHUD.misc.timer.display == 0 or (mod.Config.CoopHUD.misc.timer.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.timer.display == 2 and not CoopHUD.IsMapDown)) or false;
 	
 	if mod.CoopHUD.DATA.Timer.Visible then

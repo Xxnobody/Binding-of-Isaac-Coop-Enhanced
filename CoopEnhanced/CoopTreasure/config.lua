@@ -186,7 +186,7 @@ ModConfigMenu.AddSetting(
 );
 
 local sync_modules = {"Global"};
-mod.Registry.AddCallback(mod.Callbacks.POST_REGISTRY_EXECUTE, function()
+mod.Registry:AddCallback(mod.Callbacks.POST_REGISTRY_EXECUTE, function()
 	for name,_ in pairs(mod.Registry.Modules) do
 		if mod.Config[name] and mod.Config[name].players ~= nil then table.insert(sync_modules,name); end
 	end

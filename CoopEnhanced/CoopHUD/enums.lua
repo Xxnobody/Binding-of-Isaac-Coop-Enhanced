@@ -72,18 +72,6 @@ CoopHUD.Item.ChargeBar.Charge = { -- taken from coopHUD+ (Konoca)
 	}
 };
 
-CoopHUD.Item.Pocket.CardBacks = {
-	Tarot = 0,
-	Suit = 1,
-	Reverse = 2,
-	Humanity = 3,
-	Credit = 4,
-	Holy = 5,
-	Monopoly = 6,
-	Magic = 7,
-	UNO = 8,
-};
-
 CoopHUD.Item.Active.Special = { -- taken from coopHUD+ (Konoca)
 	[CollectibleType.COLLECTIBLE_D_INFINITY] = function(_,item_data,sprite_data,_)
 		local tmpFrame = 0;
@@ -259,7 +247,7 @@ CoopHUD.Item.Inventory.IgnoredCollectibles = {
 	[CollectibleType.COLLECTIBLE_DAMOCLES_PASSIVE] = true,
 	[CollectibleType.COLLECTIBLE_DOGMA] = true,
 };
-CoopHUD.Stats.Stat = {
+CoopHUD.StatType = {
 	SPEED = 0,
 	FIRE_DELAY = 1,
 	DAMAGE = 2,
@@ -274,7 +262,7 @@ CoopHUD.Stats.Stat = {
 	LIBRARY = 11,
 	NUMBER = 12,
 };
-CoopHUD.Misc = {
+CoopHUD.MiscType = {
 	COIN = 0,
 	KEY = 1,
 	BOMB = 2,
@@ -293,24 +281,34 @@ CoopHUD.Misc = {
 	RED_HEART = 15,
 	POOP = 16,
 };
-CoopHUD.Destinations = {
+CoopHUD.Destination = {
 	MOM = 0,
 	HEART = 1,
 	SATAN = 2,
 	ISAAC = 3,
 	LAMB = 4,
-	MEGA = 5,
-	CHEST = 6,
-	HUSH = 7,
-	VOID = 8,
-	CORPSE = 9,
-	BEAST = 10,
-	MISC = 11,
+	BLUE = 5,
+	MEGA = 6,
+	HUSH = 8,
+	VOID = 9,
+	CORPSE = 11,
+	BEAST = 12
 };
-CoopHUD.Banner = {
+CoopHUD.BannerType = {
 	FLOOR = 0,
 	ITEM = 1,
 	FORTUNE = 2,
+};
+CoopHUD.CardBacks = {
+	TAROT = 0,
+	SUIT = 1,
+	REVERSE = 2,
+	HUMANITY = 3,
+	CREDIT = 4,
+	HOLY = 5,
+	MONOPOLY = 6,
+	MAGIC = 7,
+	UNO = 8,
 };
 CoopHUD.SkinColors = {
 	[SkinColor.SKIN_PINK] = Color(1.0,1.0,1.0,0),
@@ -321,13 +319,6 @@ CoopHUD.SkinColors = {
 	[SkinColor.SKIN_GREEN] = Color(0.0,1.0,0.0,1),
 	[SkinColor.SKIN_GREY] = Color(0.35,0.35,0.35,1),
 	[SkinColor.SKIN_SHADOW] = Color(0.05,0.05,0.05,1)
-};
-CoopHUD.Callbacks = {
-	POST_PLAYER_RENDER = 1,
-	PRE_HEALTH_RENDER = 2,
-	PRE_MISC_RENDER = 3,
-	PRE_STATS_RENDER = 4,
-	POST_HUD_RENDER = 5,
 };
 CoopHUD.Positions = {
 	Active = {[0] = Vector(20,15),[1] = Vector(5,5)},

@@ -10,5 +10,5 @@ function CoopHUD.LowFirerateChargeBar()
 	local function renderBar(_,player_data)
 		LowFirerateChargeBar:SetPlayerOffset(player_data.Player.Type, mod.Config.CoopHUD.mods.LOWFIRERATEBAR.offset);
 	end
-	mod.Registry.AddCallback(mod.Callbacks.HUD_POST_PLAYER_RENDER, renderBar);
+	mod.Registry:AddCallback(mod.Callbacks.HUD_POST_PLAYER_RENDER, renderBar);
 end

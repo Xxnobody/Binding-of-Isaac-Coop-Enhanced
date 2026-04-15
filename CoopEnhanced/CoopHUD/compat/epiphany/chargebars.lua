@@ -31,7 +31,7 @@ local function RenderChargeBar(HUDSprite, charge, maxCharge, position)
 end
 
 function M.EpiphanySamsonCharge(_, player, offset)
-	if not mod.CoopHUD.IsVisible or player:GetPlayerType() ~= Epiphany.PlayerType.SAMSON then return end
+	if not mod.CoopHUD.isVisible or player:GetPlayerType() ~= Epiphany.PlayerType.SAMSON then return end
 
 	local mainChargeBar = player:GetData().EP_Samson_MainChargeBar
 	if not mainChargeBar then
@@ -57,7 +57,7 @@ bombWarning.PlaybackSpeed = 0.5
 local epsilon = 0.0001
 
 function M.EpiphanyCainCharge(_, player, offset)
-	if not mod.CoopHUD.IsVisible
+	if not mod.CoopHUD.isVisible
 	or player:HasCollectible(Epiphany.Item.SHARP_ROCK.ID)
 	or player:HasCurseMistEffect() and player:GetPlayerType() ~= Epiphany.PlayerType.CAIN then
 		return

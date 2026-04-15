@@ -7,15 +7,19 @@ local game = Game();
 local hud = game:GetHUD();
 
 -- Coop HUD Functions
+function CoopHUD.IsVisible()
+	return CoopHUD.isVisible;
+end
+
 function CoopHUD.SetVisible(force)
-	local toggle = not CoopHUD.IsVisible;
+	local toggle = not CoopHUD.isVisible;
 	if type(force) == "boolean" then toggle = force; end
 	if toggle then
 		game:GetHUD():SetVisible(false);
-		CoopHUD.IsVisible = true;
+		CoopHUD.isVisible = true;
 	else
 		game:GetHUD():SetVisible(true);
-		CoopHUD.IsVisible = false;
+		CoopHUD.isVisible = false;
 	end
 end
 
@@ -28,7 +32,7 @@ function CoopEnhanced.CoopHUD.gameStart(isCont, data)
 	CoopEnhanced.CoopHUD.Misc.Difficulty = {[1] = {}};
 	CoopEnhanced.CoopHUD.Misc.Wave = {[1] = {}};
 	CoopEnhanced.CoopHUD.Misc.Extra = {[1] = {},[2] = {}};
-	CoopHUD.IsVisible = true;
+	CoopHUD.isVisible = true;
 	if isCont then
 		CoopEnhanced.CoopHUD.DATA.Players = data.CoopHUD.players;
 	end
@@ -42,8 +46,8 @@ end
 
 function CoopEnhanced.CoopHUD.createBanner(name, desc, banner_type, display_bottom_paper)
 	local sprite = Sprite();
-	if banner_type == CoopHUD.Banner.FORTUNE then sprite:Load(mod.Animations.Fortune, true) else sprite:Load(mod.Animations.Banner, true); end
-	local banner_timer = game:GetFrameCount() + (banner_type == CoopHUD.Banner.FLOOR and 1800 or (30 * mod.Config.CoopHUD.banner.duration));
+	if banner_type == CoopHUD.BannerType.FORTUNE then sprite:Load(mod.Animations.Fortune, true) else sprite:Load(mod.Animations.Banner, true); end
+	local banner_timer = game:GetFrameCount() + (banner_type == CoopHUD.BannerType.FLOOR and 1800 or (30 * mod.Config.CoopHUD.banner.duration));
 	if not display_bottom_paper then sprite:ReplaceSpritesheet(1, mod.Images.Blank); end
 	sprite:LoadGraphics();
 	sprite:Play('Text', false);
@@ -111,7 +115,7 @@ function CoopEnhanced.CoopHUD.getCoopMenuSprites(joininig)
 end
 
 function CoopEnhanced.CoopHUD.RenderCoopMenuSprite(joining)
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_COOP_MENU_RENDER, joining, mod.Players.Unlocked); -- Execute pre Coop Menu rendering functions (Joining Player Data, Unlocked Characters Data)
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_COOP_MENU_RENDER, joining, mod.Players.Unlocked); -- Execute pre Coop Menu rendering functions (Joining Player Data, Unlocked Characters Data)
 	
 	local sel = joining.Selected;
 	local max = #mod.Players.Unlocked;
@@ -178,9 +182,9 @@ end
 function CoopEnhanced.CoopHUD.IsPlayerJoining()
 	return CoopHUD.DATA.Joining and CoopHUD.DATA.Joining.Total and CoopHUD.DATA.Joining.Total > 0;
 end
-function CoopEnhanced.CoopHUD.getJoiningByController(player_index)
+function CoopEnhanced.CoopHUD.getJoiningByController(controller_index)
 	for i,joining in pairs(CoopHUD.DATA.Joining) do
-		if joining.Controller == player_index then
+		if joining.Controller == controller_index then
 			return joining, i;
 		end
 	end
@@ -256,12 +260,12 @@ mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, removeCollecti
 local function fortuneDisplay(_)
 	local fortunesprite = game:GetHUD():GetFortuneSprite();
 	CoopHUD.DATA.Banner.Sprite = fortunesprite;
-	CoopHUD.DATA.Banner.Type = CoopHUD.Banner.FORTUNE;
+	CoopHUD.DATA.Banner.Type = CoopHUD.BannerType.FORTUNE;
 end
 mod:AddCallback(ModCallbacks.MC_PRE_FORTUNE_DISPLAY, fortuneDisplay);
 local function displayBanner(_ , name, description, isSticky, IsCurse)
 	if name == CoopHUD.DATA.Banner.Name then return; end
-	local banner_type = isSticky and CoopHUD.Banner.FLOOR or CoopHUD.Banner.ITEM;
+	local banner_type = isSticky and CoopHUD.BannerType.FLOOR or CoopHUD.BannerType.ITEM;
 	CoopEnhanced.CoopHUD.createBanner(name, description, banner_type, IsCurse);
 	return false;
 end
@@ -272,7 +276,7 @@ local hotkey_timer = 0;
 local function onRender()
 	-- Renderer Checks
 	if not mod.Config.modules.CoopHUD or game:GetSeeds():HasSeedEffect(SeedEffect.SEED_NO_HUD) or (not Isaac:CanStartTrueCoop() and mod.Config.CoopHUD.toggle_hud.coop_only and not PlayerManager.IsCoopPlay()) then -- Check if HUD can be rendered at all
-		CoopHUD.IsVisible = false;
+		CoopHUD.isVisible = false;
 		CoopHUD.Refresh = false;
 		return;
 	elseif (mod.Config.CoopHUD.toggle_hud.coop_only and not PlayerManager.IsCoopPlay()) or (not mod.Config.CoopHUD.toggle_hud.pause_display and Utils.IsPauseMenuOpen()) then -- Check for Coop play and pause screens
@@ -284,14 +288,14 @@ local function onRender()
 	
 	mod.CoopHUD.Refresh = (mod.Config.CoopHUD.renderer.refresh == 1 or (CoopEnhanced.FrameCount % mod.Config.CoopHUD.renderer.refresh) == 0);
 	
-	if CoopHUD.DATA.Banner.Type == CoopHUD.Banner.FORTUNE then -- Temperary fix until an API to get Fortune text is available
+	if CoopHUD.DATA.Banner.Type == CoopHUD.BannerType.FORTUNE then -- Temperary fix until an API to get Fortune text is available
 		if CoopHUD.DATA.Banner.Sprite:IsFinished() then
 			CoopHUD.DATA.Banner = {};
 		else
 			hud:SetVisible(true);
 			return;
 		end
-	elseif Isaac:CanStartTrueCoop() and not game:IsPaused() and CoopHUD.IsVisible then 
+	elseif Isaac:CanStartTrueCoop() and not game:IsPaused() and CoopHUD.isVisible then 
 		CoopHUD.InitNewPlayers();
 		if mod.Config.CoopHUD.players.menu.display == 0 and CoopHUD.IsPlayerJoining() then hud:SetVisible(true); return; end
 	elseif game:GetRoom():GetType() == RoomType.ROOM_BOSS and game:GetRoom():IsFirstVisit() and game:GetRoom():GetFrameCount() < 5 then -- Hide all HUDs when entering a boss cutscene
@@ -314,7 +318,7 @@ local function onRender()
 		hotkey_timer = 0;
 	end
 	
-	if not CoopHUD.IsVisible then return; end
+	if not CoopHUD.isVisible then return; end
 	hud:SetVisible(false);
 	
 	CoopHUD.IsMapDown = false;

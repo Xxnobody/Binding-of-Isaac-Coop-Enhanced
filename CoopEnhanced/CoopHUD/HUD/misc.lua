@@ -22,27 +22,27 @@ function Misc.GetPickups(screen_dimensions)
 	local pickups = {};
 	local player_entity = game:GetPlayer();
 	
-	pickups[1] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[1] and mod.CoopHUD.Misc.Pickups[1].Sprite or nil, Misc.COIN), Type = "Coin", Value = player_entity:GetNumCoins() or 0};
+	pickups[1] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[1] and mod.CoopHUD.Misc.Pickups[1].Sprite or nil, CoopHUD.MiscType.COIN), Type = "Coin", Value = player_entity:GetNumCoins() or 0};
 
-	local bomb_sprite = player_entity:GetNumGigaBombs() > 0 and Misc.GIGA_BOMB or (player_entity:HasGoldenBomb() and Misc.GOLDEN_BOMB or Misc.BOMB);
+	local bomb_sprite = player_entity:GetNumGigaBombs() > 0 and CoopHUD.MiscType.GIGA_BOMB or (player_entity:HasGoldenBomb() and CoopHUD.MiscType.GOLDEN_BOMB or CoopHUD.MiscType.BOMB);
 	pickups[2] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[2] and mod.CoopHUD.Misc.Pickups[2].Sprite or nil, bomb_sprite), Type = "Bomb", Value = player_entity:GetNumBombs() or 0};
 		
-	local key_sprite = player_entity:HasGoldenKey() and Misc.GOLDEN_KEY or Misc.KEY;
+	local key_sprite = player_entity:HasGoldenKey() and CoopHUD.MiscType.GOLDEN_KEY or CoopHUD.MiscType.KEY;
 	pickups[3] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[3] and mod.CoopHUD.Misc.Pickups[3].Sprite or nil, key_sprite), Type = "Key", Value = player_entity:GetNumKeys() or 0};
 	
 	if PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BLUEBABY_B) then
-		local poop = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[4] and mod.CoopHUD.Misc.Pickups[4].Sprite or nil, Misc.POOP), Type = "Poop", Value = player_entity:GetPoopMana() or 0};
-		if Utils.AnyoneIsNotTaintedBlueBaby() then pickups[4] = poop; else pickups[2] = poop; end
+		local poop = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[4] and mod.CoopHUD.Misc.Pickups[4].Sprite or nil, CoopHUD.MiscType.POOP), Type = "Poop", Value = player_entity:GetPoopMana() or 0};
+		if Utils.AnyoneIsNotPlayerType(PlayerType.PLAYER_BLUEBABY_B) then pickups[4] = poop; else pickups[2] = poop; end
 	else 
 		pickups[4] = {};
 	end
 	if PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BETHANY) then
-		pickups[5] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[5] and mod.CoopHUD.Misc.Pickups[5].Sprite or nil, Misc.SOUL_HEART), Type = "Soul", Value = player_entity:GetSoulCharge() or 0};
+		pickups[5] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[5] and mod.CoopHUD.Misc.Pickups[5].Sprite or nil, CoopHUD.MiscType.SOUL_HEART), Type = "Soul", Value = player_entity:GetSoulCharge() or 0};
 	else 
 		pickups[5] = {};
 	end
 	if PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BETHANY_B) then
-		pickups[6] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[6] and mod.CoopHUD.Misc.Pickups[6].Sprite or nil, Misc.RED_HEART), Type = "Blood", Value = player_entity:GetBloodCharge() or 0};
+		pickups[6] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[6] and mod.CoopHUD.Misc.Pickups[6].Sprite or nil, CoopHUD.MiscType.RED_HEART), Type = "Blood", Value = player_entity:GetBloodCharge() or 0};
 	else 
 		pickups[6] = {};
 	end
@@ -173,9 +173,9 @@ function Misc.GetDifficulty(screen_dimensions)
 	
 	local diffMap = {
 		[Difficulty.DIFFICULTY_NORMAL] = nil,
-		[Difficulty.DIFFICULTY_HARD] = Misc.HARD,
-		[Difficulty.DIFFICULTY_GREED] = Misc.GREED,
-		[Difficulty.DIFFICULTY_GREEDIER] = Misc.GREEDIER,
+		[Difficulty.DIFFICULTY_HARD] = CoopHUD.MiscType.HARD,
+		[Difficulty.DIFFICULTY_GREED] = CoopHUD.MiscType.GREED,
+		[Difficulty.DIFFICULTY_GREEDIER] = CoopHUD.MiscType.GREEDIER,
 	};
 	local challenge = mod.Challenge;
 	local difficulty = challenge.ID == Challenge.CHALLENGE_NULL and diffMap[game.Difficulty] or nil;
@@ -248,13 +248,13 @@ function Misc.GetExtra(screen_dimensions)
 	mod.CoopHUD.Misc.Difficulty[1].Data.Pos.X = mod.CoopHUD.Misc.Difficulty[1].Data.Pos.X - diff_offset;
 		
 	if not mod.UnlocksAllowed then
-		local sprite = Misc.GetSprite(mod.CoopHUD.Misc.Extra[1].Sprite, Misc.NO_ACHIEVEMENTS);
+		local sprite = Misc.GetSprite(mod.CoopHUD.Misc.Extra[1].Sprite, CoopHUD.MiscType.NO_ACHIEVEMENTS);
 		mod.CoopHUD.Misc.Extra[1] = {Sprite = sprite, Data = {Pos = Utils.cloneTable(pos), Scale = scale}};
 	end
 	if game:GetVictoryLap() > 0 then
 		if not mod.UnlocksAllowed then pos.X = pos.X + size; end
 		local text_pos = pos + Vector(size + 2,0);
-		local sprite = Misc.GetSprite(mod.CoopHUD.Misc.Extra[2].Sprite, Misc.VICTORY_LAP);
+		local sprite = Misc.GetSprite(mod.CoopHUD.Misc.Extra[2].Sprite, CoopHUD.MiscType.VICTORY_LAP);
 		mod.CoopHUD.Misc.Extra[2] = {Sprite = sprite, Data = {Pos = pos, Text = {Value = game:GetVictoryLap(), Pos = text_pos, Font = mod.Fonts.CoopHUD.misc, Scale = scale}, Scale = scale}};
 	end
 end
@@ -269,21 +269,21 @@ function Misc.GetDestination()
 	if not params then return; end
 	if mod.Challenge.IsDaily then
 		anim_name = "Idle";
-		destination = Misc.DAILY;
-	elseif params:GetEndStage() == LevelStage.STAGE3_2 and not params:IsSecretPath() then destination = CoopHUD.Destinations.MOM;
-	elseif params:GetEndStage() == LevelStage.STAGE3_2 then sprite.Color = Utils.GetColorByName("Violet") -- Color Mausoleum Mom
-	elseif params:GetEndStage() == LevelStage.STAGE4_2 then destination = CoopHUD.Destinations.HEART;
-	elseif params:GetEndStage() == LevelStage.STAGE5 and not params:IsAltPath() then destination = CoopHUD.Destinations.SATAN;
-	elseif params:GetEndStage() == LevelStage.STAGE5 and params:IsAltPath() then destination = CoopHUD.Destinations.ISAAC;
-	elseif params:GetEndStage() == LevelStage.STAGE6 and not params:IsAltPath() then destination = CoopHUD.Destinations.LAMB;
-	elseif params:IsMegaSatanRun() then destination = CoopHUD.Destinations.MEGA;
-	elseif params:GetEndStage() == LevelStage.STAGE6 and params:IsAltPath() then destination = CoopHUD.Destinations.CHEST;
-	elseif params:GetEndStage() == LevelStage.STAGE4_3 then destination = CoopHUD.Destinations.HUSH;
-	elseif params:GetEndStage() == LevelStage.STAGE4_2 and params:IsSecretPath() then destination = CoopHUD.Destinations.CORPSE;
-	elseif params:IsBeastPath() then destination = CoopHUD.Destinations.BEAST;
+		destination = CoopHUD.MiscType.DAILY;
+	elseif params:GetEndStage() == LevelStage.STAGE3_2 and not params:IsSecretPath() then destination = CoopHUD.Destination.MOM;
+	elseif params:GetEndStage() == LevelStage.STAGE3_2 then destination = CoopHUD.Destination.MOM; sprite.Color = Utils.GetColorByName("Violet"); -- Color Mausoleum Mom
+	elseif params:GetEndStage() == LevelStage.STAGE4_2 then destination = CoopHUD.Destination.HEART;
+	elseif params:GetEndStage() == LevelStage.STAGE5 and not params:IsAltPath() then destination = CoopHUD.Destination.SATAN;
+	elseif params:GetEndStage() == LevelStage.STAGE5 and params:IsAltPath() then destination = CoopHUD.Destination.ISAAC;
+	elseif params:GetEndStage() == LevelStage.STAGE6 and not params:IsAltPath() then destination = CoopHUD.Destination.LAMB;
+	elseif params:IsMegaSatanRun() then destination = CoopHUD.Destination.MEGA;
+	elseif params:GetEndStage() == LevelStage.STAGE6 and params:IsAltPath() then destination = CoopHUD.Destination.CHEST;
+	elseif params:GetEndStage() == LevelStage.STAGE4_3 then destination = CoopHUD.Destination.HUSH;
+	elseif params:GetEndStage() == LevelStage.STAGE4_2 and params:IsSecretPath() then destination = CoopHUD.Destination.CORPSE;
+	elseif params:IsBeastPath() then destination = CoopHUD.Destination.BEAST;
 	else
 		anim_name = "Idle";
-		destination = Misc.VICTORY_LAP;
+		destination = CoopHUD.MiscType.VICTORY_LAP;
 	end
 	return Misc.GetSprite(sprite,destination,anim_name);
 end
@@ -308,10 +308,10 @@ function Misc.Render(screen_dimensions)
 		if mod.CoopHUD.Misc.Wave.Visible then mod.CoopHUD.Misc.Data["Wave"] = mod.CoopHUD.Misc.Wave; end
 		if mod.CoopHUD.Misc.Extra.Visible then mod.CoopHUD.Misc.Data["Extra"] = mod.CoopHUD.Misc.Extra; end
 		
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_MISC_UPDATE,mod.CoopHUD.Misc.Data);
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_MISC_UPDATE,mod.CoopHUD.Misc.Data);
 	end
 	
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_MISC_RENDER,mod.CoopHUD.Misc.Data);
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_MISC_RENDER,mod.CoopHUD.Misc.Data);
 	
 	if mod.CoopHUD.Misc.Data then
 		for n,tbl in pairs(mod.CoopHUD.Misc.Data) do
@@ -335,5 +335,4 @@ function Misc.Render(screen_dimensions)
 			end
 		end
 	end
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_MISC_RENDER);
 end

@@ -42,7 +42,7 @@ function CoopTreasure.AddRoomType(name, room_type, default, func) -- Add additio
 end
 
 require(mod.Directory .. 'CoopTreasure.compat');
-CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_COMPAT); -- Execute Post Compat Setup Callbacks
+CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_COMPAT); -- Execute Post Compat Setup Callbacks
 
 function CoopTreasure.ClearGridSpace(position,radius) -- Clear Grid entities around pedestals
 	local room = game:GetRoom();
@@ -153,7 +153,7 @@ function CoopTreasure:onPedestal(pedestal_entity, entity)
 		room_data.Treasure.Assignments[pedestal_corner] = player_index;
 	elseif room_data.Treasure.Assignments[pedestal_corner] ~= math.abs(player_index) then return false; end
 	
-	if (pedestal_entity.Price < 0 and not Utils.CanPayDevilPrice(player_entity,pedestal_entity.Price)) or (pedestal_entity.Price > 0 and player_entity:GetNumCoins() < pedestal_entity.Price) then return true; end
+	if pedestal_entity.Price ~= 0 and not Utils.CanPayPrice(player_entity,pedestal_entity.Price) then return true; end
 	
 	room_data.Treasure.Owned[pedestal_corner] = player_index;
 	if room_data.MoreOptions.Enabled and #room_data.Treasure.Items[pedestal_corner] > 1 then
@@ -181,10 +181,10 @@ function CoopTreasure:onRender()
 	local room_ID = Utils.GetRoomID();
 	local room_data = CoopTreasure.DATA[room_ID];
 	
-	if not CoopEnhanced.Config.modules.CoopTreasure or (mod.Config.CoopTreasure.dead and mod.Players.Total <= 1 or mod.Players.Alive <= 1) or Utils.IsPauseMenuOpen() or not room_data or room:IsMirrorWorld() or room:GetFrameCount() < 5 or not Isaac.GetPlayer().ControlsEnabled or (not game:GetHUD():IsVisible() and not CoopEnhanced.CoopHUD.IsVisible) then return; end
+	if not CoopEnhanced.Config.modules.CoopTreasure or (mod.Config.CoopTreasure.dead and mod.Players.Total <= 1 or mod.Players.Alive <= 1) or Utils.IsPauseMenuOpen() or not room_data or room:IsMirrorWorld() or room:GetFrameCount() < 5 or not Isaac.GetPlayer().ControlsEnabled or (not game:GetHUD():IsVisible() and not CoopEnhanced.CoopHUD.isVisible) then return; end
 		
 	local display = mod.Config.CoopTreasure.assign.display;
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_RENDER, room_data, display); -- Execute Pre Owner Label Render Callbacks (room_data(table),display(boolean))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_RENDER, room_data, display); -- Execute Pre Owner Label Render Callbacks (room_data(table),display(boolean))
 	-- Display Pedestal Owner Markers
 	if room_data.Assign > 1 and display > 0 and #room_data.Treasure.Items > 1 then
 		local player_sync = mod.Config.CoopTreasure.player_sync;
@@ -272,11 +272,11 @@ function CoopTreasure:onRoom()
 	room_data.MoreOptions = {Enabled = (#orig_peds > 1), Offset = (room_data.Spawn.Vertical and Vector(0,2 * mod.GridSize) or Vector(2 * mod.GridSize,0))};
 	
 	-- Get Room Specific Data, Run Room Specific Methods
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_ROOM_DATA, room_data); -- Execute Pre Room Data update Callbacks (room_data(table))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_ROOM_DATA, room_data); -- Execute Pre Room Data update Callbacks (room_data(table))
 	local room_function = CoopTreasure.RoomConfigs[room_type] and CoopTreasure.RoomConfigs[room_type][room_variant] or nil;
 	if room_function then room_function(room,room_data); end
 	if room_data == nil or room_data.Spawn.Maximum == 0 or room_data.Assign <= 0 then return; end
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_ROOM_DATA, room_data); -- Execute Post Room Data update Callbacks (room_data(table))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_ROOM_DATA, room_data); -- Execute Post Room Data update Callbacks (room_data(table))
 	
 	-- Set Pedestal Assignments
 	local players = Utils.getMainPlayers();
@@ -299,7 +299,7 @@ function CoopTreasure:onRoom()
 	
 	for i,pedestal_entity in pairs(orig_peds) do
 		pedestal_entity = pedestal_entity:ToPickup();
-		CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_PEDESTAL, 1, pedestal_entity); -- Execute Pre Pedestal updates for player 1 Callbacks (player_index, pedestal_entity(EntityPickup))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_PEDESTAL, 1, pedestal_entity); -- Execute Pre Pedestal updates for player 1 Callbacks (player_index, pedestal_entity(EntityPickup))
 		if i > room_data.Spawn.Maximum then
 			pedestal_entity:Remove();
 		else
@@ -314,7 +314,7 @@ function CoopTreasure:onRoom()
 			pedestal_entity:Remove();
 			local pedestal_data = {Pointer = EntityPtr(new_pedestal_entity), Position = item_pos, Price = new_pedestal_entity.Price, IsBlind = isBlind};
 			table.insert(room_data.Treasure.Items[1],pedestal_data);
-			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_PEDESTAL, 1, new_pedestal_entity, pedestal_data); -- Execute Post Pedestal updates for player 1 Callbacks (player_index, new_pedestal_entity(EntityPickup), pedestal_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_PEDESTAL, 1, new_pedestal_entity, pedestal_data); -- Execute Post Pedestal updates for player 1 Callbacks (player_index, new_pedestal_entity(EntityPickup), pedestal_data(table))
 		end
 	end
 	
@@ -329,7 +329,7 @@ function CoopTreasure:onRoom()
 			local item_id = item_pool:GetCollectible(room:GetItemPool(math.max(room:GetSpawnSeed())), true, math.max(1,room:GetSpawnSeed())); -- Gets seed accurate Collectible Type
 			local pedestal_entity = game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, item_pos, Vector.Zero, nil, item_id, math.max(1,room:GetSpawnSeed())):ToPickup();
 			pedestal_entity:SetForceBlind(room_data.Treasure.Items[1][ii].IsBlind);
-			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_PEDESTAL, i, pedestal_entity); -- Execute Pre Pedestal updates for player 1 Callbacks (player_index, pedestal_entity(EntityPickup))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_PEDESTAL, i, pedestal_entity); -- Execute Pre Pedestal updates for player 1 Callbacks (player_index, pedestal_entity(EntityPickup))
 			
 			if room_data.Assign > 1 and players[i]:GetPlayerType() == PlayerType.PLAYER_KEEPER_B then pedestal_entity.Price = 15; pedestal_entity.ShopItemId = -1; -- Set Miser costs
 			elseif isDevilDeal then pedestal_entity.Price = Utils.GetDevilPrice(players[i],nil,item_id); else pedestal_entity.Price = room_data.Treasure.Prices[i] or 0; end -- Set Health price
@@ -337,11 +337,11 @@ function CoopTreasure:onRoom()
 			local pedestal_data = {Pointer = EntityPtr(pedestal_entity), Position = item_pos, SubType = pedestal_entity.SubType, IsBlind = pedestal_entity:IsBlind()};
 			--Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, item_pos, Vector.Zero, nil);
 			table.insert(room_data.Treasure.Items[i],pedestal_data);
-			CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_PEDESTAL, i, pedestal_entity, pedestal_data); -- Execute Post Pedestal updates for player 1 Callbacks (player_index, pedestal_entity(EntityPickup), pedestal_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_PEDESTAL, i, pedestal_entity, pedestal_data); -- Execute Post Pedestal updates for player 1 Callbacks (player_index, pedestal_entity(EntityPickup), pedestal_data(table))
 		end
 	end
 	
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_ROOM_SETUP,room_data); -- Execute Post Room Data Setup (room_data(table))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_ROOM_SETUP,room_data); -- Execute Post Room Data Setup (room_data(table))
 	CoopTreasure.DATA[room_ID] = room_data;
 end
 mod:AddPriorityCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.Priorities[4], CoopTreasure.onRoom);

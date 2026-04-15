@@ -3,7 +3,7 @@ local mod = CoopEnhanced;
 local Registry = mod.Registry;
 local Callbacks = mod.Callbacks;
 
-function Registry.AddCallback(callbackID, func, ...)
+function Registry.AddCallback(modID, callbackID, func, ...)
 	if not callbackID or type(callbackID) ~= "number" or callbackID < 0 or callbackID > Callbacks.NUM_CALLBACKS or not Registry.Callbacks[callbackID] then
 		mod.Debug('Invalid Callback ID ' .. (callbackID or "nil") .. " entered.");
 		return;
@@ -11,7 +11,7 @@ function Registry.AddCallback(callbackID, func, ...)
 	table.insert(Registry.Callbacks[callbackID],{CallbackID = callbackID,Function = func,Params = {...},Priority = 0});
 end
 
-function Registry.AddPriorityCallback(callbackID, priority, func, ...)
+function Registry.AddPriorityCallback(modID, callbackID, priority, func, ...)
 	priority = priority or 0;
 	if  not callbackID or type(callbackID) ~= "number" or callbackID < 0 or callbackID > Callbacks.NUM_CALLBACKS or not Registry.Callbacks[callbackID] then
 		mod.Debug('Invalid Callback ID ' .. callbackID .. " entered.");
@@ -29,7 +29,7 @@ function Registry.AddPriorityCallback(callbackID, priority, func, ...)
 	table.insert(Registry.Callbacks[callbackID], index, {CallbackID = callbackID,Function = func,Params = {...},Priority = priority});
 end
 
-function Registry.RemoveCallback(callbackID, func)
+function Registry.RemoveCallback(modID, callbackID, func)
 	if not callbackID then return; end
 	if type(callbackID) ~= "number" or callbackID < 0 or callbackID > Callbacks.NUM_CALLBACKS or not Registry.Callbacks[callbackID] then
 		mod.Debug('Invalid Callback ID ' .. callbackID .. " entered.");
@@ -45,7 +45,7 @@ function Registry.RemoveCallback(callbackID, func)
 	print("Function in callback ID " .. callbackID .. " no found! Cannot remove Callback.")
 end
 
-function Registry.RegisterCallback(callback_name)
+function Registry.RegisterCallback(modID, callback_name)
 	if Callbacks[callback_name] ~= nil then mod.Debug('Callback with name' .. callback_name .. " already registered!."); return; end
 	local new_index = 0;
 	for callback,i in pairs(Callbacks) do
@@ -56,7 +56,7 @@ function Registry.RegisterCallback(callback_name)
 	Registry.Callbacks[new_index] = {};
 end
 
-function Registry.ExecuteCallback(callbackID, ...)
+function Registry.ExecuteCallback(modID, callbackID, ...)
 	local callbacks = Registry.Callbacks[callbackID];
 	if not callbacks then return; end
 	for _, callback in ipairs(callbacks) do

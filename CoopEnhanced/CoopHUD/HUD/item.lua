@@ -160,16 +160,15 @@ function Pocket.GetSprite(sprite, pocket_data, player_entity)
 				sprite_data.Sheets[2] = mod.Images.CardsPills;
 				sprite_data.Frame = 0;
 
-				if card.CardType == ItemConfig.CARDTYPE_TAROT then sprite_data.Frame = Pocket.CardBacks.Tarot;
-				elseif card.CardType == ItemConfig.CARDTYPE_SUIT then sprite_data.Frame = Pocket.CardBacks.Suit;
-				elseif card.CardType == ItemConfig.CARDTYPE_TAROT_REVERSE then sprite_data.Frame = Pocket.CardBacks.Reverse;
-				elseif card.ID == Card.CARD_RULES or card.ID == Card.CARD_SUICIDE_KING or card.ID == Card.CARD_QUESTIONMARK or card.ID == Card.CARD_QUEEN_OF_HEARTS then sprite_data.Frame = Pocket.CardBacks.Suit;
-				elseif card.ID == Card.CARD_CREDIT then sprite_data.Frame = Pocket.CardBacks.Credit;
-				elseif card.ID == Card.CARD_HUMANITY then sprite_data.Frame = Pocket.CardBacks.Humanity;
-				elseif card.ID == Card.CARD_GET_OUT_OF_JAIL then sprite_data.Frame = Pocket.CardBacks.Monopoly;
-				elseif card.ID == Card.CARD_HOLY then sprite_data.Frame = Pocket.CardBacks.Holy;
-				elseif card.ID == Card.CARD_WILD then sprite_data.Frame = Pocket.CardBacks.UNO;
-				elseif card.ID == Card.CARD_CHAOS or card.ID == Card.CARD_HUGE_GROWTH or card.ID == Card.CARD_ANCIENT_RECALL or card.ID == Card.CARD_ERA_WALK then sprite_data.Frame = Pocket.CardBacks.Magic; end
+				if card.CardType == ItemConfig.CARDTYPE_TAROT then sprite_data.Frame = CoopHUD.CardBacks.TAROT;
+				elseif card.CardType == ItemConfig.CARDTYPE_SUIT or card.ID == Card.CARD_RULES or card.ID == Card.CARD_SUICIDE_KING or card.ID == Card.CARD_QUESTIONMARK or card.ID == Card.CARD_QUEEN_OF_HEARTS then sprite_data.Frame = CoopHUD.CardBacks.SUIT;
+				elseif card.CardType == ItemConfig.CARDTYPE_TAROT_REVERSE then sprite_data.Frame = CoopHUD.CardBacks.REVERSE;
+				elseif card.ID == Card.CARD_CREDIT then sprite_data.Frame = CoopHUD.CardBacks.CREDIT;
+				elseif card.ID == Card.CARD_HUMANITY then sprite_data.Frame = CoopHUD.CardBacks.HUMANITY;
+				elseif card.ID == Card.CARD_GET_OUT_OF_JAIL then sprite_data.Frame = CoopHUD.CardBacks.MONOPOLY;
+				elseif card.ID == Card.CARD_HOLY then sprite_data.Frame = CoopHUD.CardBacks.HOLY;
+				elseif card.ID == Card.CARD_WILD then sprite_data.Frame = CoopHUD.CardBacks.UNO;
+				elseif card.ID == Card.CARD_CHAOS or card.ID == Card.CARD_HUGE_GROWTH or card.ID == Card.CARD_ANCIENT_RECALL or card.ID == Card.CARD_ERA_WALK then sprite_data.Frame = CoopHUD.CardBacks.MAGIC; end
 			end
 		end
 	else
@@ -255,7 +254,7 @@ function ChargeBar.GetSprite(sprite, charge_data);
 end
 
 function Active.Render(player_number);
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_ACTIVE_RENDER, mod.CoopHUD.DATA.Players[player_number].Inventory.Active); -- Execute Pre Active Render Callbacks (actives_data(table))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_ACTIVE_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Active); -- Execute Pre Active Render Callbacks (actives_data(table))
 	
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
 	local actives = player_data.Inventory.Active;
@@ -284,7 +283,7 @@ function Active.Render(player_number);
 end
 
 function Trinket.Render(player_number);
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_TRINKET_RENDER, mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket); -- Execute Pre Trinket Render Callbacks (trinkets_data(table))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_TRINKET_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket); -- Execute Pre Trinket Render Callbacks (trinkets_data(table))
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
 	local trinkets = player_data.Inventory.Trinket;
 	for slot,trinket in pairs(trinkets) do
@@ -296,7 +295,7 @@ function Trinket.Render(player_number);
 end
 
 function Pocket.Render(player_number);
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_POCKET_RENDER, mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket); -- Execute Pre Pocket Render Callbacks (pockets_data(table))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_POCKET_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket); -- Execute Pre Pocket Render Callbacks (pockets_data(table))
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
 	local pockets = player_data.Inventory.Pocket;
 	
@@ -331,7 +330,7 @@ function Pocket.Render(player_number);
 end
 
 function Inventory.Render(player_number) 
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_INVENTORY_RENDER, mod.CoopHUD.DATA.Players[player_number].Inventory.Special); -- Execute Pre Inventory Render Callbacks (inventory_data(table))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_INVENTORY_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Special); -- Execute Pre Inventory Render Callbacks (inventory_data(table))
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
 	local sprite_func = Inventory.GetSprite[player_data.Player.Type];
 	
@@ -346,7 +345,7 @@ function Inventory.Render(player_number)
 		if extra_func then extra_func(player_data); end
 	end
 	
-	CoopEnhanced.Registry.ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_PASSIVE_RENDER, mod.CoopHUD.DATA.Players[player_number].Inventory.Passive); -- Execute Pre Passives Render Callbacks (passives_data(table))
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_PASSIVE_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Passive); -- Execute Pre Passives Render Callbacks (passives_data(table))
 	if player_data.Inventory.Passive and player_data.Inventory.Passive.Data and #player_data.Inventory.Passive.Data > 0 then
 		for i,data in pairs(player_data.Inventory.Passive.Data) do
 			mod.CoopHUD.Item.Inventory.Sprite:ReplaceSpritesheet(1, data.Item);
