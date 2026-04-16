@@ -269,14 +269,16 @@ mod.Registry.Commands = {
 		end
 	end,
 	["health"] = function(args) -- Modify a players health
-		local player_index = args[1] and tonumber(args[1]) or 1;
-		local health_amount = args[3] and tonumber(args[3]) or 0;
+		local player_index = tonumber(args[1]) or 1;
+		local health_amount = tonumber(args[3]) or 0;
+		local twin_index = tonumber(args[4]) or 0;
 		local player_entity = Isaac.GetPlayer(player_index - 1);
-		if player_entity and args[2] and args[2] == "heal" then player_entity:AddHearts(health_amount); return; end
-		local health_type = args[2] and tonumber(args[2]) or 0;
+		if twin_index > 0 then player_entity = Utils.getPlayerTwins(player_entity)[twin_index]; end
+		local health_type = tonumber(args[2]) or 0;
 		local health_types = Utils.getHealthTypes();
-		if not player_entity or health_type <= 0 or health_type > #health_types or health_amount == 0 then
-			print("Incorrect arguments for command. ('health <player_index> <health_type> <health_amount>')");
+		if player_entity and args[2] == "heal" then player_entity:AddHearts(health_amount); return;
+		elseif not player_entity or health_type <= 0 or health_type > #health_types or health_amount == 0 then
+			print("Incorrect arguments for command. ('health <player_index> <health_type> <health_amount> <twin_index>')");
 			mod.Debug("Player Index: " .. player_index .. ", Type: " .. health_type .. ", Amount: " .. health_amount);
 			print("Current Health Types: ");
 			for i,health_info in pairs(health_types) do
@@ -287,7 +289,7 @@ mod.Registry.Commands = {
 		health_amount = health_amount * health_types[health_type].Total;
 		if player_entity and not player_entity:IsCoopGhost() then
 			if CustomHealthAPI then
-				CustomHealthAPI.Library.AddHealth(player, health_types[health_type].Name, health_amount, true, true, true, true, true, true, true, true, false);
+				CustomHealthAPI.Library.AddHealth(player_entity, health_types[health_type].Name, health_amount, true, true, true, true, true, true, true, true, false);
 			else
 				if Utils.IsLost(player_entity) or (Utils.IsKeeper(player_entity) and health_type > 1) then print("Incompatable Health Type for Player."); return; end
 				local health_functions = {
@@ -402,7 +404,7 @@ Console.RegisterCommand((mod.Config.commands.CMD .. "giveitem"),"Give an item to
 Console.RegisterCommand((mod.Config.commands.CMD .. "removeitem"),"Remove an item from a player","removeitem <item_id> <player_index> <active_slot> <drop_item> <twin_index>",false,AutocompleteType.ITEM);
 Console.RegisterCommand("changeplayer","Change a player to another character","changeplayer <player_type> <player_index>",true,AutocompleteType.PLAYER);
 Console.RegisterCommand("removeplayer","Remove an existing player","removeplayer <player_index> <remove_twins>",true,AutocompleteType.NONE);
-Console.RegisterCommand("health","Modify the health of a player","health <player_index> <health_type> <health_amount>",true,AutocompleteType.NONE); 
+Console.RegisterCommand("health","Modify the health of a player","health <player_index> <health_type> <health_amount> <twin_index>",true,AutocompleteType.NONE); 
 Console.RegisterCommand("revive","Revives a dead/ghost player","revive <player_index> <cost>",true,AutocompleteType.NONE); 
 Console.RegisterCommand("controller","Change the controller index of a player","controller <player_index> <controller_index>",true,AutocompleteType.NONE);
 

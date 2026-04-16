@@ -234,7 +234,7 @@ function Player.Render(player_number, screen_dimensions)
 				local max_slots, row_size, inventory = GetInfo(player_data);
 				local scale = mod.Config.CoopHUD.inventory.special.scale * extra_scale;
 				local screen_edge = player_data.Edge.Pos + (((CoopHUD.Positions.Inventory + mod.Config.CoopHUD.inventory.special.offset) * extra_scale) * player_data.Edge.Multipliers);
-				local offset = Vector(0,mod.Config.CoopHUD.inventory.special.pocket_offset and player_data.Inventory.Pocket.Total > 0 and player_data.Inventory.Pocket.Total * (32 * (mod.Config.CoopHUD.pocket[(player_data.Inventory.Pocket.Total - 1)].scale.Y * scale.Y)) or 0);
+				local offset = Vector(0,mod.Config.CoopHUD.inventory.special.pocket_offset and player_data.Inventory.Pocket.Total > 0 and player_data.Inventory.Pocket.Total * ((32 + (player_entity:GetTrinket(mod.TrinketSlot.PRIMARY) ~= TrinketType.TRINKET_NULL and (18 * mod.Config.CoopHUD.trinket[mod.TrinketSlot.PRIMARY].scale.X) or 2)) * (mod.Config.CoopHUD.pocket[(player_data.Inventory.Pocket.Total - 1)].scale.Y * scale.Y)) or 0);
 				
 				local data = {};
 				local row = 0;

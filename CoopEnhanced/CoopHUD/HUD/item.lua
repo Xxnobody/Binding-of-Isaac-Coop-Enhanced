@@ -13,6 +13,171 @@ local Pocket = Item.Pocket;
 
 local Utils = mod.Utils;
 
+CoopHUD.Item.Active.Special = { -- taken from coopHUD+ (Konoca)
+	[CollectibleType.COLLECTIBLE_D_INFINITY] = function(_,item_data,sprite_data,_)
+		local tmpFrame = 0;
+		local varData = item_data.Item.Desc.VarData;
+		local path = mod.Images.DInfinity;
+		if varData then
+			if varData == Active.D_INFINITY.D4 then tmpFrame = 2;
+			elseif varData == Active.D_INFINITY.D6 then tmpFrame = 4;
+			elseif varData == Active.D_INFINITY.E6 then tmpFrame = 6;
+			elseif varData == Active.D_INFINITY.D7 then tmpFrame = 8;
+			elseif varData == Active.D_INFINITY.D8 then tmpFrame = 10;
+			elseif varData == Active.D_INFINITY.D10 then tmpFrame = 12;
+			elseif varData == Active.D_INFINITY.D12 then tmpFrame = 14;
+			elseif varData == Active.D_INFINITY.D20 then tmpFrame = 16;
+			elseif varData == Active.D_INFINITY.D100 then tmpFrame = 18;
+			end
+		end
+		sprite_data.Animation = 'DInfinity';
+		sprite_data.Frame = (tmpFrame + sprite_data.Frame);
+		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
+	end,
+	[CollectibleType.COLLECTIBLE_THE_JAR] = function(_,_,sprite_data,player_entity)
+		local path = mod.Images.TheJar;
+		sprite_data.Animation = 'Jar';
+		sprite_data.Frame = math.ceil(player_entity:GetJarHearts() / 2);
+		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
+	end,
+	[CollectibleType.COLLECTIBLE_JAR_OF_FLIES] = function(_,_,sprite_data,player_entity)
+		local path = mod.Images.JarOfFlies;
+		sprite_data.Animation = 'Jar';
+		sprite_data.Frame = player_entity:GetJarFlies();
+		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
+	end,
+	[CollectibleType.COLLECTIBLE_JAR_OF_WISPS] = function(_,item_data,sprite_data,_)
+		local path = mod.Images.JarOfWisps;
+		sprite_data.Animation = 'WispJar';
+		sprite_data.Frame = ((item_data.Item.Desc.VarData - 1) + (15 * sprite_data.Frame));
+		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
+	end,
+	[CollectibleType.COLLECTIBLE_EVERYTHING_JAR] = function(_,_,sprite_data,_)
+		local path = mod.Images.EverythingJar;
+		sprite_data.Animation = 'EverythingJar';
+		sprite_data.Frame = (item_data.Bar.Charge.Current + 1);
+		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
+	end,
+	[CollectibleType.COLLECTIBLE_MAMA_MEGA] = function(_,_,sprite_data,player_entity)
+		local path = mod.Images.MamaMega;
+		sprite_data.Frame = (player_entity:HasGoldenBomb() and sprite_data.Frame + 1 or sprite_data.Frame);
+		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
+	end,
+	[CollectibleType.COLLECTIBLE_SMELTER] = function(_,_,sprite_data,_)
+		sprite_data.Frame = (3 * sprite_data.Frame);
+	end,
+	[CollectibleType.COLLECTIBLE_GLOWING_HOUR_GLASS] = function(_,item_data,sprite_data,_)
+		local path = mod.Images.GlowingHourGlass;
+		sprite_data.Animation = 'GlowingHourGlass';
+		sprite_data.Frame = ((3 - data.Item.Desc.VarData) + 1);
+		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
+	end,
+	[CollectibleType.COLLECTIBLE_URN_OF_SOULS] = function(_,_,sprite_data,player_entity)
+		--print(player_entity:GetTotalActiveCharge(0))
+		--((21 * player_entity:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_URN_OF_SOULS)) + player_entity:GetUrnSouls() + 1)
+		
+		local path = mod.Images.UrnOfSouls;
+		sprite_data.Animation = 'SoulUrn';
+		sprite_data.Frame = (0); -- currently player_entity:GetUrnSouls() is broken and returns the number 1065353216 regardlesss of Urn amount
+		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
+	end,
+	[CollectibleType.COLLECTIBLE_FLIP] = function(_,_,sprite_data,player_entity)
+		local path = mod.Images.Flip;
+		sprite_data.Animation = 'Flip';
+		sprite_data.Frame = (player_entity:GetType() == PlayerType.PLAYER_LAZARUS2_B and 1 or 0);
+		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
+	end,
+};
+CoopHUD.Item.Inventory.GetInfo = { -- taken from coopHUD+ (Konoca)
+	[PlayerType.PLAYER_ISAAC_B] = function (player_data)
+		local max_slots, row_size = 8, 4;
+		if player_data.Player.Entity.Ref:ToPlayer():HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) then
+			max_slots = 12;
+			row_size = 6;
+		end
+		return max_slots, row_size, player_data.Inventory.Passive.Images;
+	end,
+	[PlayerType.PLAYER_CAIN_B] = function (player_data)
+		return 8, 4, player_data.Player.Entity.Ref:ToPlayer():GetBagOfCraftingContent();
+	end,
+	[PlayerType.PLAYER_BLUEBABY_B] = function (player_data)
+		local inv = {};
+		for i = 0, 6, 1 do
+			table.insert(inv, player_data.Player.Entity.Ref:ToPlayer():GetPoopSpell(i));
+		end
+		return 6, 6, inv;
+	end
+};
+
+CoopHUD.Item.Inventory.GetSprite = { -- taken from coopHUD+ (Konoca)
+	[PlayerType.PLAYER_ISAAC_B] = function(sprite, item, i)
+		sprite = sprite or Sprite();
+		sprite:Load(mod.Animations.Inventory, false);
+		sprite:SetFrame('Idle', i - 1);
+		if item then sprite:ReplaceSpritesheet(2, item); end
+		sprite:LoadGraphics();
+		return sprite;
+	end,
+	[PlayerType.PLAYER_CAIN_B] = function(sprite, item, i)
+		sprite = sprite or Sprite();
+		sprite:Load(mod.Animations.Crafting, false);
+		sprite:SetFrame('Idle', (item or 0));
+		sprite:LoadGraphics();
+		return sprite;
+	end,
+	[PlayerType.PLAYER_BLUEBABY_B] = function(sprite, item, i)
+		sprite = sprite or Sprite();
+		sprite:Load(mod.Animations.Poops, false);
+		sprite:SetFrame(i == 1 and 'Idle' or 'IdleSmall', item);
+		sprite:LoadGraphics();
+		return sprite;
+	end
+};
+
+CoopHUD.Item.Inventory.ExtraFunctions = { -- taken from coopHUD+ (Konoca)
+	[PlayerType.PLAYER_CAIN_B] = function(player_data)
+		local function GetResult()
+			local id = player_data.Player.Entity.Ref:ToPlayer():GetBagOfCraftingOutput();
+			if player_data.Inventory.Special.Total ~= 8 or id == 0 then return nil; end
+			local item = Isaac:GetItemConfig():GetCollectible(id);
+			if (Game():GetLevel():GetCurses() & 64) == 64 and not mod.Config.CoopHUD.inventory.special.ignore_curse then return (ReworkedCOB ~= nil and ("gfx/items/collectibles/questionmark_Q" .. item.Quality .. ".png") or mod.Images.QuestionMark); end
+			return item.GfxFileName;
+		end
+		local result = GetResult();
+		local sprite = player_data.Inventory.Special.Sprite;
+		if not sprite or not player_data.Inventory.Special.Data[1] then return; end
+		if result or mod.Config.CoopHUD.inventory.special.result_display then 
+			local result_pos = player_data.Inventory.Special.Data[#player_data.Inventory.Special.Data].Pos + (((Vector(((mod.Config.CoopHUD.inventory.special.space.X * 3) * mod.Config.CoopHUD.inventory.special.scale.X), ((mod.Config.CoopHUD.inventory.special.space.Y / -1.5) * mod.Config.CoopHUD.inventory.special.scale.Y)) + mod.Config.CoopHUD.inventory.special.result_offset) * mod.Config.CoopHUD.inventory.special.result_scale) * player_data.Edge.Multipliers);
+			
+			sprite.Color = Color(1, 1, 1, mod.Config.CoopHUD.inventory.special.result_opacity);
+			sprite.Scale = mod.Config.CoopHUD.inventory.special.result_scale;
+			
+			sprite.FlipX = player_data.Edge.Multipliers.X < 0;
+			sprite:SetFrame('Result', 0);
+			
+			sprite:LoadGraphics();
+			sprite:Render(result_pos);
+			
+			if result then
+				local result_sprite = player_data.Inventory.Special.ResultSprite or Sprite(mod.Animations.Item, false);
+				result_sprite.Scale = sprite.Scale;
+				result_sprite.Color = sprite.Color;
+				result_sprite:ReplaceSpritesheet(0, result);
+				result_sprite:ReplaceSpritesheet(1, result);
+				result_sprite:ReplaceSpritesheet(2, result);
+				result_sprite:SetFrame('Idle', 0);
+				result_sprite:LoadGraphics();
+				result_sprite:Render((result_pos + Vector(0,22 * result_sprite.Scale.Y)));
+				player_data.Inventory.Special.ResultSprite = result_sprite;
+			end
+		end
+		sprite.Color = Color(1, 1, 1, mod.Config.CoopHUD.inventory.special.opacity);
+		sprite.Scale = mod.Config.CoopHUD.inventory.special.scale;
+		sprite.FlipX = false;
+		sprite:LoadGraphics();
+	end
+};
+
 function Active.GetBook(player_entity, id)
 	local hasVirtues = player_entity:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES) and id ~= CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES;
 	local hasBelial = player_entity:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_BELIAL) and id ~= CollectibleType.COLLECTIBLE_BOOK_OF_BELIAL;

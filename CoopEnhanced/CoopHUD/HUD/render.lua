@@ -89,13 +89,11 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 			if (player_index % 2) == 0 then
 				edge.Pos.X = screen_dimensions.Max.X - (edge.Offset.X + mod.Config.CoopHUD.players.mirrored_offset.X);
 				edge.Multipliers.X = -1;
-				print(player_index)
 			end
 			if player_index > 2 then
 				edge.Pos.Y = screen_dimensions.Max.Y - (edge.Offset.Y + mod.Config.CoopHUD.players.mirrored_offset.Y);
 				edge.Multipliers.Y = -1;
 			end
-			print(edge.Pos)
 			
 			if not mod.CoopHUD.DATA.Players[index] then
 				mod.CoopHUD.DATA.Players[index] = {

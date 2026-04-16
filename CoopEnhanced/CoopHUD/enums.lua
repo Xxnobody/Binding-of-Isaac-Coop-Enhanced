@@ -331,7 +331,7 @@ CoopHUD.Positions = {
 	Coop = Vector(45,15),
 	Difficulty = Vector(10,70),
 	Health = Vector(45,10),
-	Inventory = Vector(8,55),
+	Inventory = Vector(25,70),
 	Misc = Vector(4,65),
 	Pickups = Vector(1,50),
 	Pocket = {[0] = Vector(8,55),[1] = Vector(8,65),[2] = Vector(8,75),[3] = Vector(8,85),},

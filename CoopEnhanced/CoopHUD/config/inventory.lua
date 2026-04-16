@@ -207,9 +207,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopHUD.inventory.special.result_display; end,
-		Display = function()
-			return 'Display: ' .. (mod.Config.CoopHUD.inventory.special.result_display and 'Always' or 'Result');
-		end,
+		Display = function() return 'Display: ' .. (mod.Config.CoopHUD.inventory.special.result_display and 'Always' or 'Result'); end,
 		OnChange = function(b) mod.Config.CoopHUD.inventory.special.result_display = b; end,
 	}
 );

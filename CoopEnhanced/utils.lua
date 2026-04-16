@@ -60,22 +60,14 @@ function Utils.decodeData(data) -- Taken from CoopHUD+, credit to Kona
 	end
 	return new_data;
 end
-function Utils.ensureCompatibility(data1, data2) -- Taken from CoopHUD+, credit to Kona
+function Utils.ensureCompatibility(data1, data2)
 	local new_config = {};
 	for key, value in pairs(data1) do
-		local new_value = (type(data2) == "table" or type(data2) == "userdata") and data2[key] or nil;
-		
-		if new_value == nil then
-			new_config[key] = value;
-			goto skip_key;
-		elseif value ~= nil and type(new_value) ~= type(value) then
-			new_value = value;
-		end
+		local new_value = (type(data2) == "table" or type(data2) == "userdata") and data2[key] or value;
 		if type(value) == 'table' then
 			new_value = Utils.ensureCompatibility(value, new_value);
 		end
 		new_config[key] = new_value;
-		::skip_key::
 	end
 	return new_config;
 end
