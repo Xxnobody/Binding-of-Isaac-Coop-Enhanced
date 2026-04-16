@@ -39,7 +39,7 @@ Here are each modules features. Each module can be totally disabled by the main 
 	* Automatic Pricing! Items will have their prices adjusted according to whichever player is closest. Works with Devil Deals/Black Markets/Treasure Rooms and more, for characters like The Keeper, Lost, Blue Baby, etc. No more making everything expensive because one player is Tainted Keeper.
 	* Ghost Player Flight! With custom options to prevent ghost players from grabbing pickups from areas they normally couldn't reach, stop them from opening chests, disallow them from buying stuff, or even remove the ability to body block enemies (they are ghosts after all).
 	* Greed Mode Revive Machine! Adds a revive machine to the Greed Mode shop that appears near the center on every floor after the first. (Not sure why this isn't vanilla)
-	* Sacrifice Room Revives! Dead players can no be revived in Sacrifice Rooms by a living player using it. There's a (configurable) compounding percent chance to revive the closes dead player every sacrifice payed.
+	* Sacrifice Room Revives! Dead players can no be revived in Sacrifice Rooms by a living player using it. There's a (configurable) compounding percent chance to revive the closest dead player every sacrifice payed.
 ### Co-op Fixes
 	* A small Fullscreen tweak that resets the window to 0,0 and refreshes the screen whenever you start/restart a game. 
 	* Fixes an issue where Co-op is prevented from starting due to the game sometimes incrementing the Room Visits counter too many times on first join. Configurable amount of room visits. (You can set room visits maximum to 0 to allow starting Co-op at any point in the run as long as it's the floor's starting room)
