@@ -129,6 +129,6 @@ Some mods are required to get the full experience, some are just required.
 
 ## Issues
 All issues should either be reported here in the Issues tab, or by posting on the Steam Page. Please include:
-	* Console logs (Required)
-	* How to replicate the bug
-	* Any mods that contributed to the bug
+- Console logs (Required)
+- How to replicate the bug.
+- Any mods that contributed to the bug.
