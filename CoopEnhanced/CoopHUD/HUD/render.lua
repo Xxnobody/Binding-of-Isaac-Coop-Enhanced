@@ -145,7 +145,7 @@ function CoopHUD.RenderBanners(screen_dimensions)
 		CoopHUD.DATA.Banner.Pos = screen_dimensions.Center;
 		local anchor = mod.Config.CoopHUD.banner.anchor;
 		local edge_multiplier = anchor == 1 and 1 or -1;
-		if anchor > 0 then CoopHUD.DATA.Banner.Pos.Y = (anchor == 1 and mod.Config.CoopHUD.offset.Y or screen_dimensions.Max.Y - mod.Config.CoopHUD.offset.Y) + ((65 * mod.Config.CoopHUD.banner.scale.Y) * edge_multiplier); end
+		if anchor > 0 then CoopHUD.DATA.Banner.Pos.Y = (anchor == 1 and mod.Config.CoopHUD.offset.Y or screen_dimensions.Max.Y - mod.Config.CoopHUD.offset.Y) + ((50 * mod.Config.CoopHUD.banner.scale.Y) * edge_multiplier); end
 		CoopHUD.DATA.Banner.Pos = CoopHUD.DATA.Banner.Pos + Vector(mod.Config.CoopHUD.banner.offset.X,mod.Config.CoopHUD.banner.offset.Y * edge_multiplier);
 	end
 	

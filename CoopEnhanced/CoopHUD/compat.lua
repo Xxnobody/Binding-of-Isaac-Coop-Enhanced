@@ -38,7 +38,7 @@ local function configSetup()
 				Display = function() return 'Void Max Charge: ' .. valid_charges[mod.Config.CoopHUD.mods.DIVOID.max_charge]; end,
 				OnChange = function(n) mod.Config.CoopHUD.mods.DIVOID.max_charge = n; end,
 			}
-		);]]--
+		);]]-- Doesn't Work because the mod loads the value once at runtime, change it in the mod directly
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
 			CoopHUD.MCM.categories.mods,
@@ -277,6 +277,46 @@ local function configSetup()
 				CurrentSetting = function() return mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.enabled; end,
 				Display = function() return 'Enable: ' .. (mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.enabled and 'on' or 'off'); end,
 				OnChange = function(b) mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.enabled = b; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.mods,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.offset.X; end,
+				Display = function() return 'Offset (X): ' .. mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.offset.X; end,
+				OnChange = function(n) mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.offset.X = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.mods,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.offset.Y; end,
+				Display = function() return 'Offset (Y): ' .. mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.offset.Y; end,
+				OnChange = function(n) mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.offset.Y = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.mods,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.text_offset.X; end,
+				Display = function() return 'Text Offset (X): ' .. mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.text_offset.X; end,
+				OnChange = function(n) mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.text_offset.X = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.mods,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.text_offset.Y; end,
+				Display = function() return 'Text Offset (Y): ' .. mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.text_offset.Y; end,
+				OnChange = function(n) mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.text_offset.Y = n; end,
 			}
 		);
 	end	

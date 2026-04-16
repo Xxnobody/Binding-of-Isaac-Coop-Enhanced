@@ -369,6 +369,8 @@ mod.CoopHUD.DefaultConfig = {
 			},
 			boss_counter = {
 				enabled = true,
+				offset = Vector(10, 0),
+				text_offset = Vector(3, -1),
 			}
 		},
 	}

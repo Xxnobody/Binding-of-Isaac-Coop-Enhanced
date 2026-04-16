@@ -99,17 +99,17 @@ function Misc.GetWave(screen_dimensions)
 	if not mod.CoopHUD.Misc.Wave then mod.CoopHUD.Misc.Wave = {[1] = {}}; end
 	mod.CoopHUD.Misc.Wave[1].Data = {};
 		
-	local wave_type = game:GetRoom():GetType() == RoomType.ROOM_BOSSRUSH and "bossrush" or ((game:IsGreedMode() and stage ~= LevelStage.STAGE7_GREED and game:GetLevel():GetCurrentRoomIndex() == game:GetLevel():GetStartingRoomIndex() and (game.Difficulty == Difficulty.DIFFICULTY_GREEDIER and "greedier" or "greed")) or (game:GetRoom():GetBossID() == BossType.GREAT_GIDEON and "gideon" or nil));
+	local wave_type = game:GetRoom():GetType() == RoomType.ROOM_BOSSRUSH and CoopHUD.WaveType.BOSSRUSH or ((game:IsGreedMode() and stage ~= LevelStage.STAGE7_GREED and game:GetLevel():GetCurrentRoomIndex() == game:GetLevel():GetStartingRoomIndex() and (game.Difficulty == Difficulty.DIFFICULTY_GREEDIER and CoopHUD.WaveType.GREEDIER or CoopHUD.WaveType.GREED)) or (game:GetRoom():GetBossID() == BossType.GREAT_GIDEON and CoopHUD.WaveType.GIDEON or nil));
 	if not wave_type then mod.CoopHUD.Misc.Wave.Visible = false; return; end
 	
 	mod.CoopHUD.Misc.Wave.Visible = (mod.Config.CoopHUD.misc.wave.display == 0 or (mod.Config.CoopHUD.misc.wave.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.wave.display == 2 and not CoopHUD.IsMapDown or false)));
 	if not mod.CoopHUD.Misc.Wave.Visible then return; end
 	
-	local max_waves = wave_type == "bossrush" and Ambush.GetMaxBossrushWaves() or ((wave_type == "greed" or wave_type == "greedier") and (game:GetGreedWavesNum() - 1) or 6);
-	local wave = wave_type == "bossrush" and Ambush.GetCurrentWave() or ((wave_type == "greed" or wave_type == "greedier") and (game:GetLevel().GreedModeWave) or 0);
+	local max_waves = wave_type == CoopHUD.WaveType.BOSSRUSH and Ambush.GetMaxBossrushWaves() or ((wave_type == CoopHUD.WaveType.GREED or wave_type == CoopHUD.WaveType.GREEDIER) and (game:GetGreedWavesNum() - 1) or 6);
+	local wave = wave_type == CoopHUD.WaveType.BOSSRUSH and Ambush.GetCurrentWave() or ((wave_type == CoopHUD.WaveType.GREED or wave_type == CoopHUD.WaveType.GREEDIER) and (game:GetLevel().GreedModeWave) or 0);
 	
 	-- Temporary fix until Gideon Waves are exposed to the API
-	if wave_type == "gideon" then
+	if wave_type == CoopHUD.WaveType.GIDEON then
 		if not Isaac.FindByType(EntityType.ENTITY_GIDEON)[1] then return; end
 		if not CoopHUD.Misc.Gideon then
 			local function gideonWaveTracker(_,entity_type,_,_,_,_,spawner_entity)

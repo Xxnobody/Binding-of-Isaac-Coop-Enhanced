@@ -449,12 +449,12 @@ mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, params)
 		for i = 3, #args, 1 do
 			if config == nil then print("Config value for '" .. (args[(i - 1)] or "nil") .. "' not found!"); return;
 			elseif type(config) == "userdata" and config.X then
-				local x = tonumber(args[i]);
-				local y = tonumber(args[(i + 1)]);
-				config = Vector((x or config.X),(y or config.Y));
+				config.X = args[i] == "reset" and default_config.X or (tonumber(args[i]) or config.X);
+				config.Y = args[i] == "reset" and default_config.Y or (tonumber(args[(i + 1)]) or config.Y);
+				print(params:sub(1,(params:find(args[i]) - 2)) .. " changed to " .. "Vector (" .. config.X .. ", " .. config.Y .. ")");
 				break;
 			elseif i == #args then 
-				if config[args[i]] ~= nil then	print(params .. " = " .. tostring(config[args[i]])); end
+				if config[args[i]] ~= nil then print(params .. " = " .. tostring(config[args[i]])); end
 				break;
 			elseif (i + 1) == #args and args[(i + 1)] ~= nil then
 				local config_type = type(config[(tonumber(args[i]) or args[i])]);
@@ -467,7 +467,7 @@ mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, params)
 				
 				if value ~= nil then
 					config[(tonumber(args[i]) or args[i])] = value;
-					print(params .. " changed to " .. tostring(config[args[i]]));
+					print(params:sub(1,(params:find(args[(i + 1)]) - 2)) .. " changed to " .. tostring(config[args[i]]));
 					break;
 				end
 			end

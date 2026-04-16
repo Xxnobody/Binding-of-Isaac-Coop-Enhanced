@@ -11,6 +11,7 @@ mod.CoopExtras.DefaultConfig = {
 	ghost_flight = {
 		enabled = true,
 		pickups = true,
+		shopping = true,
 		chests = true,
 		interact = 0,
 	},
@@ -80,6 +81,16 @@ ModConfigMenu.AddSetting(
 		Display = function() return 'Heavy Locks: ' .. (mod.Config.CoopExtras.ghost_flight.chests and 'on' or 'off'); end,
 		OnChange = function(b) mod.Config.CoopExtras.ghost_flight.chests = b; end,
 		Info = {'Co-op players cannot open chests, only push them.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopExtras.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopExtras.ghost_flight.shopping; end,
+		Display = function() return 'Broke Ghosts: ' .. (mod.Config.CoopExtras.ghost_flight.shopping and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopExtras.ghost_flight.shopping = b; end,
+		Info = {'Co-op players cannot buy anything from shops.'},
 	}
 );
 ModConfigMenu.AddSetting(

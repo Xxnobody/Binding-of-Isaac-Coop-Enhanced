@@ -16,9 +16,9 @@ function CoopHUD.EnhancedBossBars()
 			local barSize = HPBars.barSizes.horizontal[math.min(bossCount, 10)];
 			if mod.Config.CoopHUD.mods.EBB.auto_pad then
 				local min_padding = 0;
-				if deals_anchor == 0 then min_padding = min_padding + (mod.Config.CoopHUD.stats.scale.Y * 17); end
-				if pickups_anchor == 0 then min_padding = min_padding + (mod.Config.CoopHUD.misc.pickups.scale.Y * 17); end
-				if wave_anchor == 0 then min_padding = min_padding + (mod.Config.CoopHUD.misc.wave.scale.Y * 17); end
+				if deals_anchor == 0 then min_padding = min_padding + (mod.Config.CoopHUD.stats.scale.Y * 18); end
+				if pickups_anchor == 0 then min_padding = min_padding + (mod.Config.CoopHUD.misc.pickups.scale.Y * 18); end
+				if wave_anchor == 0 then min_padding = min_padding + (mod.Config.CoopHUD.misc.wave.scale.Y * 18); end
 				return Vector(screenCenter.X / 2 - (bossCount * barSize) / 2 - ((bossCount - 1) * barPadding),screenCenter.Y - math.max(min_padding,HPBars.Config.ScreenPadding));
 			else
 				return Vector(screenCenter.X / 2 - (bossCount * barSize) / 2 - ((bossCount - 1) * barPadding),screenCenter.Y - HPBars.Config.ScreenPadding);
@@ -27,9 +27,9 @@ function CoopHUD.EnhancedBossBars()
 			local barSize = HPBars.barSizes.horizontal[math.min(bossCount, 10)];
 			if mod.Config.CoopHUD.mods.EBB.auto_pad then
 				local min_padding = 0;
-				if deals_anchor == 1 then min_padding = min_padding + (mod.Config.CoopHUD.stats.scale.Y * 17); end
-				if pickups_anchor == 1 then min_padding = min_padding + (mod.Config.CoopHUD.misc.pickups.scale.Y * 17); end
-				if wave_anchor == 1 then min_padding = min_padding + (mod.Config.CoopHUD.misc.wave.scale.Y * 17); end
+				if deals_anchor == 1 then min_padding = min_padding + (mod.Config.CoopHUD.stats.scale.Y * 18); end
+				if pickups_anchor == 1 then min_padding = min_padding + (mod.Config.CoopHUD.misc.pickups.scale.Y * 18); end
+				if wave_anchor == 1 then min_padding = min_padding + (mod.Config.CoopHUD.misc.wave.scale.Y * 18); end
 				return Vector(screenCenter.X / 2 - (bossCount * barSize) / 2 - ((bossCount - 1) * barPadding),math.max(min_padding,HPBars.Config.ScreenPadding));
 			else
 				return Vector(screenCenter.X / 2 - (bossCount * barSize) / 2 - ((bossCount - 1) * barPadding),HPBars.Config.ScreenPadding);

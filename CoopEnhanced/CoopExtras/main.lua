@@ -98,18 +98,20 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, CoopExtras.GhostFlight, CacheFla
 
 function CoopExtras:onGhostPickup(pickup_entity, entity)
 	local player_entity = entity:ToPlayer();
-	if not player_entity or not player_entity:IsCoopGhost() then return; end
+	if not mod.Config.CoopExtras.ghost_flight.pickups or not player_entity or not player_entity:IsCoopGhost() then return; end
 	
 	local canPickup = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_PICKUP, player_entity, chest_type); -- Execute Pre Ghost Pickup Callbacks (player_entity(EntityPlayer), pickup_entity(EntityPickup)) Return true to allow pickup
 	if canPickup then return; end
-	if mod.Config.CoopExtras.ghost_flight.interact == 4 then return true; end
+	if mod.Config.CoopExtras.ghost_flight.interact == 4 or mod.Config.CoopExtras.ghost_flight.shopping and pickup_entity.Price ~= 0 then return true; end
 	
-	if not mod.Config.CoopExtras.ghost_flight.pickups then return; end
 	local other_pos = nil;
 	for i,player in pairs(PlayerManager.GetPlayers()) do
-		if not player:IsCoopGhost() and (not other_pos or player_entity.Position:Distance(player.Position) < player_entity.Position:Distance(other_pos)) then other_pos = player.Position; end
+		if not player:IsCoopGhost() and (not other_pos or player_entity.Position:Distance(player.Position) < player_entity.Position:Distance(other_pos)) then
+			other_pos = player.Position;
+			if player.CanFly then return; end
+		end
 	end
-	if other_pos and not Utils.CheckSafeSpawnPosition(other_pos,pickup_entity.Position) then return false; end
+	if other_pos and not someone_has_flight and not Utils.CheckSafeSpawnPosition(other_pos,pickup_entity.Position) then return false; end
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, CoopExtras.onGhostPickup);
 

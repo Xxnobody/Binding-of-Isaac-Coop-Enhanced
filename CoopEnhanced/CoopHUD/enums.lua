@@ -299,6 +299,12 @@ CoopHUD.BannerType = {
 	ITEM = 1,
 	FORTUNE = 2,
 };
+CoopHUD.WaveType = {
+	BOSSRUSH = 0,
+	GREED = 1,
+	GREEDIER = 2,
+	GIDEON = 3,
+};
 CoopHUD.CardBacks = {
 	TAROT = 0,
 	SUIT = 1,

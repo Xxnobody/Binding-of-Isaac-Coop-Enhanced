@@ -13,7 +13,7 @@ end
 
 function Registry.AddPriorityCallback(modID, callbackID, priority, func, ...)
 	priority = priority or 0;
-	if  not callbackID or type(callbackID) ~= "number" or callbackID < 0 or callbackID > Callbacks.NUM_CALLBACKS or not Registry.Callbacks[callbackID] then
+	if not callbackID or type(callbackID) ~= "number" or callbackID < 0 or callbackID > Callbacks.NUM_CALLBACKS or not Registry.Callbacks[callbackID] then
 		mod.Debug('Invalid Callback ID ' .. callbackID .. " entered.");
 		return;
 	end

@@ -13,7 +13,7 @@ CoopEnhanced.Fonts = {};
 CoopEnhanced.Utils = {};
 CoopEnhanced.Twins = {};
 CoopEnhanced.Directory = "CoopEnhanced.";
-CoopEnhanced.Players = {Alive = 0,Total = 0,Types = {},Unlocked = {}}; -- Alive/Total only tracks main players (not twins like Esau) 
+CoopEnhanced.Players = {Alive = 0,Total = 0,Types = {},Unlocked = {}};
 CoopEnhanced.Registry = {Callbacks = {}, Commands = {}};
 CoopEnhanced.Callbacks = {NUM_CALLBACKS = 0};
 

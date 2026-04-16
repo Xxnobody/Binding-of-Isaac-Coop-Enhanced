@@ -13,24 +13,29 @@ function CoopHUD.Reflourished()
 		if not mod.Config.CoopHUD.misc.wave.background or not misc_data["Wave"] then return; end
 		local sprite = misc_data["Wave"][1].Sprite or nil;
 		local data = misc_data["Wave"][1].Data or nil;
-		if sprite and data and data.Type == "bossrush" then
+		if data.Wave.Current == 0 then data.Text = nil; misc_data["Wave"].Visible = false; return; end
+		if sprite and data and data.Type == CoopHUD.WaveType.BOSSRUSH then
 			if not mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.enabled then
 				if sprite:GetFilename() ~= mod.Animations.Waves then sprite:Load(mod.Animations.Waves, true); end
 				return;
 			end
 			data.Animated = true;
-			data.Pos = data.Pos + Vector(30,10); --Needs to be offset due to how the anim2 file sets positions
-			if data.Wave.Current == 0 or Game():GetRoom():IsAmbushDone() then data.Text = nil; end
-			if data.Text then data.Text.Pos.Y = data.Text.Pos.Y - 6; end
+			data.Pos = data.Pos + ((mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.offset + Vector(7,7)) * mod.Config.CoopHUD.misc.wave.scale); --Needs extra offset due to how the anim2 file sets positions
+			if data.Text then data.Text.Pos = data.Text.Pos + ((mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.text_offset) * mod.Config.CoopHUD.misc.wave.text_scale); end
 			if sprite:GetFilename() ~= wavebar_animation then sprite:Load(wavebar_animation, true); end
 			if data.Wave.Current ~= last_wave then
 				last_wave = data.Wave.Current;
 				if data.Wave.Current == 1 then sprite:Play("Stage1");
 				elseif data.Wave.Current % (data.Wave.Max//5) == 0 and not Game():GetRoom():IsAmbushDone() then
-					sprite:Play(("Stage" .. ((data.Wave.Current//(data.Wave.Max//5)) + 1)), true);
+					sprite:Play(("Stage" .. ((data.Wave.Current // (data.Wave.Max // 5)) + 1)), true);
 				end
 			elseif data.Wave.Current == data.Wave.Max and Game():GetRoom():IsAmbushDone() then
-				if sprite:GetAnimation() ~= "Break" then sprite:Play("Break", true); elseif sprite:IsFinished("Break") then data.Animated = false; end
+				if sprite:GetAnimation() ~= "Break" then sprite:Play("Break", true);
+				elseif sprite:IsFinished("Break") then
+					data.Animated = false;
+					data.Text = nil;
+					CoopHUD.Misc.Wave.Visible = false;
+				end
 			end
 		end
 	end
