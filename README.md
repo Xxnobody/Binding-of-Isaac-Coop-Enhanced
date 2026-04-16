@@ -37,7 +37,7 @@ Here are each modules features. Each module can be totally disabled by the main 
 	* API functions for mods to add room types, or callbacks to change room data depending on type/variant.
 ### Co-op Extras
 	* Automatic Pricing! Items will have their prices adjusted according to whichever player is closest. Works with Devil Deals/Black Markets/Treasure Rooms and more, for characters like The Keeper, Lost, Blue Baby, etc. No more making everything expensive because one player is Tainted Keeper.
-	* Ghost Player Flight! With custom options to prevent ghost players from grabbing pickups from areas they normally couldn't reach, stop them from opening chests, or even remove the ability to body block enemies (they're ghosts after all).
+	* Ghost Player Flight! With custom options to prevent ghost players from grabbing pickups from areas they normally couldn't reach, stop them from opening chests, disallow them from buying stuff, or even remove the ability to body block enemies (they are ghosts after all).
 	* Greed Mode Revive Machine! Adds a revive machine to the Greed Mode shop that appears near the center on every floor after the first. (Not sure why this isn't vanilla)
 ### Co-op Fixes
 	* A small Fullscreen tweak that resets the window to 0,0 and refreshes the screen whenever you start/restart a game. 
