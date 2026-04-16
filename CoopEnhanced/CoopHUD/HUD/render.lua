@@ -61,7 +61,7 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 			local index = i;
 			local player_index = 0;
 			local player_entity = Isaac.GetPlayer(i - 1);
-			local edge = {Pos = screen_dimensions.Min, Offset = mod.Config.CoopHUD.offset, Multipliers = Vector.One};
+			local edge = {Pos = Utils.cloneTable(screen_dimensions.Min), Offset = Utils.cloneTable(mod.Config.CoopHUD.offset), Multipliers = Vector.One};
 			
 			if mod.Twins[i] then
 				index = -i;
@@ -87,13 +87,15 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 			local player_name = Utils.getPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.CoopHUD.tainted);
 			
 			if (player_index % 2) == 0 then
-				edge.Pos.X = screen_dimensions.Max.X - (edge.Pos.X + mod.Config.CoopHUD.players.mirrored_offset.X);
+				edge.Pos.X = screen_dimensions.Max.X - (edge.Offset.X + mod.Config.CoopHUD.players.mirrored_offset.X);
 				edge.Multipliers.X = -1;
+				print(player_index)
 			end
 			if player_index > 2 then
-				edge.Pos.Y = screen_dimensions.Max.Y - (edge.Pos.Y + mod.Config.CoopHUD.players.mirrored_offset.Y);
+				edge.Pos.Y = screen_dimensions.Max.Y - (edge.Offset.Y + mod.Config.CoopHUD.players.mirrored_offset.Y);
 				edge.Multipliers.Y = -1;
 			end
+			print(edge.Pos)
 			
 			if not mod.CoopHUD.DATA.Players[index] then
 				mod.CoopHUD.DATA.Players[index] = {

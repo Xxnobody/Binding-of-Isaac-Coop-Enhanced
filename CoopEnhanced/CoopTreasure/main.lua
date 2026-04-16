@@ -326,7 +326,7 @@ function CoopTreasure:onRoom()
 			if ii > 1 then item_pos = item_pos + ((room_data.MoreOptions.Offset / (#room_data.Treasure.Items[1] >= 3 and 2 or 1)) * edge_multipliers); end
 			CoopTreasure.ClearGridSpace(item_pos, room_data.Spawn.Radius); -- Clear grid entities from around pedestals
 			if room_data.Safe.Enable and room_data.Safe.Mode > 0 then item_pos = Utils.GetSafeSpawnPosition(game:GetPlayer().Position, item_pos, {safe_args[1] * edge_multipliers.X,safe_args[2] * edge_multipliers.Y,2}); end -- Safe Pos Check
-			local item_id = item_pool:GetCollectible(room:GetItemPool(math.max(room:GetSpawnSeed())), true, math.max(1,room:GetSpawnSeed())); -- Gets seed accurate Collectible Type
+			local item_id = item_pool:GetCollectible(room:GetItemPool(math.max(1,room:GetSpawnSeed())), true, math.max(1,room:GetSpawnSeed())); -- Gets seed accurate Collectible Type
 			local pedestal_entity = game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, item_pos, Vector.Zero, nil, item_id, math.max(1,room:GetSpawnSeed())):ToPickup();
 			pedestal_entity:SetForceBlind(room_data.Treasure.Items[1][ii].IsBlind);
 			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_PEDESTAL, i, pedestal_entity); -- Execute Pre Pedestal updates for player 1 Callbacks (player_index, pedestal_entity(EntityPickup))

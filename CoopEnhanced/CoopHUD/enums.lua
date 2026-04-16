@@ -335,6 +335,6 @@ CoopHUD.Positions = {
 	Misc = Vector(4,65),
 	Pickups = Vector(1,50),
 	Pocket = {[0] = Vector(8,55),[1] = Vector(8,65),[2] = Vector(8,75),[3] = Vector(8,85),},
-	Stats = Vector(0,100),
+	Stats = Vector(0,90),
 	Trinket = {[0] = Vector(12,65),[1] = Vector(25,68)},
 };

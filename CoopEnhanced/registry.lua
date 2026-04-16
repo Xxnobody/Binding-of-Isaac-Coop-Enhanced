@@ -60,6 +60,7 @@ local ModuleRegistry = {
 		CoopEnhanced.Registry:RegisterCallback("EXTRAS_PRE_GHOST_CHEST");
 		CoopEnhanced.Registry:RegisterCallback("EXTRAS_PRE_GHOST_PICKUP");
 		CoopEnhanced.Registry:RegisterCallback("EXTRAS_PRE_GHOST_COLLISION");
+		CoopEnhanced.Registry:RegisterCallback("EXTRAS_PRE_SACRIFICE_REVIVE");
 		require(dir .. "enums");
 		require(dir .. "config");
 		require(dir .. "main");

@@ -125,10 +125,43 @@ mod:AddCallback(ModCallbacks.MC_PRE_OPEN_CHEST, CoopExtras.onGhostChest);
 function CoopExtras:onGhostCollide(player_entity, entity)
 	local enemy_entity = entity:ToNPC();
 	if not player_entity:IsCoopGhost() or not enemy_entity then return; end
-	local canCollide = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_PRICE_DATA, player_entity, enemy_entity); -- Execute Pre item Pricing Callbacks (player_entity(EntityPlayer), enemy_entity(EntityNPC))
+	local canCollide = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_COLLISION, player_entity, enemy_entity); -- Execute Pre item Pricing Callbacks (player_entity(EntityPlayer), enemy_entity(EntityNPC))
 	if canCollide then return; end
 	if mod.Config.CoopExtras.ghost_flight.interact == 4 then return true; end
 	if enemy_entity:GetBossID() > 0 and mod.Config.CoopExtras.ghost_flight.interact >= 3 then return true; end
 	if enemy_entity:GetBossID() == 0 and mod.Config.CoopExtras.ghost_flight.interact >= 1 then return true; end
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, CoopExtras.onGhostCollide);
+
+function CoopExtras:onGhostButton(player_entity, grid_index, grid_entity)
+	if not grid_entity or not grid_entity:GetType() ~= GridEntityType.GRID_PRESSURE_PLATE or not player_entity:IsCoopGhost() then return; end
+	local canActivate = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_BUTTON, player_entity, grid_entity:ToPressurePlate()); -- Execute Pre item Pricing Callbacks (player_entity(EntityPlayer), grid_entity(GridEntityPressurePlate))
+	if canActivate then return; end
+	return true;
+end
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, CoopExtras.onGhostButton);
+
+
+-- Coop Sacrificial Revive
+function CoopExtras:sacrificalRevive(player_entity, damage, damage_flags)
+	if not mod.Config.CoopExtras.sacrifice_revive.enabled or game:GetRoom():GetType() ~= RoomType.ROOM_SACRIFICE or (damage_flags & DamageFlag.DAMAGE_SPIKES == 0) or (damage_flags & DamageFlag.DAMAGE_NO_PENALTIES == 0) then return; end
+	local revive_chance = CoopExtras.DATA.ReviveChance or 0;
+	local ghost_entity = nil;
+	for i,player in pairs(PlayerManager.GetPlayers()) do
+		if player:IsCoopGhost() and (not ghost_entity or player_entity.Position:Distance(player.Position) < player_entity.Position:Distance(other_pos)) then
+			ghost_entity = player;
+		end
+	end
+	if not ghost_entity then return; end
+	local rng = RNG(math.max(1,game:GetRoom():GetSpawnSeed()));
+	local revive_check = rng:RandomInt(0,100);
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_SACRIFICE_REVIVE, player_entity, ghost_entity, revive_chance, revive_check);
+	if revive_check <= revive_chance then
+		revive_chance = 0;
+		ghost_entity:ReviveCoopGhost();
+	elseif mod.Config.CoopExtras.sacrifice_revive.increase then
+		revive_chance = math.min(100,revive_chance + mod.Config.CoopExtras.sacrifice_revive.chance);
+	end
+	CoopExtras.DATA.ReviveChance = revive_chance;
+end
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, CoopExtras.sacrificalRevive);

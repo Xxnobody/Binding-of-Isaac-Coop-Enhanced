@@ -8,11 +8,17 @@ mod.CoopExtras.DefaultConfig = {
 	
 	item_prices = true,
 	greed_revive = true,
+	sacrifice_revive = {
+		enabled = true,
+		chance = 25.0,
+		increase = true,
+	},
 	ghost_flight = {
 		enabled = true,
 		pickups = true,
 		shopping = true,
-		chests = true,
+		chests = false,
+		buttons = false,
 		interact = 0,
 	},
 };
