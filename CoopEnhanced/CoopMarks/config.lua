@@ -29,10 +29,12 @@ mod.CoopMarks.DefaultConfig = {
 		}
 	},
 	coop_only = false,
+	coop_menu = true,
 	colors = false,
 	player_sync = "Global",
 	opacity = 1,
 	offset = Vector(0,0),
+	menu_offset = Vector(0,0),
 	rel_offset = Vector(0,0),
 	scale = Vector(0.5,0.5),
 	text_scale = Vector(1,1),
@@ -134,6 +136,34 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopMarks.coop_only; end,
 		Display = function() return 'Coop Only: ' .. (mod.Config.CoopMarks.coop_only and 'on' or 'off'); end,
 		OnChange = function(b) mod.Config.CoopMarks.coop_only = b; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopMarks.coop_menu; end,
+		Display = function() return 'Coop Menu: ' .. (mod.Config.CoopMarks.coop_menu and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopMarks.coop_menu = b; end,
+		Info = {'Enable to show completion marks with the Coop character select menu.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.menu_offset.X; end,
+		Display = function() return 'Menu Offset (X): ' .. mod.Config.CoopMarks.menu_offset.X; end,
+		OnChange = function(n) mod.Config.CoopMarks.menu_offset.X = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.menu_offset.Y; end,
+		Display = function() return 'Menu Offset (Y): ' .. mod.Config.CoopMarks.menu_offset.Y; end,
+		OnChange = function(n) mod.Config.CoopMarks.menu_offset.Y = n; end,
 	}
 );
 

@@ -200,7 +200,7 @@ function CoopEnhanced.CoopHUD.InitNewPlayers()
 				local screen_dimensions = Utils.GetScreenDimensions();
 				local joining = {Index = (mod.Players.Total + CoopHUD.DATA.Joining.Total + 1), Controller = controller_index, Selected = 1, Move = 0};
 				
-				joining.Pos = Vector((joining.Index % 2) == 0 and (screen_dimensions.Max.X - (CoopHUD.Positions.Coop.X + mod.Config.CoopHUD.players.mirrored_offset.X + 8)) or CoopHUD.Positions.Coop.X, joining.Index > 2 and (screen_dimensions.Max.Y - (CoopHUD.Positions.Coop.Y + mod.Config.CoopHUD.offset.Y + mod.Config.CoopHUD.players.mirrored_offset.Y + 4)) or CoopHUD.Positions.Coop.Y);
+				joining.Pos = Vector((joining.Index % 2) == 0 and (screen_dimensions.Max.X - (CoopHUD.Positions.Coop.X + mod.Config.CoopHUD.players.mirrored_offset.X + 8)) or CoopHUD.Positions.Coop.X, joining.Index > 2 and (screen_dimensions.Max.Y - (CoopHUD.Positions.Coop.Y + mod.Config.CoopHUD.offset.Y + mod.Config.CoopHUD.players.mirrored_offset.Y + (25 * mod.Config.CoopHUD.players.menu.scale.Y))) or CoopHUD.Positions.Coop.Y);
 				joining.Sprites = CoopHUD.getCoopMenuSprites(joining);
 				CoopHUD.DATA.Joining[i] = joining;
 				CoopHUD.DATA.Joining.Total = (CoopHUD.DATA.Joining.Total or 0) + 1;

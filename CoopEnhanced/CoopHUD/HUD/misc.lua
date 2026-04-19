@@ -64,7 +64,7 @@ function Misc.GetPickups(screen_dimensions)
 	if anchor < 2 then
 		for i,pickup in ipairs(mod.CoopHUD.Misc.Pickups) do
 			if pickup and pickup.Data ~= nil then
-				total_width = total_width + (((pickup.Data.Text.Font:GetStringWidth(pickup.Data.Text.Value) + 2) * scale.X) + size);
+				total_width = total_width + (((pickup.Data.Text.Font:GetStringWidth(pickup.Data.Text.Value) + 1) * scale.X) + size);
 				pickups_total = pickups_total + 1;
 			end
 		end

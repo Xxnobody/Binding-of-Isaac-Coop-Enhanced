@@ -98,7 +98,7 @@ mod.Colors = {
 	{Name = "Yellow",Value = Color(1,1,0,1)},
 };
 mod.Characters = {
-	{Name = "Issac", Type = PlayerType.PLAYER_ISAAC, Achievement = nil},
+	{Name = "Isaac", Type = PlayerType.PLAYER_ISAAC, Achievement = nil},
 	{Name = "Magdalene", Type = PlayerType.PLAYER_MAGDALENE, Achievement = Achievement.MAGDALENE},
 	{Name = "Cain", Type = PlayerType.PLAYER_CAIN, Achievement = Achievement.CAIN},
 	{Name = "Judas", Type = PlayerType.PLAYER_JUDAS, Achievement = Achievement.JUDAS},
