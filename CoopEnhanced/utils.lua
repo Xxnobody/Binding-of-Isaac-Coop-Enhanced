@@ -301,8 +301,10 @@ function Utils.getMainPlayerIndex(player_entity)
 end
 function Utils.getMainTwin(player_entity)
 	if player_entity == nil then return; end
+	local player_ID = Utils.GetPlayerID(player_entity);
 	for i = 1, game:GetNumPlayers(), 1 do
-		if mod.Twins[i] then return Isaac.GetPlayer(i - 1), i; end
+		local player = Isaac.GetPlayer(i - 1);
+		if mod.Twins[i] and Utils.GetPlayerID(Isaac.GetPlayer(mod.Twins[i] - 1)) == player_ID then return player, i; end
 	end
 	return nil,0;
 end

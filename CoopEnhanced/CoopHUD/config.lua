@@ -21,6 +21,7 @@ mod.CoopHUD.DefaultConfig = {
 	},
 	active = {
 		colors = false,
+		bar_colors = false,
 		book_correction_offset = Vector(0,-3),
 		book_charge_outline = true,
 		[0] = {
@@ -66,6 +67,7 @@ mod.CoopHUD.DefaultConfig = {
 	pocket = {
 		display = 0,
 		colors = false,
+		bar_colors = false,
 		[0] = {
 			opacity = 1,
 			offset = Vector(0, 0),
@@ -164,7 +166,7 @@ mod.CoopHUD.DefaultConfig = {
 			scale = Vector(1, 1),
 		},
 		twins = {
-			offset = Vector(45, 30),
+			offset = Vector(15, 60),
 			scale = Vector(0.75, 0.75),
 			pocket_offset = false,
 		},

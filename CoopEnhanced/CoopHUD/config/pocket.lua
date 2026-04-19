@@ -21,7 +21,18 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopHUD.pocket.colors; end,
 		Display = function() return 'Player Colors: ' .. (mod.Config.CoopHUD.pocket.colors and 'on' or 'off'); end,
 		OnChange = function(b) mod.Config.CoopHUD.pocket.colors = b; end,
-		Info = {'Colorize Trinkets based on player color.'},
+		Info = {'Colorize Pocket Items based on player color.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.pocket,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopHUD.pocket.bar_colors; end,
+		Display = function() return 'Player Bar Colors: ' .. (mod.Config.CoopHUD.pocket.bar_colors and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.pocket.bar_colors = b; end,
+		Info = {'Colorize Charge Bars based on player color.'},
 	}
 );
 

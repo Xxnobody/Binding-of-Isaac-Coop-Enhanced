@@ -66,7 +66,7 @@ function CoopLabels.RenderLabels(_)
 			local player_data = CoopLabels.DATA[i].Data;
 			player_data.Pos = Isaac.WorldToScreen(player_entity.Position) + mod.Config.CoopLabels.offset;
 			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.LABELS_PRE_RENDER, i, player_data); -- Execute Pre Label Render Callbacks (player_index, player_data(table))
-			if player_data.Text then
+			if player_data.Text and player_data.Text.Value then
 				local text_offset = mod.Config.CoopLabels.text_offset;
 				player_data.Pos.X = (player_data.Pos.X - ((mod.Fonts.CoopLabels.labels:GetStringWidth(player_data.Text.Value) / 2) * player_data.Text.Scale.X)) + text_offset.X;
 				player_data.Pos.Y = player_data.Pos.Y + 1 + text_offset.Y;

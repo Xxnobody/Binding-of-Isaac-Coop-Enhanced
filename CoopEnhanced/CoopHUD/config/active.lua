@@ -39,7 +39,18 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopHUD.active.colors; end,
 		Display = function() return 'Player Colors: ' .. (mod.Config.CoopHUD.active.colors and 'on' or 'off'); end,
 		OnChange = function(b) mod.Config.CoopHUD.active.colors = b; end,
-		Info = {'Colorize Items and Charge Bars based on player color.'},
+		Info = {'Colorize Items based on player color.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.active,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopHUD.active.bar_colors; end,
+		Display = function() return 'Player Bar Colors: ' .. (mod.Config.CoopHUD.active.bar_colors and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.active.bar_colors = b; end,
+		Info = {'Colorize Charge Bars based on player color.'},
 	}
 );
 

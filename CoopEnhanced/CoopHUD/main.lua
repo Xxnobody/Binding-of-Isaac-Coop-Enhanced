@@ -34,7 +34,7 @@ function CoopEnhanced.CoopHUD.gameStart(isCont, data)
 	CoopEnhanced.CoopHUD.Misc.Extra = {[1] = {},[2] = {}};
 	CoopHUD.isVisible = true;
 	if isCont then
-		CoopEnhanced.CoopHUD.DATA.Players = data.CoopHUD.players;
+		if CoopEnhanced.CoopHUD then CoopEnhanced.CoopHUD.DATA.Players = data.CoopHUD.players; end
 	end
 end
 function CoopEnhanced.CoopHUD.gameEnd(data)
