@@ -62,7 +62,7 @@ Several mods have been given built in support for most features:
 - Library Chance (https://steamcommunity.com/sharedfiles/filedetails/?id=3534359537): HUD support, with Custom calculations.
 - Library Expanded (https://steamcommunity.com/sharedfiles/filedetails/?id=2917917616): HUD support, Coop Treasure also has support for all of its various Library layouts.
 - Low Firerate Bar (https://steamcommunity.com/sharedfiles/filedetails/?id=3387673993): HUD support.
-- Isaac Reflourished (https://steamcommunity.com/sharedfiles/filedetails/?id=https://steamcommunity.com/sharedfiles/filedetails/?id=3655824749): HUD support for I'm Excited timer and Boss Rush Wave Bar (Disable the boss Rush Bar in Reflourished config or you'll see double). Also supports Reflourished Book Library chance increase from Library Chance HUD.
+- Isaac Reflourished (https://steamcommunity.com/sharedfiles/filedetails/?id=3655824749): HUD support for I'm Excited timer and Boss Rush Wave Bar (Disable the boss Rush Bar in Reflourished config or you'll see double). Also supports Reflourished Book Library chance increase from Library Chance HUD.
 - Martha of Bethany (https://steamcommunity.com/sharedfiles/filedetails/?id=2987653166): Some HUD support.
 - Mei (https://steamcommunity.com/sharedfiles/filedetails/?id=842051906): Some HUD support.
 - Nemesis (https://steamcommunity.com/sharedfiles/filedetails/?id=2501339433): Some HUD support.
@@ -70,9 +70,8 @@ Several mods have been given built in support for most features:
 - Samael (https://steamcommunity.com/sharedfiles/filedetails/?id=3897795840): Some HUD support.
 - Zodiac Planetariums (https://steamcommunity.com/sharedfiles/filedetails/?id=2516129211): Support for Planetarium Coop Treasure generation.
 
-
 ## Known Incompatibilites
-Most mods that don't ad HUD elements, change Coop Ghosts, or alter Treasure Rooms are compatible. Otherwise compatability is dubious. Here's a list of known Incompatible mods (that won't get compatibility or already contain all the features found within).
+Most mods that don't add HUD elements, change Coop Ghosts, or alter Treasure Rooms are compatible. Otherwise compatability is dubious. Here's a list of known Incompatible mods (that won't get compatibility or already contain all the features found within).
 - Coop Commands: (https://steamcommunity.com/sharedfiles/filedetails/?id=2657359273): Most are in this mod.
 - Coop Completion Marks(https://steamcommunity.com/sharedfiles/filedetails/?id=3346134460): Already in this mod.
 - Coop Found HUD or similar (https://steamcommunity.com/sharedfiles/filedetails/?id=3162170417): Already in this mod.
@@ -95,6 +94,10 @@ Repentogon adds a lot of features when it comes to Completion Marks but I'm pret
 
 #### Treasure Pedestals
 Due to how some treasure rooms are laid out, the item pedestals may end up having weird/inaccessible placement. I've put many safety checks in to try and avoid this, but some rooms just need to be manually edited. There are API functions/callbacks added to do this and can be easily implemented with 10 minutes of work.
+
+## Known Issues:
+These issues are either being worked on or are unfixable due to mod API limitations.
+- **Fortune Banners**: The Co-op HUD is hidden whenever a Fortune text banner pops up on the screen. Until the API callback allows getting fortune text.
 
 ## Required Mods
 Some mods are required to get the full experience, some are just required.
