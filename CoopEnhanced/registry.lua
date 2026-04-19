@@ -38,10 +38,10 @@ local ModuleRegistry = {
 				["save"] = function(args)
 					if args[1] == nil then CoopEnhanced.CoopFixes.BackupAllPlayers(true); print('Successfully saved backup data for all Players.'); return; end
 					local player_index = tonumber(args[1]);
-					local player_entity = Isaac.GetPlayer(player_index - 1);
+					local player_entity = Utils.getMainPlayerByIndex(player_index);
 					local players = Utils.getPlayersByController(player_entity.ControllerIndex);
 					if #players == 0 then print('Incorrect arguments for command: save <player_index>'); return; end
-					for i,player_entity in pairs(players) do CoopEnhanced.CoopFixes.BackupPlayer(player_entity,true); end
+					for i,player in pairs(players) do CoopEnhanced.CoopFixes.BackupPlayer(player,true); end
 					print('Successfully saved backup data for Player (' .. player_index .. ').');
 				end
 			}
@@ -208,7 +208,7 @@ mod.Registry.Commands = {
 		local player_type = args[1] and tonumber(args[1]) or -1;
 		local player_index = args[2] and tonumber(args[2]) or 1;
 		if player_type == -1 then print("Incorrect arguments for command. ('changeplayer <player_type> <player_index>')"); end
-		local player_entity = Isaac.GetPlayer(player_index - 1);
+		local player_entity = Utils.getMainPlayerByIndex(player_index);
 		if player_entity then
 			game:ShowHallucination(5,BackdropType.BACKDROP_NULL);
 			if CustomHealthAPI then CustomHealthAPI.Helper.ChangePlayerType(player_entity, player_type); else player_entity:ChangePlayerType(player_type); end
@@ -217,7 +217,7 @@ mod.Registry.Commands = {
 	["removeplayer"] = function(args) -- Remove a Player (Crashes the game)
 		local player_index = args[1] and tonumber(args[1]) or 0;
 		if player_index == -1 then print("Incorrect arguments for command. ('removeplayer <player_index> <remove_twins>')"); end
-		local player_entity = Isaac.GetPlayer(player_index - 1);
+		local player_entity = Utils.getMainPlayerByIndex(player_index);
 		if player_entity then
 			if args[1] == "true" then
 				if player_entity:GetMainTwin():GetName() ~= player_entity:GetName() then PlayerManager.RemoveCoPlayer(player_entity:GetMainTwin());
@@ -230,7 +230,7 @@ mod.Registry.Commands = {
 		local player_index = args[1] and tonumber(args[1]) or 1;
 		local revive_cost = args[2] and tonumber(args[2]) or 0;
 		local reviver_index = args[3] and tonumber(args[3]) or 1;
-		local player_entity = Isaac.GetPlayer(player_index - 1);
+		local player_entity = Utils.getMainPlayerByIndex(player_index);
 		if not player_entity then print("Incorrect arguments for command. ('revive <player_index> <cost>')"); return; end
 		if player_entity and player_entity:IsCoopGhost() then
 			if revive_cost > 0 then -- Cost in coins
@@ -272,7 +272,7 @@ mod.Registry.Commands = {
 		local player_index = tonumber(args[1]) or 1;
 		local health_amount = tonumber(args[3]) or 0;
 		local twin_index = tonumber(args[4]) or 0;
-		local player_entity = Isaac.GetPlayer(player_index - 1);
+		local player_entity = Utils.getMainPlayerByIndex(player_index);
 		if twin_index > 0 then player_entity = Utils.getPlayerTwins(player_entity)[twin_index]; end
 		local health_type = tonumber(args[2]) or 0;
 		local health_types = Utils.getHealthTypes();
@@ -315,7 +315,7 @@ mod.Registry.Commands = {
 	["controller"] = function(args) -- Change controller indexes
 		local player_index = args[1] and tonumber(args[1]) or -1;
 		local controller_index = args[2] and tonumber(args[2]) or -1;
-		local player_entity = Isaac.GetPlayer(player_index - 1);
+		local player_entity = Utils.getMainPlayerByIndex(player_index);
 		if player_index == -1 or controller_index == -1 or not player_entity then print("Incorrect arguments for command. ('controller <player_index> <controller_index>')"); return; end
 		player_entity:SetControllerIndex(controller_index);
 	end,
@@ -326,7 +326,7 @@ mod.Registry.Commands = {
 		local player_index = tonumber(args[2]) or 1;
 		local slot = tonumber(args[3]) or 0;
 		local twin_index = tonumber(args[4]) or 0;
-		local player_entity = Isaac.GetPlayer(player_index - 1);
+		local player_entity = Utils.getMainPlayerByIndex(player_index);
 		if twin_index > 0 then player_entity = Utils.getPlayerTwins(player_entity)[twin_index]; end
 		if collectible_type == -1 or not player_entity then print("Incorrect arguments for command. ('" .. mod.Config.commands.CMD .. "giveitem <item_id> <player_index> <active_slot> <twin_index>')"); return; end
 		if item_type == 0 then -- Collectibles (c)
@@ -352,7 +352,7 @@ mod.Registry.Commands = {
 		local player_index = tonumber(args[2]) or 1;
 		local slot = tonumber(args[3]) or 0;
 		local twin_index = tonumber(args[5]) or 0;
-		local player_entity = Isaac.GetPlayer(player_index - 1);
+		local player_entity = Utils.getMainPlayerByIndex(player_index);
 		if twin_index > 0 then player_entity = Utils.getPlayerTwins(player_entity)[twin_index]; end
 		if collectible_type == -1 or not player_entity then print("Incorrect arguments for command. ('" .. mod.Config.commands.CMD .. "removeitem <item_id> <player_index> <active_slot> <drop_item> <twin_index>')"); return; end
 		local position = Utils.GetSafeSpawnPosition(player_entity.Position, (player_entity.Position - Vector(0,mod.GridSize)), {1,1,2});

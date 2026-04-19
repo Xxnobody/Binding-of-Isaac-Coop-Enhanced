@@ -299,6 +299,11 @@ function Utils.getMainPlayerIndex(player_entity)
 	end
 	return 0;
 end
+function Utils.getMainPlayerByIndex(player_index)
+	if player_index == nil then return; end
+	local players = Utils.getMainPlayers();
+	return players and players[player_index] or nil;
+end
 function Utils.getMainTwin(player_entity)
 	if player_entity == nil then return; end
 	local player_ID = Utils.GetPlayerID(player_entity);

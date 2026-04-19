@@ -69,7 +69,7 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 				player_index = mod.Twins[i];
 				edge.Pos = edge.Pos + mod.Config.CoopHUD.players.twins.offset;
 				if mod.Config.CoopHUD.players.twins.pocket_offset and mod.CoopHUD.DATA.Players[player_index] and mod.CoopHUD.DATA.Players[player_index].Inventory.Pocket.Total > 0 then
-					edge.Pos.Y = edge.Pos.Y + mod.CoopHUD.DATA.Players[player_index].Inventory.Pocket.Total * (16 * mod.Config.CoopHUD.pocket[(mod.CoopHUD.DATA.Players[player_index].Inventory.Pocket.Total - 1)].scale.Y);
+					edge.Pos.Y = edge.Pos.Y + mod.CoopHUD.DATA.Players[player_index].Inventory.Pocket.Total * (32 * mod.Config.CoopHUD.pocket[(mod.CoopHUD.DATA.Players[player_index].Inventory.Pocket.Total - 1)].scale.Y);
 				end
 			else
 				player_index = i - num_twins;

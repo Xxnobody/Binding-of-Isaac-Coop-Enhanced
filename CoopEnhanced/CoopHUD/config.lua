@@ -166,7 +166,7 @@ mod.CoopHUD.DefaultConfig = {
 			scale = Vector(1, 1),
 		},
 		twins = {
-			offset = Vector(15, 60),
+			offset = Vector(15, 45),
 			scale = Vector(0.75, 0.75),
 			pocket_offset = false,
 		},
