@@ -61,6 +61,7 @@ Several mods have been given built in support for most features:
 - Jericho (https://steamcommunity.com/sharedfiles/filedetails/?id=3207962098): HUD support (Needs Testing).
 - Library Chance (https://steamcommunity.com/sharedfiles/filedetails/?id=3534359537): HUD support, with Custom calculations.
 - Library Expanded (https://steamcommunity.com/sharedfiles/filedetails/?id=2917917616): HUD support, Coop Treasure also has support for all of its various Library layouts.
+- Live Planetarium Chance (https://steamcommunity.com/sharedfiles/filedetails/?id=3702842339): HUD Support.
 - Low Firerate Bar (https://steamcommunity.com/sharedfiles/filedetails/?id=3387673993): HUD support.
 - Isaac Reflourished (https://steamcommunity.com/sharedfiles/filedetails/?id=3655824749): HUD support for I'm Excited timer and Boss Rush Wave Bar (Disable the boss Rush Bar in Reflourished config or you'll see double). Also supports Reflourished Book Library chance increase from Library Chance HUD.
 - Martha of Bethany (https://steamcommunity.com/sharedfiles/filedetails/?id=2987653166): Some HUD support.
