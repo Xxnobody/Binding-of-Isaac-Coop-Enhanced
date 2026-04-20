@@ -16,6 +16,7 @@ function Player.Render(player_number, screen_dimensions)
 	local player_entity = player.Entity.Ref:ToPlayer();
 	local isPlayerMapDown = CoopHUD.IsPlayerMapDown[player_data.Controller];
 	local isTwin = player_number < 0;
+	local mainTwin = not isTwin and Utils.getMainTwin(player_entity) or nil;
 	local isKeeper = Utils.IsKeeper(player_entity);
 	local isBaby = Utils.IsBaby(player_entity);
 	local isTemporary = Utils.IsTemporary(player_entity);
@@ -104,7 +105,7 @@ function Player.Render(player_number, screen_dimensions)
 								local prefix = value > 0 and '+' or '-';
 								
 								local value_text = string.format(stat.IsPercent and '%.1f%%' or '%.2f', math.abs(value));
-								if ((player.Index) % 2) ~= 0 then value_text = prefix .. value_text; else value_text = value_text .. prefix; end
+								value_text = value_text .. prefix;
 								local update_pos = stat.Text.Pos + (((deals.Anchor < 2 and Vector(8, 4 * (deals.Anchor == 0 and -1 or 1)) or mod.Config.CoopHUD.stats.text.update.offset + Vector((mod.Fonts.CoopHUD.stats:GetStringWidth(stat.Text.Value) + 2) * mod.Config.CoopHUD.stats.text.scale.X, 0))) * stat.Edge);
 								if stat.Edge.X < 0 then update_pos.X = update_pos.X - (mod.Fonts.CoopHUD.stats:GetStringWidth(value_text) * mod.Config.CoopHUD.stats.text.scale.X); end
 								
@@ -119,7 +120,7 @@ function Player.Render(player_number, screen_dimensions)
 					mod.CoopHUD.Stats.Deals = deals;
 				end
 			end
-			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_STATS_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Stats); -- Execute Post Stats data update Callbacks (player_index (Number), stats_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_STATS_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Stats); -- Execute Post Stats data update Callbacks (player_index (Number), stats_data(table))
 			
 			-- Active Items
 			for slot = ActiveSlot.SLOT_PRIMARY, ActiveSlot.SLOT_SECONDARY, 1 do
@@ -160,7 +161,7 @@ function Player.Render(player_number, screen_dimensions)
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].Sprite = Item.Active.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].Sprite, data, player_entity);
 				end
 			end
-			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_ACTIVE_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Active); -- Execute Post Active Items data update Callbacks (player_index (Number), actives_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_ACTIVE_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Active); -- Execute Post Active Items data update Callbacks (player_index (Number), actives_data(table))
 			
 			-- Pocket Items
 			local pocket_items, pocket_total = Item.Pocket.GetItems(player_entity);
@@ -211,7 +212,7 @@ function Player.Render(player_number, screen_dimensions)
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Sprite = Item.Pocket.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Sprite, data, player_entity);
 				end
 			end
-			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_POCKET_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket); -- Execute Post Pocket Items data update Callbacks (player_index (Number), pockets_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_POCKET_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket); -- Execute Post Pocket Items data update Callbacks (player_index (Number), pockets_data(table))
 			
 			-- Trinket Items
 			for slot = mod.TrinketSlot.PRIMARY, mod.TrinketSlot.SECONDARY, 1 do
@@ -219,8 +220,8 @@ function Player.Render(player_number, screen_dimensions)
 				local item_id = player_entity:GetTrinket(slot);
 				if item_id ~= TrinketType.TRINKET_NULL then
 					local scale = mod.Config.CoopHUD.trinket[slot].scale * extra_scale;
-					local pocket_offset = pocket_total ~= nil and pocket_total > 0 and (mod.Config.CoopHUD.trinket[slot].pocket_offset and Vector(0,pocket_total * (20 * mod.Config.CoopHUD.pocket[(pocket_total - 1)].scale.Y))) or Vector.Zero;
-					local pos = player_data.Edge.Pos + (((CoopHUD.Positions.Trinket[slot] + mod.Config.CoopHUD.trinket[slot].offset + pocket_offset) * extra_scale) * player_data.Edge.Multipliers);
+					local extra_offset = pocket_total ~= nil and pocket_total > 0 and (mod.Config.CoopHUD.trinket[slot].offset_w_pockets and Vector(0,pocket_total * (20 * mod.Config.CoopHUD.pocket[(pocket_total - 1)].scale.Y))) or Vector.Zero;
+					local pos = player_data.Edge.Pos + (((CoopHUD.Positions.Trinket[slot] + mod.Config.CoopHUD.trinket[slot].offset + extra_offset) * extra_scale) * player_data.Edge.Multipliers);
 					if isTwin then pos.Y = pos.Y - (25 * extra_scale.Y); end
 					if player_data.Edge.Multipliers.Y < 0 then pos.Y = pos.Y + 20; end
 					local color = Utils.ColorOpacity((mod.Config.CoopHUD.trinket.colors and player.Color or Color.Default),mod.Config.CoopHUD.trinket[slot].opacity);
@@ -229,7 +230,7 @@ function Player.Render(player_number, screen_dimensions)
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket[slot].Sprite = Item.Trinket.GetSprite(player_data.Inventory.Trinket[slot].Sprite, data);
 				end
 			end
-			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_TRINKET_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket); -- Execute Post Trinket Items data update Callbacks (trinkets_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_TRINKET_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket); -- Execute Post Trinket Items data update Callbacks (trinkets_data(table))
 			
 			-- Special/Crafting Inventory
 			local GetInfo = Item.Inventory.GetInfo[player.Type];
@@ -238,8 +239,8 @@ function Player.Render(player_number, screen_dimensions)
 			if mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Visible then
 				local max_slots, row_size, inventory = GetInfo(player_data);
 				local scale = mod.Config.CoopHUD.inventory.special.scale * extra_scale;
-				local screen_edge = player_data.Edge.Pos + (((CoopHUD.Positions.Inventory + mod.Config.CoopHUD.inventory.special.offset) * extra_scale) * player_data.Edge.Multipliers);
-				local offset = Vector(0,mod.Config.CoopHUD.inventory.special.pocket_offset and player_data.Inventory.Pocket.Total > 0 and player_data.Inventory.Pocket.Total * ((32 + (player_entity:GetTrinket(mod.TrinketSlot.PRIMARY) ~= TrinketType.TRINKET_NULL and (18 * mod.Config.CoopHUD.trinket[mod.TrinketSlot.PRIMARY].scale.X) or 2)) * (mod.Config.CoopHUD.pocket[(player_data.Inventory.Pocket.Total - 1)].scale.Y * scale.Y)) or 0);
+				local screen_edge = player_data.Edge.Pos + (((CoopHUD.Positions.Special + mod.Config.CoopHUD.inventory.special.offset) * extra_scale) * player_data.Edge.Multipliers);
+				local offset = Vector(0,mod.Config.CoopHUD.inventory.special.offset_w_pockets and player_data.Inventory.Pocket.Total > 0 and player_data.Inventory.Pocket.Total * ((32 + (player_entity:GetTrinket(mod.TrinketSlot.PRIMARY) ~= TrinketType.TRINKET_NULL and (18 * mod.Config.CoopHUD.trinket[mod.TrinketSlot.PRIMARY].scale.X) or 2)) * (mod.Config.CoopHUD.pocket[(player_data.Inventory.Pocket.Total - 1)].scale.Y * scale.Y)) or 0);
 				
 				local data = {};
 				local row = 0;
@@ -261,41 +262,75 @@ function Player.Render(player_number, screen_dimensions)
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Total = total;
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Data = data;
 			end
-			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_INVENTORY_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Special); -- Execute Post Inventory/Crafting data update Callbacks (player_index (Number), inventory_data(table))
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_INVENTORY_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Special); -- Execute Post Inventory/Crafting data update Callbacks (player_index (Number), inventory_data(table))
 			
+			-- Collectible/Passive Items
 			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Data = {};
-			if not isTwin then
-				-- Collectible/Passive Items
-				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible = mod.Config.CoopHUD.inventory.items.display == 0 or (mod.Config.CoopHUD.inventory.items.display == 1 and isPlayerMapDown or (mod.Config.CoopHUD.inventory.items.display == 2 and not isPlayerMapDown or false));
-				if mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible then
-					local anchor = mod.Config.CoopHUD.inventory.items.anchor;
-					local edge = anchor == 0 and player_data.Edge.Pos.X or (anchor == 1 and screen_dimensions.Max.X - player_data.Edge.Offset.X or player_data.Edge.Offset.X);
-					local edge_multiplier = (anchor == 1 and -1 or 1);
-					local edge_indexed = Vector(edge, screen_dimensions.Max.Y - player_data.Edge.Offset.Y);
-					local scale = mod.Config.CoopHUD.inventory.items.scale;
-						
-					mod.CoopHUD.Item.Inventory.Sprite = mod.CoopHUD.Item.Inventory.Sprite or Sprite(mod.Animations.Item, false);
-					mod.CoopHUD.Item.Inventory.Sprite:SetFrame('Idle', 0);
-					mod.CoopHUD.Item.Inventory.Sprite.Scale = scale;
-					mod.CoopHUD.Item.Inventory.Sprite.Color = mod.Config.CoopHUD.inventory.items.colors and Utils.ConvertColorToColorize(player_data.Player.Color,mod.Config.CoopHUD.inventory.items.opacity) or Color(1, 1, 1, mod.Config.CoopHUD.inventory.items.opacity);
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible = (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.inventory.items.dead) and mod.Config.CoopHUD.inventory.items.display == 0 or (mod.Config.CoopHUD.inventory.items.display == 1 and isPlayerMapDown or (mod.Config.CoopHUD.inventory.items.display == 2 and not isPlayerMapDown or false));
+			if mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible and (mod.Config.CoopHUD.inventory.items.anchor == 0 or not isTwin) then
+				local anchor = mod.Config.CoopHUD.inventory.items.anchor;
+				local offset = mod.Config.CoopHUD.inventory.items.offset;
+				local scale = mod.Config.CoopHUD.inventory.items.scale;
+				local space = mod.Config.CoopHUD.inventory.items.space;
+				local pos = Vector.Zero;
 					
-					local offset = Vector.Zero;
-					local item_offset = mod.Config.CoopHUD.inventory.items.space * scale;
-					local item_pos = edge_indexed + (mod.Config.CoopHUD.inventory.items.offset + Vector((((((edge_multiplier < 0 and mod.Players.Total - (player.Index - 1) or player.Index) * item_offset.X) / (anchor == 0 and 2 or 1)) + 16 + mod.Config.CoopHUD.inventory.items.space.X) * scale.X) * edge_multiplier, (-item_offset.Y * mod.Config.CoopHUD.inventory.items.max) - (8 * scale.Y)));
-					local inventory = player_data.Inventory.Passive.Images or {};
-					if #inventory > 0 and (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.inventory.items.dead) then
-						local data = {};
-						for i = 1, #inventory, 1 do
-							if i > mod.Config.CoopHUD.inventory.items.max then break; end
-							local item = inventory[(#inventory - (i - 1))];
-							data[i] = {Item = item, Pos = (item_pos + offset)};
-							offset = offset + Vector(0,item_offset.Y);
-						end
-						mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Data = data;
-					end
+				if anchor > 0 then
+					local edge = anchor == 1 and player_data.Edge.Pos.X or ((anchor == 3 and (screen_dimensions.Max.X - ((10 + space.X * (mod.Config.CoopHUD.inventory.items.dead and mod.Players.Total or mod.Players.Alive)) * scale.X)) or 0) + player_data.Edge.Offset.X);
+					local edge_indexed = Vector(edge, screen_dimensions.Max.Y - player_data.Edge.Offset.Y);
+							
+					pos = edge_indexed + (offset + Vector((((anchor == 1 and ((player.Index > 2) and 2 or 1) or player.Index) * space.X) * scale.X), (-space.Y * mod.Config.CoopHUD.inventory.items.max) - (8 * scale.Y)));
+				else
+					local hasTwin = (mainTwin ~= nil or Utils.isMainTwin(player_entity));
+					local twin_offset = (isTwin and ((mod.Config.CoopHUD.players.twins.offset * -1) + mod.Config.CoopHUD.inventory.items.twin_offset) or Vector.Zero);
+					local twins_offset = (mod.Config.CoopHUD.inventory.items.offset_w_twins and hasTwin and (mod.Config.CoopHUD.inventory.items.twins_offset * mod.Config.CoopHUD.players.twins.scale) or Vector.Zero);
+					local pocket_offset = (mod.Config.CoopHUD.inventory.items.offset_w_pockets and not hasTwin and pocket_total > 0 and (Vector(0,pocket_total * (20 * mod.Config.CoopHUD.pocket[(pocket_total - 1)].scale.Y))) or Vector.Zero);
+					local player_offset = Vector(((player.Index % 2) == 0 and (0 - mod.Config.CoopHUD.players.mirrored_offset.X) or 0),(player.Index > 2 and (25 - mod.Config.CoopHUD.players.mirrored_offset.Y) or 0));
+					local extra_offset = not player_entity:IsCoopGhost() and (pocket_offset + twins_offset + twin_offset + player_offset) or Vector.Zero;
+					
+					pos = player_data.Edge.Pos + ((CoopHUD.Positions.Inventory + offset + extra_offset) * player_data.Edge.Multipliers);
 				end
-				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_PASSIVE_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Passive); -- Execute Post Inventory/Crafting data update Callbacks (player_index (Number), passives_data(table))
-				
+				mod.CoopHUD.Item.Inventory.Sprite = mod.CoopHUD.Item.Inventory.Sprite or Sprite(mod.Animations.Item, false);
+				mod.CoopHUD.Item.Inventory.Sprite:SetFrame('Idle', 0);
+				mod.CoopHUD.Item.Inventory.Sprite.Scale = scale;
+				mod.CoopHUD.Item.Inventory.Sprite.Color = mod.Config.CoopHUD.inventory.items.colors and Utils.ConvertColorToColorize(player_data.Player.Color,mod.Config.CoopHUD.inventory.items.opacity) or Color(1, 1, 1, mod.Config.CoopHUD.inventory.items.opacity);
+					
+				local inventory = player_data.Inventory.Passive.Images or {};
+				if #inventory > 0 then
+					local data = {};
+					local direction = mod.Config.CoopHUD.inventory.items.direction;
+					local dir_multi = Vector(direction == Direction.LEFT and -1 or 1,direction == Direction.UP and -1 or 1);
+					dir_multi = dir_multi * Vector(mod.Config.CoopHUD.inventory.items.invert_direction.X == 1 and -1 or 1, mod.Config.CoopHUD.inventory.items.invert_direction.Y == 1 and -1 or 1);
+					local max_grid = mod.Config.CoopHUD.inventory.items.max_grid;
+					local grid = Vector.One;
+					local item_offset = Vector.Zero;
+					for i = 1, #inventory, 1 do
+						if i > mod.Config.CoopHUD.inventory.items.max then break; end
+						local item = inventory[(#inventory - (i - 1))];
+						data[i] = {Item = item, Pos = (pos + item_offset)};
+						if direction == Direction.LEFT or direction == Direction.RIGHT then
+							grid.X = grid.X + 1;
+							if grid.X <= max_grid.X then
+								item_offset.X = item_offset.X + (space.X * dir_multi.X);
+							else
+								grid.X = 1; grid.Y = grid.Y + 1; 
+								if grid.Y <= max_grid.Y then item_offset = Vector(0,item_offset.Y + (space.Y * dir_multi.Y)); else item_offset = Vector.Zero; grid.Y = 1; end
+							end
+						else
+							grid.Y = grid.Y + 1;
+							if grid.Y <= max_grid.Y then
+								item_offset.Y = item_offset.Y + (space.Y * dir_multi.Y);
+							else
+								grid.Y = 1; grid.X = grid.X + 1; 
+								if grid.X <= max_grid.X then item_offset = Vector(item_offset.X + (space.X * dir_multi.X),0); else item_offset = Vector.Zero; grid.X = 1; end
+							end
+						end
+					end
+					mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Data = data;
+				end
+				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_PASSIVE_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Passive); -- Execute Post Inventory/Crafting data update Callbacks (player_index (Number), passives_data(table))
+			end
+			
+			if not isTwin then
 				-- Player Heads
 				if mod.Config.CoopHUD.players.heads.display then
 					local head_pos = player_data.Edge.Pos + ((CoopHUD.Positions.Active[ActiveSlot.SLOT_PRIMARY] + (Vector((player_data.Edge.Multipliers.X > 0 and -0.5 or 1),8) * mod.Config.CoopHUD.players.heads.scale) + mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].offset + mod.Config.CoopHUD.players.heads.offset + (player_entity:GetActiveItem(ActiveSlot.SLOT_PRIMARY) ~= 0 and not player_entity:IsCoopGhost() and (mod.Config.CoopHUD.players.heads.item_offset * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale) or Vector(0,-4))) * player_data.Edge.Multipliers);
@@ -311,18 +346,18 @@ function Player.Render(player_number, screen_dimensions)
 				-- Name under/over Active Items
 				if mod.Config.CoopHUD.players.names.display then
 					if not mod.CoopHUD.DATA.Players[player_number].Label then mod.CoopHUD.DATA.Players[player_number].Label = {}; end
-					local player_name = player.Config.type == 1 and (Utils.getMainTwin(player_entity) ~= nil and (player.Name .. " & " .. Utils.getPlayerName(Utils.getMainTwin(player_entity), player.Index, player.Config.type, "", mod.Config.CoopHUD.tainted))) or player.Name;
-					local scale = math.min(1,(6 / string.len(player_name)));
+					local player_name = player.Config.type == 1 and (mainTwin ~= nil and (player.Name .. " & " .. Utils.getPlayerName(mainTwin, player.Index, player.Config.type, "", mod.Config.CoopHUD.tainted))) or player.Name;
 					local name_size = Vector(mod.Fonts.CoopHUD.players:GetStringWidth(player_name),mod.Fonts.CoopHUD.players:GetBaselineHeight(player_name));
+					local max_scale = math.min(1,(50 / name_size.X));
 					local head_offset = mod.Config.CoopHUD.players.heads.display and mod.Config.CoopHUD.players.names.head_offset and player_entity:GetActiveItem(ActiveSlot.SLOT_PRIMARY) ~= 0 and not player_entity:IsCoopGhost() and ((mod.Config.CoopHUD.players.heads.item_offset.Y * (player_data.Edge.Multipliers.X > 0 and -1.5 or 1.5)) * mod.Config.CoopHUD.players.heads.scale.X) or 0;
 					local item_pos = player_data.Edge.Pos + ((CoopHUD.Positions.Active[ActiveSlot.SLOT_PRIMARY] + mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].offset) * player_data.Edge.Multipliers)
 					local name_pos = Vector(item_pos.X - ((head_offset * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale.X) + (8 - mod.Config.CoopHUD.players.names.offset.X) * player_data.Edge.Multipliers.X), item_pos.Y + (((mod.Config.CoopHUD.players.names.offset.Y + 2) * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale.Y) * player_data.Edge.Multipliers.Y));
-					if player_data.Edge.Multipliers.X < 0 then name_pos.X = name_pos.X - (name_size.X * scale); end
-					if player_data.Edge.Multipliers.Y < 0 then name_pos.Y = name_pos.Y - (name_size.Y * scale); end
+					if player_data.Edge.Multipliers.X < 0 then name_pos.X = name_pos.X - (name_size.X * max_scale); end
+					if player_data.Edge.Multipliers.Y < 0 then name_pos.Y = name_pos.Y - (name_size.Y * max_scale); end
 					name_pos.X = math.max(2,name_pos.X) -- Prevent it from leaving the screen
-					mod.CoopHUD.DATA.Players[player_number].Label.Text = {Value = player_name, Pos = name_pos, Scale = (mod.Config.CoopHUD.players.names.scale * scale),  Color = Utils.ConvertColorToFont(player.Color, mod.Config.CoopHUD.players.names.opacity)};
+					mod.CoopHUD.DATA.Players[player_number].Label.Text = {Value = player_name, Pos = name_pos, Scale = (mod.Config.CoopHUD.players.names.scale * max_scale),  Color = Utils.ConvertColorToFont(player.Color, mod.Config.CoopHUD.players.names.opacity)};
 				end
-				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_LABEL_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Label); -- Execute Post Label data update Callbacks (player_index (Number), label_data(table))
+				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_LABEL_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Label); -- Execute Post Label data update Callbacks (player_index (Number), label_data(table))
 			end
 		end
 		

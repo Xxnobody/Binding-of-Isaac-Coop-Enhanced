@@ -1,7 +1,7 @@
 local mod = CoopEnhanced
 local CoopHUD = CoopEnhanced.CoopHUD
 
-ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.inventory, 'Collectibles');
+ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.inventory, 'Passive Collectibles');
 ModConfigMenu.AddSetting(
 	CoopHUD.MCM.title,
 	CoopHUD.MCM.categories.inventory,
@@ -20,21 +20,10 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
 		Minimum = 0,
-		Maximum = 2,
+		Maximum = 3,
 		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.anchor; end,
-		Display = function() return 'Anchor: ' .. (mod.Config.CoopHUD.inventory.items.anchor == 0 and 'Both' or (mod.Config.CoopHUD.inventory.items.anchor == 1 and 'Right' or 'Left')); end,
+		Display = function() return 'Anchor: ' .. (mod.Config.CoopHUD.inventory.items.anchor == 0 and 'Player' or (mod.Config.CoopHUD.inventory.items.anchor == 1 and 'Split' or (mod.Config.CoopHUD.inventory.items.anchor == 2 and 'Left' or 'Right'))); end,
 		OnChange = function(n) mod.Config.CoopHUD.inventory.items.anchor = n; end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopHUD.MCM.title,
-	CoopHUD.MCM.categories.inventory,
-	{
-		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.dead; end,
-		Display = function() return 'Dead Players: ' .. (mod.Config.CoopHUD.inventory.items.dead and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopHUD.inventory.items.dead = b; end,
-		Info = {'Enable to show passive items for dead players.'},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -53,9 +42,42 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.categories.inventory,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.dead; end,
+		Display = function() return 'Dead Players: ' .. (mod.Config.CoopHUD.inventory.items.dead and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.inventory.items.dead = b; end,
+		Info = {'Enable to show passive items for dead players.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.colors; end,
 		Display = function() return 'Item Colors: ' .. (mod.Config.CoopHUD.inventory.items.colors and 'on' or 'off'); end,
 		OnChange = function(b) mod.Config.CoopHUD.inventory.items.colors = b; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.offset_w_pockets; end,
+		Display = function() return 'Pocket Offset: ' .. (mod.Config.CoopHUD.inventory.items.offset_w_pockets and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.inventory.items.offset_w_pockets = b; end,
+		Info = {'Enable to shift the inventory position down with pocket items.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.offset_w_twins; end,
+		Display = function() return 'Twins Offset: ' .. (mod.Config.CoopHUD.inventory.items.offset_w_twins and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.inventory.items.offset_w_twins = b; end,
+		Info = {'Enable to shift the inventory position when you have a twin.'},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -83,9 +105,9 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.categories.inventory,
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
-		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.space.X; end,
-		Display = function() return 'Space Between Players: ' .. mod.Config.CoopHUD.inventory.items.space.X; end,
-		OnChange = function(n) mod.Config.CoopHUD.inventory.items.space.X = n; end,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.twin_offset.X; end,
+		Display = function() return 'Twin Offset (X): ' .. mod.Config.CoopHUD.inventory.items.twin_offset.X; end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.twin_offset.X = n; end,
 	}
 );
 ModConfigMenu.AddSetting(
@@ -93,9 +115,29 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.categories.inventory,
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
-		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.space.Y; end,
-		Display = function() return 'Space Between Items: ' .. mod.Config.CoopHUD.inventory.items.space.Y; end,
-		OnChange = function(n) mod.Config.CoopHUD.inventory.items.space.Y = n; end,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.twin_offset.Y; end,
+		Display = function() return 'Twin Offset (Y): ' .. mod.Config.CoopHUD.inventory.items.twin_offset.Y; end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.twin_offset.Y = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.twins_offset.X; end,
+		Display = function() return 'Offset w/ Twin (X): ' .. mod.Config.CoopHUD.inventory.items.twins_offset.X; end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.twins_offset.X = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.twins_offset.Y; end,
+		Display = function() return 'Offset w/ Twin (Y): ' .. mod.Config.CoopHUD.inventory.items.twins_offset.Y; end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.twins_offset.Y = n; end,
 	}
 );
 ModConfigMenu.AddSetting(
@@ -122,6 +164,86 @@ ModConfigMenu.AddSetting(
 	}
 );
 
+ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.inventory, 'Grid');
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0,
+		Maximum = 3,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.direction; end,
+		Display = function() return 'Direction: ' .. (mod.Config.CoopHUD.inventory.items.direction == 0 and 'Left' or (mod.Config.CoopHUD.inventory.items.direction == 1 and 'Up' or (mod.Config.CoopHUD.inventory.items.direction == 2 and 'Right' or 'Down'))); end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.direction = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.invert_direction.X; end,
+		Minimum = 0,
+		Maximum = 1,
+		Display = function() return 'Invert Direction (X): ' .. (mod.Config.CoopHUD.inventory.items.invert_direction.X == 1 and 'on' or 'off'); end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.invert_direction.X = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.invert_direction.Y; end,
+		Minimum = 0,
+		Maximum = 1,
+		Display = function() return 'Invert Direction (Y): ' .. (mod.Config.CoopHUD.inventory.items.invert_direction.Y == 1 and 'on' or 'off'); end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.invert_direction.Y = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 1,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.max_grid.X; end,
+		Display = function() return 'Max Columns: ' .. math.floor(mod.Config.CoopHUD.inventory.items.max_grid.X); end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.max_grid.X = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 1,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.max_grid.Y; end,
+		Display = function() return 'Max Rows: ' .. math.floor(mod.Config.CoopHUD.inventory.items.max_grid.Y); end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.max_grid.Y = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.space.X; end,
+		Display = function() return 'Space Between Columns: ' .. mod.Config.CoopHUD.inventory.items.space.X; end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.space.X = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.space.Y; end,
+		Display = function() return 'Space Between Rows: ' .. mod.Config.CoopHUD.inventory.items.space.Y; end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.items.space.Y = n; end,
+	}
+);
+
 ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.inventory);
 ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.inventory, 'Crafting/Special');
 ModConfigMenu.AddSetting(
@@ -134,6 +256,17 @@ ModConfigMenu.AddSetting(
 		Maximum = 3,
 		Display = function() return 'Display: ' .. (mod.Config.CoopHUD.inventory.special.display == 0 and 'Always' or (mod.Config.CoopHUD.inventory.special.display == 1 and 'Map' or (mod.Config.CoopHUD.inventory.special.display == 2 and 'No Map' or 'Never'))); end,
 		OnChange = function(n) mod.Config.CoopHUD.inventory.special.display = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.special.offset_w_pockets; end,
+		Display = function() return 'Pocket Offset: ' .. (mod.Config.CoopHUD.inventory.special.offset_w_pockets and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.inventory.special.offset_w_pockets = b; end,
+		Info = {'Enable to shift the inventory position down with pocket items.'},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -185,17 +318,6 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopHUD.inventory.special.space.Y; end,
 		Display = function() return 'Spacing (Y): ' .. mod.Config.CoopHUD.inventory.special.space.Y; end,
 		OnChange = function(n) mod.Config.CoopHUD.inventory.special.space.Y = n; end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopHUD.MCM.title,
-	CoopHUD.MCM.categories.inventory,
-	{
-		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopHUD.inventory.special.pocket_offset; end,
-		Display = function() return 'Pocket Offset: ' .. (mod.Config.CoopHUD.inventory.special.pocket_offset and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopHUD.inventory.special.pocket_offset = b; end,
-		Info = {'Enable to shift the inventory position down with pocket items.'},
 	}
 );
 

@@ -68,9 +68,9 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.categories.players,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopHUD.players.twins.pocket_offset; end,
-		Display = function() return 'Pocket Offset: ' .. (mod.Config.CoopHUD.players.twins.pocket_offset and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopHUD.players.twins.pocket_offset = b; end,
+		CurrentSetting = function() return mod.Config.CoopHUD.players.twins.offset_w_pockets; end,
+		Display = function() return 'Pocket Offset: ' .. (mod.Config.CoopHUD.players.twins.offset_w_pockets and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.players.twins.offset_w_pockets = b; end,
 	}
 );
 ModConfigMenu.AddSetting(

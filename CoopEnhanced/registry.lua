@@ -313,10 +313,12 @@ mod.Registry.Commands = {
 		end
 	end,
 	["controller"] = function(args) -- Change controller indexes
-		local player_index = args[1] and tonumber(args[1]) or -1;
-		local controller_index = args[2] and tonumber(args[2]) or -1;
+		local player_index = tonumber(args[1]) or 1;
+		local controller_index = tonumber(args[2]) or -1;
+		local twin_index = tonumber(args[3]) or 0;
 		local player_entity = Utils.getMainPlayerByIndex(player_index);
-		if player_index == -1 or controller_index == -1 or not player_entity then print("Incorrect arguments for command. ('controller <player_index> <controller_index>')"); return; end
+		if twin_index > 0 then player_entity = Utils.getPlayerTwins(player_entity)[twin_index]; end
+		if not player_entity or controller_index == -1 then print("Incorrect arguments for command. ('controller <player_index> <controller_index> <twin_index>')"); return; end
 		player_entity:SetControllerIndex(controller_index);
 	end,
 	["giveitem"] = function(args) -- Give item to player index

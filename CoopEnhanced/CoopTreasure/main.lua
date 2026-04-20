@@ -197,7 +197,7 @@ function CoopTreasure:onRender()
 					if not player_entity then return; end
 						
 					local player_config = player_sync == "Global" and mod.Config.players[player_index] or (mod.Config[player_sync] and mod.Config[player_sync].players[player_index] or mod.Config.CoopTreasure.players[player_index]);
-					local player_name = display > 1 and Utils.getPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.CoopLabels.tainted) or nil;
+					local player_name = display > 1 and Utils.getPlayerName(player_entity, Utils.getMainPlayerIndex(player_entity), player_config.type, player_config.name, mod.Config.CoopLabels.tainted) or nil;
 					local player_color = Colors[player_config.color].Value;
 					
 					local edge_multipliers = Vector((i % 2 == 0) and -1 or 1, i > 2 and -1 or 1);
@@ -221,7 +221,7 @@ function CoopTreasure:onRender()
 							room_data.Render[i].Text.Value,
 							room_data.Render[i].Text.Pos.X or 0, room_data.Render[i].Text.Pos.Y or 0,
 							scale.X * mod.Config.CoopTreasure.assign.text.scale.X, scale.Y * mod.Config.CoopTreasure.assign.text.scale.Y,
-							room_data.Render[i].Color or Color.Default, room_data.Render[i].Text.Width or 0, room_data.Render[i].Text.Center or true
+							room_data.Render[i].Color or KColor.White, room_data.Render[i].Text.Width or 0, room_data.Render[i].Text.Center or true
 						);
 					end
 				end

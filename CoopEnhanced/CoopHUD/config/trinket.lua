@@ -64,9 +64,9 @@ for i = 0, 1, 1 do
 		CoopHUD.MCM.categories.trinket,
 		{
 			Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopHUD.trinket[i].pocket_offset; end,
-		Display = function() return 'Pocket Offset: ' .. (mod.Config.CoopHUD.trinket[i].pocket_offset and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopHUD.trinket[i].pocket_offset = b; end,
+		CurrentSetting = function() return mod.Config.CoopHUD.trinket[i].offset_w_pockets; end,
+		Display = function() return 'Pocket Offset: ' .. (mod.Config.CoopHUD.trinket[i].offset_w_pockets and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.trinket[i].offset_w_pockets = b; end,
 		Info = {'When enabled, trinkets are moved down by the number of pocket items.'},
 		}
 	);

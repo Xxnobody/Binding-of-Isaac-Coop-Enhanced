@@ -57,7 +57,7 @@ mod.Colors = {
 	{Name = "Aquamarine",Value = Color(0.5,1,0.8,1)},
 	{Name = "Black",Value = Color(0.1,0.1,0.1,1)},
 	{Name = "Blood",Value = Color(1,0.25,0.25,1)},
-	{Name = "Blue",Value = Color(0,0,1,1)},
+	{Name = "Blue",Value = Color(0,0,0.9,1)},
 	{Name = "Brown",Value = Color(0.65,0.30,0.2,1)},
 	{Name = "Dark Blue",Value = Color(0.1,0.1,0.45,1)},
 	{Name = "Dark Green",Value = Color(0,0.5,0,1)},
