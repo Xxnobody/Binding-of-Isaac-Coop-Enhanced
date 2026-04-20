@@ -106,7 +106,7 @@ function Player.Render(player_number, screen_dimensions)
 								
 								local value_text = string.format(stat.IsPercent and '%.1f%%' or '%.2f', math.abs(value));
 								value_text = value_text .. prefix;
-								local update_pos = stat.Text.Pos + (((deals.Anchor < 2 and Vector(8, 4 * (deals.Anchor == 0 and -1 or 1)) or mod.Config.CoopHUD.stats.text.update.offset + Vector((mod.Fonts.CoopHUD.stats:GetStringWidth(stat.Text.Value) + 2) * mod.Config.CoopHUD.stats.text.scale.X, 0))) * stat.Edge);
+								local update_pos = stat.Text.Pos + (((deals.Anchor < 2 and Vector(4, 4 * (deals.Anchor == 0 and -1 or 1)) or mod.Config.CoopHUD.stats.text.update.offset + Vector((mod.Fonts.CoopHUD.stats:GetStringWidth(stat.Text.Value) + 2) * mod.Config.CoopHUD.stats.text.scale.X, 0))) * stat.Edge);
 								if stat.Edge.X < 0 then update_pos.X = update_pos.X - (mod.Fonts.CoopHUD.stats:GetStringWidth(value_text) * mod.Config.CoopHUD.stats.text.scale.X); end
 								
 								mod.CoopHUD.DATA.Players[player_number].Stats.Updates[slot].Color = Utils.FontOpacity((value > 0 and KColor.Green or KColor.Red),opacity);

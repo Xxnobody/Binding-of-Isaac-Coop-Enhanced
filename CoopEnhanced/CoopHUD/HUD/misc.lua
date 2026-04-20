@@ -64,12 +64,12 @@ function Misc.GetPickups(screen_dimensions)
 	if anchor < 2 then
 		for i,pickup in ipairs(mod.CoopHUD.Misc.Pickups) do
 			if pickup and pickup.Data ~= nil then
-				total_width = total_width + (((pickup.Data.Text.Font:GetStringWidth(pickup.Data.Text.Value) + 1) * scale.X) + size);
+				total_width = total_width + (((pickup.Data.Text.Font:GetStringWidth(pickup.Data.Text.Value)) * scale.X) + (size * 2));
 				pickups_total = pickups_total + 1;
 			end
 		end
 		local other_data = mod.CoopHUD.Stats.Deals.Anchor == anchor and mod.CoopHUD.Stats.Deals.Visible and mod.CoopHUD.Stats.Deals.Data[1] or nil;
-		pos.X = (screen_dimensions.Center.X - (total_width / 1.5));
+		pos.X = (screen_dimensions.Center.X - (total_width / 2));
 		pos.Y = (other_data and (other_data.Pos.Y + (anchor == 0 and (-size * scale.X) or (size * mod.Config.CoopHUD.stats.scale.Y)))) or ((anchor == 0 and (screen_dimensions.Max.Y - size) or 0) + (offset.Y * edge_multipliers.Y));
 	else
 		pos.X = pos.X + (anchor == 2 and (screen_dimensions.Max.X - (pos.X + (size + 5) or 0)) + (offset.X * edge_multipliers.X));

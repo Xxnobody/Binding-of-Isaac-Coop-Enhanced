@@ -93,6 +93,12 @@ function Stats.GetDevilAngelChance()
 	return chances;
 end
 
+function Stats.GetPlanetariumChance()
+	local chance = game:GetLevel():GetPlanetariumChance() * 100;
+	if LivePlanetariumChance then chance = LivePlanetariumChance.storage.currentFloorSpawnChance or chance; end
+	return chance;
+end
+
 function Stats.GetLibraryChance()
 	local chance = LibraryChance and LibraryChance.Util:GetData("LibraryChance", nil, LibraryChance.Enum.DataPersistenceFlag.RUN).LibraryChance or 0.0;
 	-- Player Items
@@ -133,7 +139,7 @@ function Stats.GetStats(player_entity, player_number)
 			stats[CoopHUD.StatType.DEVIL] = Stats.GetStat(chances.devil * 100, CoopHUD.StatType.DEVIL, true);
 			stats[CoopHUD.StatType.ANGEL] = Stats.GetStat(chances.angel * 100, CoopHUD.StatType.ANGEL, true);
 		end
-		stats[CoopHUD.StatType.PLANETARIUM] = Stats.GetStat(game:GetLevel():GetPlanetariumChance() * 100, CoopHUD.StatType.PLANETARIUM, true);
+		stats[CoopHUD.StatType.PLANETARIUM] = Stats.GetStat(Stats.GetPlanetariumChance(), CoopHUD.StatType.PLANETARIUM, true);
 		if mod.Config.CoopHUD.stats.library_chance then
 			local library_chance = Stats.GetLibraryChance();
 			stats[CoopHUD.StatType.LIBRARY] = Stats.GetStat(library_chance * 100, 0, true);

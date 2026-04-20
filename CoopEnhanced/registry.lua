@@ -542,7 +542,7 @@ local function modCompats()
 		CoopEnhanced.AddCharacter("Mei",Isaac.GetPlayerTypeByName("Mei"),nil,{Anm2 = anim2,Animation = "Mei",Frame = 0});
 		CoopEnhanced.AddCharacter("The Asomatous",Isaac.GetPlayerTypeByName("Tainted Mei",true),nil,{Anm2 = anim2,Animation = "Mei",Frame = 1});
 	end
-	if XMLData.GetEntryByName(XMLNode.MOD,"Nemesis [for REP]") then
+	if XMLData.GetModById("Nemesis [for REP]") ~= nil then
 		CoopEnhanced.AddCharacter("Nemesis",Isaac.GetPlayerTypeByName("Nemesis"),nil,{Anm2 = anim2,Animation = "Nemesis",Frame = 0});
 		CoopEnhanced.AddCharacter("The Ensorcelled",Isaac.GetPlayerTypeByName("Tainted Nemesis",true),nil,{Anm2 = anim2,Animation = "Nemesis",Frame = 1});
 	end

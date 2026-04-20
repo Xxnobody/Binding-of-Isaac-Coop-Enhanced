@@ -5,7 +5,7 @@ local Utils = mod.Utils;
 local game = Game();
 
 local function ModCompat()
-	if XMLData.GetEntryByName(XMLNode.MOD,"Angel Beggar") then
+	if XMLData.GetModById("Angel Beggar") ~= nil then
 		CoopEnhanced.CoopTreasure.AngelBeggar = {Variants = {}};
 		local set = RoomConfig.GetStage(StbType.SPECIAL_ROOMS):GetRoomSet(0);
 		for i = 1, set.Size, 1 do
