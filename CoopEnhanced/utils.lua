@@ -72,42 +72,25 @@ function Utils.ensureCompatibility(data1, data2)
 	return new_config;
 end
 
-function Utils.clampFlow(min, max, val, step)
+function Utils.ClampFlow(min, max, val, step)
 	min = min or -4294967295;
 	max = max or 4294967295;
 	step = step or 1;
-	return val < min and Utils.clampFlow(min,max,(max - ((min - val) - step)),step) or (val > max and Utils.clampFlow(min,max,(min + ((val - max) - step)),step) or val);
+	return val < min and Utils.ClampFlow(min,max,(max - ((min - val) - step)),step) or (val > max and Utils.ClampFlow(min,max,(min + ((val - max) - step)),step) or val);
 end
-function Utils.getTableIndex(tbl, val)
+function Utils.GetTableIndex(tbl, val)
 	for i, v in pairs(tbl) do
 		if v == val then return i end;
 	end
 	return 0;
 end
-function Utils.mergeTables(tbl1, tbl2)
+function Utils.MergeTables(tbl1, tbl2)
 	for k, v in pairs(tbl2) do
 		tbl1[k] = v;
 	end
 	return tbl1;
 end
-function Utils.cloneTable(tbl)
-	local new_tbl = {};
-	if type(tbl) == "table" then
-		for k, v in pairs(tbl) do
-			if type(v) == "table" or type(v) == "userdata" then
-				new_tbl[k] = Utils.cloneTable(v);
-			else
-				new_tbl[k] = v;
-			end
-		end
-	elseif type(tbl) == "userdata" and tbl.X then
-		new_tbl = Vector(tbl.X,tbl.Y);
-	else
-		return tbl;
-	end
-	return new_tbl;
-end
-function Utils.shiftTable(tbl,step)
+function Utils.ShiftTable(tbl,step)
 	if step == 0 then return; end
 	local start_index = step > 0 and 1 or #tbl;
 	local end_index = step > 0 and #tbl or 1;
@@ -118,20 +101,23 @@ function Utils.shiftTable(tbl,step)
 	end
 	return new_tbl;
 end
-function Utils.printTable(var, level)
+function Utils.PrintTable(var, level)
 	local output = "";
 	level = level or 0;
 	level = level + 1;
 	if type(var) == "table" then
 		output = output .. "{";
 		for key, value in pairs(var) do
-			output = output .. "\n" .. string.rep("\t", level) .. string.format("[%s] = ", key) .. Utils.printTable(value, level) .. ",";
+			output = output .. "\n" .. string.rep("\t", level) .. string.format("[%s] = ", key) .. Utils.PrintTable(value, level) .. ",";
 		end
 		output = output .. "\n" .. string.rep("\t", level - 1) .. "}";
 	elseif type(var) == "userdata" then
-		if var.X then output = output .. "Vector(" .. var.X .. "," .. var.Y .. ")"; end
+		if var.X then output = output .. "Vector(" .. var.X .. "," .. var.Y .. ")"; 
+		elseif var.PlaybackSpeed then
+			output = output .. "Sprite(Anm2 = '" .. var:GetFilename() .. "', Animation = '" .. var:GetAnimation() .. "', Frame = " .. var:GetFrame() .. ", Playing = " .. var:IsPlaying() .. ")"
+		end
 	elseif type(var) == "function" then
-		output = output .. "function()";
+		output = output .. "function(" .. tostring(var) .. ")";
 	else
 		output = output .. var;
 	end
@@ -141,33 +127,33 @@ function Utils.printTable(var, level)
 	end
 	print(output);
 end
-function Utils.CleanupName(name)
-	return string.gsub(name,"_"," "):lower():gsub("(%a)([%w_']*)",function(f,r) return f:upper()..r:lower(); end);
-end
 
--- Game Utilities
-function Utils.IsPauseMenuOpen()
-	return game:IsPauseMenuOpen() or Utils.IsMCMenuOpen() or Utils.IsDSSMenuOpen();
-end
-function Utils.IsMCMenuOpen()
-	return ModConfigMenu and ModConfigMenu.IsVisible;
-end
-function Utils.IsDSSMenuOpen()
-	return DeadSeaScrollsMenu and DeadSeaScrollsMenu.IsOpen();
-end
-
-function Utils.getHealthTypes()
-	if not CustomHealthAPI then return mod.HealthTypes; end
-	local health_types = {};
-	for name,info in pairs(CustomHealthAPI.PersistentData.HealthDefinitions) do
-		local total = info.MaxHP and info.MaxHP > 0 and info.MaxHP or (info.AnimationName ~= nil and (type(info.AnimationName) == "table" and #info.AnimationName > 0 and #info.AnimationName or 1) or (info.AnimationNames ~= nil and (type(info.AnimationNames) == "table" and #info.AnimationNames > 0 and #info.AnimationNames or 1)));
-		table.insert(health_types,{Name = name, Total = total, Order = (info.SortOrder or 0)});
+function Utils.CloneObject(val)
+	local new_tbl = {};
+	if type(val) == "table" then
+		for k, v in pairs(val) do
+			if type(v) == "table" or type(v) == "userdata" then
+				new_tbl[k] = Utils.CloneObject(v);
+			else
+				new_tbl[k] = v;
+			end
+		end
+	elseif type(val) == "userdata" then
+		if val.X then new_tbl = Vector(val.X + 0,val.Y + 0);
+		elseif val.PlaybackSpeed then return Utils.CloneSprite(val);
+		end
+	elseif type(val) == "boolean" then
+		return val and true or false;
+	elseif type(val) == "number" then
+		return val + 0;
+	elseif type(val) == "string" then
+		return val .. "";
+	else
+		return val;
 	end
-	table.sort(health_types,function (a,b) return a.Order < b.Order end);
-	return health_types;
+	return new_tbl;
 end
-
-function Utils.cloneSprite(sprite,sprite_data)
+function Utils.CloneSprite(sprite,sprite_data)
 	if not sprite then return; end
 	sprite_data = sprite_data or {};
 	sprite_data.Anm2 = sprite_data.Anm2 or sprite:GetFilename();
@@ -191,6 +177,32 @@ function Utils.cloneSprite(sprite,sprite_data)
 	return new_sprite;
 end
 
+function Utils.CleanupName(name)
+	return string.gsub(name,"_"," "):lower():gsub("(%a)([%w_']*)",function(f,r) return f:upper()..r:lower(); end);
+end
+
+-- Game Utilities
+function Utils.IsPauseMenuOpen()
+	return game:IsPauseMenuOpen() or Utils.IsMCMenuOpen() or Utils.IsDSSMenuOpen();
+end
+function Utils.IsMCMenuOpen()
+	return ModConfigMenu and ModConfigMenu.IsVisible;
+end
+function Utils.IsDSSMenuOpen()
+	return DeadSeaScrollsMenu and DeadSeaScrollsMenu.IsOpen();
+end
+
+function Utils.GetHealthTypes()
+	if not CustomHealthAPI then return mod.HealthTypes; end
+	local health_types = {};
+	for name,info in pairs(CustomHealthAPI.PersistentData.HealthDefinitions) do
+		local total = info.MaxHP and info.MaxHP > 0 and info.MaxHP or (info.AnimationName ~= nil and (type(info.AnimationName) == "table" and #info.AnimationName > 0 and #info.AnimationName or 1) or (info.AnimationNames ~= nil and (type(info.AnimationNames) == "table" and #info.AnimationNames > 0 and #info.AnimationNames or 1)));
+		table.insert(health_types,{Name = name, Total = total, Order = (info.SortOrder or 0)});
+	end
+	table.sort(health_types,function (a,b) return a.Order < b.Order end);
+	return health_types;
+end
+
 -- Color Utilities
 function Utils.ColorOpacity(color,opacity)
 	return Color(color.R,color.G,color.B,(opacity or color.A));
@@ -202,7 +214,7 @@ function Utils.ColorBrighthness(color,brightness)
 	return Color(color.R * brightness,color.G * brightness,color.B * brightness,color.A);
 end
 function Utils.ColorShift(color,shift)
-	return Color(Utils.clampFlow(0,1,color.R + shift,0.1),Utils.clampFlow(0,1,color.G + shift,0.1),Utils.clampFlow(0,1,color.B + shift,0.1),color.A);
+	return Color(Utils.ClampFlow(0,1,color.R + shift,0.1),Utils.ClampFlow(0,1,color.G + shift,0.1),Utils.ClampFlow(0,1,color.B + shift,0.1),color.A);
 end
 function Utils.ConvertColorToColorize(color,opacity,brightness,saturation)
 	opacity = opacity or 1;
@@ -236,7 +248,7 @@ end
 
 -- Player/Character Utils
 local random_player = {Name = "Random", Type = PlayerType.PLAYER_POSSESSOR, Achievement = nil, Sprite = {Anm2 = mod.Animations.Coop, Animation = "Main", Frame = 0,Sheets = {[1] = mod.Images.Blank}}};
-function Utils.getUnlockedCharacters(no_mods,no_random)
+function Utils.GetUnlockedCharacters(no_mods,no_random)
 	local characters = {mod.Characters[1]};
 	local last_achievement = 0;
 	for i,character in pairs(mod.Characters) do
@@ -257,7 +269,7 @@ function Utils.getUnlockedCharacters(no_mods,no_random)
 	return characters;
 end
 
-function Utils.getCharacterByType(player_type)
+function Utils.GetCharacterByType(player_type)
 	for i,character in pairs(mod.Characters) do
 		if character.Type == player_type then return character, i; end
 	end
@@ -266,7 +278,7 @@ function Utils.getCharacterByType(player_type)
 	end
 	return {},-1;
 end
-function Utils.getCharacterByName(player_name)
+function Utils.GetCharacterByName(player_name)
 	for i,character in pairs(mod.Characters) do
 		if character.Name == player_name then return character, i; end
 	end
@@ -280,64 +292,78 @@ function Utils.GetPlayerID(player_entity) -- Taken from CustomHealthAPI
 	local rng = player_entity:GetPlayerType() == PlayerType.PLAYER_LAZARUS2_B and player_entity:GetCollectibleRNG(2) or player_entity:GetCollectibleRNG(1);
 	return ("UUID-" .. tostring(rng:GetSeed()));
 end
+function Utils.GetPlayerByID(player_id)
+	for i,player_entity in pairs(PlayerManager.GetPlayers()) do
+		local player_entity = Isaac.GetPlayer(i - 1);
+		if Utils.GetPlayerID(player_entity) == player_id then return player_entity; end
+	end
+	return nil;
+end
 
-function Utils.getMainPlayers()
+function Utils.GetMainPlayers()
 	local players = {};
 	for i = 1, game:GetNumPlayers(), 1 do
-		if not mod.Twins[i] then
+		if not mod.Players.Twins[i] then
 			table.insert(players,Isaac.GetPlayer(i - 1));
 		end
 	end
 	return players;
 end
-function Utils.getMainPlayerIndex(player_entity)
+function Utils.GetMainPlayerIndex(player_entity)
 	if player_entity == nil then return; end
-	local players = Utils.getMainPlayers();
+	local players = Utils.GetMainPlayers();
 	local player_ID = Utils.GetPlayerID(player_entity);
 	for i = 1, #players, 1 do
-		if Utils.GetPlayerID(players[i]) == player_ID or Utils.GetPlayerID(Utils.getMainTwin(player_entity)) == player_ID then return i; end
+		if Utils.GetPlayerID(players[i]) == player_ID or Utils.GetPlayerID(Utils.GetMainTwin(player_entity)) == player_ID then return i; end
 	end
 	return 0;
 end
-function Utils.getMainPlayerByIndex(player_index)
+function Utils.GetMainPlayerByIndex(player_index)
 	if player_index == nil then return; end
-	local players = Utils.getMainPlayers();
+	local players = Utils.GetMainPlayers();
 	return players and players[player_index] or nil;
 end
-function Utils.getMainTwin(player_entity)
+function Utils.GetMainTwin(player_entity)
 	if player_entity == nil then return; end
 	local player_ID = Utils.GetPlayerID(player_entity);
 	for i = 1, game:GetNumPlayers(), 1 do
 		local player = Isaac.GetPlayer(i - 1);
-		if mod.Twins[i] and Utils.GetPlayerID(Isaac.GetPlayer(mod.Twins[i] - 1)) == player_ID then return player, i; end
+		if mod.Players.Twins[i] and Utils.GetPlayerID(Isaac.GetPlayer(mod.Players.Twins[i] - 1)) == player_ID then return player, i; end
 	end
 	return nil,0;
 end
-function Utils.isMainTwin(player_entity)
+function Utils.IsMainTwin(player_entity)
 	if player_entity == nil then return; end
 	for i = 1, game:GetNumPlayers(), 1 do
 		local player = Isaac.GetPlayer(i - 1);
-		if mod.Twins[i] and Utils.GetPlayerID(player) == Utils.GetPlayerID(player_entity) then return true; end
+		if mod.Players.Twins[i] and Utils.GetPlayerID(player) == Utils.GetPlayerID(player_entity) then return true; end
 	end
 	return false;
 end
-function Utils.getPlayerTwins(player_entity)
+function Utils.GetPlayerTwins(player_entity)
 	if player_entity == nil then return; end
 	local player_twins = {};
-	local player_index = Utils.getMainPlayerIndex(player_entity);
+	local player_index = Utils.GetMainPlayerIndex(player_entity);
 	for i = 1, game:GetNumPlayers(), 1 do
-		if mod.Twins[i] == player_index then table.insert(player_twins,Isaac.GetPlayer(i - 1)); end
+		if mod.Players.Twins[i] == player_index then table.insert(player_twins,Isaac.GetPlayer(i - 1)); end
 	end
 	return player_twins;
 end
-function Utils.getMainPlayerByController(controller_index)
-	local players = Utils.getMainPlayers();
+function Utils.GetMainPlayerByController(controller_index)
+	local players = Utils.GetMainPlayers();
 	for i = 1, #players, 1 do
 		if players[i].ControllerIndex == controller_index then return players[i], i; end
 	end
 	return nil,0;
 end
-function Utils.getPlayersByController(controller_index)
+function Utils.GetPlayerByController(controller_index)
+	for i = 1, game:GetNumPlayers(), 1 do
+		local player_entity = Isaac.GetPlayer(i - 1);
+		if player_entity.ControllerIndex == controller_index then return player_entity; end
+	end
+	return nil;
+end
+function Utils.GetPlayersByController(controller_index)
 	local players = {};
 	for i = 1, game:GetNumPlayers(), 1 do
 		local player_entity = Isaac.GetPlayer(i - 1);
@@ -345,29 +371,29 @@ function Utils.getPlayersByController(controller_index)
 	end
 	return players;
 end
-function Utils.getPlayerName(player_entity, player_index, name_type, custom_name, full_tainted)
+function Utils.GetPlayerName(player_entity, player_index, name_type, custom_name, full_tainted)
 	if not player_entity then return ""; end
 	local player_type = player_entity:GetPlayerType();
-	local character = Utils.getCharacterByType(player_type);
+	local character = Utils.GetCharacterByType(player_type);
 	if not character then return "???"; end
 	local char_name = Utils.IsTainted(player_entity) and (full_tainted and character.Name or "T. " .. player_entity:GetName()) or character.Name;
 	return name_type == 0 and "P" .. player_index or (name_type == 1 and char_name or custom_name);
 end
 
-function Utils.getHeadSprite(sprite, player_entity, scale) -- Taken from coopHUD *WIP*, credit to Srokks
+function Utils.GetHeadSprite(sprite, player_entity, scale) -- Taken from coopHUD *WIP*, credit to Srokks, modified by xxnobody
 	local isBaby = Utils.IsBaby(player_entity);
 	local player_type = isBaby and player_entity.BabySkin or player_entity:GetPlayerType();
-	if Utils.IsTwin(player_entity) then return nil; end
 	if isBaby and player_type > 60 then
 		player_type = 32;
 	end
-	local character_data = Utils.getCharacterByType(player_type) or {};
+	local character_data = Utils.GetCharacterByType(player_type) or {};
+	local mod_anim = "gfx/ui/coop_menu.anm2";
 	if player_type > PlayerType.PLAYER_THESOUL_B then -- Modded Characters
 		sprite = Sprite();
 		if not character_data or not character_data.Sprite then 
 			character_data.Sprite = {};
 			local mod_sprite = EntityConfig.GetPlayer(player_type):GetModdedCoopMenuSprite();
-			Utils.cloneSprite(mod_sprite,character_data.Sprite);
+			Utils.CloneSprite(mod_sprite,character_data.Sprite);
 		end
 		sprite:Load(character_data.Sprite.Anm2, true);
 		if character_data.Sprite.Sheets then 
@@ -375,78 +401,53 @@ function Utils.getHeadSprite(sprite, player_entity, scale) -- Taken from coopHUD
 				mod_sprite:ReplaceSpritesheet(id,sheet);
 			end
 		end
+		sprite.Scale = scale or Vector.One;
 		sprite:LoadGraphics();
 		sprite:SetFrame(character_data.Sprite.Animation, character_data.Sprite.Frame);
-		return sprite;
 	elseif player_type >= 0 then
 		if sprite == nil then
 			sprite = Sprite();
 			sprite:Load(mod.Animations.Coop, true);
-			sprite:ReplaceSpritesheet((isBaby and 0 or 1), mod.Images.Blank); -- Hide other spritesheet
+			sprite:ReplaceSpritesheet(1, mod.Images.Blank); -- Hide Baby spritesheet
 		end
-		sprite.FlipY = player_type == PlayerType.PLAYER_LAZARUS2_B;
 		sprite.Scale = scale or Vector.One;
-		sprite:SetFrame('Main', player_type + 1); -- +1 because 0 is Frame Random
+		local frame = player_type + 1; -- +1 because 0 is Frame Random
+		local animation = "Main";
+		if sprite:GetFilename() ~= mod_anim and Utils.HasTwin(player_type) and (player_entity:GetOtherTwin() == nil or player_type == PlayerType.PLAYER_LAZARUS2_B) then
+			sprite:Load(mod_anim,true);
+			animation = "Twins";
+			if player_type == PlayerType.PLAYER_JACOB then frame = 0;
+			elseif player_type == PlayerType.PLAYER_ESAU then frame = 1;
+			elseif player_type == PlayerType.PLAYER_JACOB_B then frame = 2;
+			elseif player_type == PlayerType.PLAYER_JACOB2_B then frame = 3;
+			elseif player_type == PlayerType.PLAYER_THEFORGOTTEN then frame = 4;
+			elseif player_type == PlayerType.PLAYER_THESOUL then frame = 5;
+			elseif player_type == PlayerType.PLAYER_THESOUL_B then frame = 6;
+			elseif player_type == PlayerType.PLAYER_LAZARUS2 then frame = 7;
+			elseif player_type == PlayerType.PLAYER_LAZARUS2_B then frame = 8;
+			end
+		end
+		sprite:SetFrame(animation, frame);
 		sprite:LoadGraphics();
-		return sprite;
 	end
-	return nil;
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.POST_HEAD_SPRITE,sprite);
+	return sprite;
 end
 
-function Utils.IsTwin(player_entity)
-	local player_type = player_entity:GetPlayerType();
-	return player_type == PlayerType.PLAYER_THESOUL or player_type == PlayerType.PLAYER_ESAU or player_type == PlayerType.PLAYER_THESOUL_B or player_type == PlayerType.PLAYER_LAZARUS2_B or (player_entity:GetMainTwin() ~= nil and player_entity:GetMainTwin():GetName() ~= player_entity:GetName());
-end
-function Utils.IsBaby(player_entity)
-	return player_entity.BabySkin > BabySubType.BABY_UNASSIGNED;
-end
-function Utils.IsIllusion(player_entity)
-	return IllusionMod and IllusionMod.GetData(player_entity).IsIllusion;
-end
-function Utils.IsLost(player_entity)
-	local player_type = player_entity:GetPlayerType();
-	return player_type == PlayerType.PLAYER_THELOST or player_type == PlayerType.PLAYER_THELOST_B;
-end
-function Utils.IsForgotten(player_entity)
-	local player_type = player_entity:GetPlayerType();
-	return player_type == PlayerType.PLAYER_THEFORGOTTEN;
-end
-function Utils.IsKeeper(player_entity)
-	local player_type = player_entity:GetPlayerType();
-	return player_type == PlayerType.PLAYER_KEEPER or player_type == PlayerType.PLAYER_KEEPER_B;
-end
-function Utils.IsTemporary(player_entity)
-	local player_type = player_entity:GetPlayerType()
-	return Utils.isMainTwin(player_entity) and (Utils.IsForgotten(player_entity) or Utils.IsKeeper(player_entity) or Utils.IsIllusion(player_entity));
-end
-function Utils.IsTainted(player_entity)
-	local player_type = player_entity:GetPlayerType();
-	local player_config = EntityConfig.GetPlayer(player_type);
-	return player_config and player_config:IsTainted();
-end
-function Utils.HasInventory(player_entity)
-	local player_type = player_entity:GetPlayerType();
-	return player_type == PlayerType.PLAYER_ISAAC_B or player_type == PlayerType.PLAYER_CAIN_B or player_type == PlayerType.PLAYER_BLUEBABY_B;
-end
-function Utils.AnyoneIsNotPlayerType(player_type)
-	for i,ptype in pairs(mod.Players.Types) do
-		if player_type ~= ptype then return true; end
-	end
-	return false;
-end
 function Utils.GetDevilPrice(player_entity,player_health,collectible_type)
 	local price = 0;
+	local player_type = player_entity:GetPlayerType();
 	player_health = player_health or CustomHealthAPI and CustomHealthAPI.PersistentData.OverriddenFunctions.GetHearts(player_entity) or player_entity:GetHearts();
 	local devil_price = player_entity:HasTrinket(TrinketType.TRINKET_JUDAS_TONGUE) and 1 or Isaac.GetItemConfig():GetCollectible(collectible_type).DevilPrice;
-	if player_entity:HasTrinket(TrinketType.TRINKET_YOUR_SOUL) or Utils.IsLost(player_entity) then price = PickupPrice.PRICE_SOUL;
-	elseif player_entity:GetPlayerType() == PlayerType.PLAYER_KEEPER or player_entity:GetPlayerType() == PlayerType.PLAYER_KEEPER_B then 
+	if player_entity:HasTrinket(TrinketType.TRINKET_YOUR_SOUL) or Utils.IsLost(player_type) then price = PickupPrice.PRICE_SOUL;
+	elseif Utils.IsKeeper(player_type) then 
 		price = (15 * devil_price) / (PlayerManager.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
 	elseif player_health < 1 and not CustomHealthAPI.Helper.PlayerIsSoulHeartOnly(player_entity,true) then price = PickupPrice.PRICE_THREE_SOULHEARTS; else
 		if devil_price == 1 then
-			if player_entity:GetPlayerType() == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_ONE_SOUL_HEART;
+			if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_ONE_SOUL_HEART;
 			else price = PickupPrice.PRICE_ONE_HEART; end
 		else
-			if player_entity:GetPlayerType() == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_TWO_SOUL_HEARTS;
+			if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_TWO_SOUL_HEARTS;
 			elseif player_health < 2 then price = PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS;				
 			else price = PickupPrice.PRICE_TWO_HEARTS end
 		end
@@ -463,6 +464,51 @@ function Utils.CanPayPrice(player_entity,price)
 		if devil_price == PickupPrice.PRICE_ONE_HEART and player_health.Red > 0 or (devil_price == PickupPrice.PRICE_TWO_HEARTS and player_health.Red > 1 or (devil_price == PickupPrice.PRICE_THREE_SOULHEARTS and player_health.Soul > 2 or (devil_price == PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS and (player_health.Red > 1 and player_health.Soul > 1) or (devil_price == PickupPrice.PRICE_ONE_SOUL_HEART and player_health.Soul > 0 or (devil_price == PickupPrice.PRICE_TWO_SOUL_HEARTS and player_health.Soul > 1 or (devil_price == PickupPrice.PRICE_ONE_HEART_AND_ONE_SOUL_HEART and (player_health.Red > 0 and player_health.Soul > 0) or (devil_price == PickupPrice.PRICE_SOUL or devil_price == PickupPrice.PRICE_SPIKES))))))) then return true; else return false; end
 	end
 	return true;
+end
+
+function Utils.IsPlayerDying(player_entity) -- Taken from LibraryExpanded
+	return player_entity:GetSprite():GetAnimation():sub(-#"Death") == "Death";
+end
+function Utils.IsBaby(player_entity)
+	return player_entity.BabySkin ~= BabySubType.BABY_UNASSIGNED;
+end
+function Utils.IsIllusion(player_entity)
+	return IllusionMod and IllusionMod.GetData(player_entity).IsIllusion;
+end
+function Utils.IsTemporary(player_entity)
+	local player_type = player_entity:GetPlayerType()
+	return Utils.IsMainTwin(player_entity) and (Utils.IsForgotten(player_type) or Utils.IsKeeper(player_type) or Utils.IsIllusion(player_entity));
+end
+function Utils.IsTainted(player_entity)
+	local player_type = player_entity:GetPlayerType();
+	local player_config = EntityConfig.GetPlayer(player_type);
+	return player_config and player_config:IsTainted();
+end
+
+-- Player Types
+function Utils.HasTwin(player_type)
+	return player_type == PlayerType.PLAYER_THEFORGOTTEN or player_type == PlayerType.PLAYER_THESOUL or player_type == PlayerType.PLAYER_THEFORGOTTEN_B or player_type == PlayerType.PLAYER_THESOUL_B or player_type == PlayerType.PLAYER_ESAU or player_type == PlayerType.PLAYER_JACOB or player_type == PlayerType.PLAYER_JACOB_B or player_type == PlayerType.PLAYER_LAZARUS2_B;
+end
+function Utils.IsTwin(player_type)
+	return player_type == PlayerType.PLAYER_THESOUL or player_type == PlayerType.PLAYER_ESAU or player_type == PlayerType.PLAYER_THESOUL_B or player_type == PlayerType.PLAYER_LAZARUS2_B;
+end
+function Utils.IsLost(player_type)
+	return player_type == PlayerType.PLAYER_THELOST or player_type == PlayerType.PLAYER_THELOST_B;
+end
+function Utils.IsForgotten(player_type)
+	return player_type == PlayerType.PLAYER_THEFORGOTTEN;
+end
+function Utils.IsKeeper(player_type)
+	return player_type == PlayerType.PLAYER_KEEPER or player_type == PlayerType.PLAYER_KEEPER_B;
+end
+function Utils.HasInventory(player_type)
+	return player_type == PlayerType.PLAYER_ISAAC_B or player_type == PlayerType.PLAYER_CAIN_B or player_type == PlayerType.PLAYER_BLUEBABY_B;
+end
+function Utils.AnyoneIsNotPlayerType(player_type)
+	for i,ptype in pairs(mod.Players.Types) do
+		if player_type ~= ptype then return true; end
+	end
+	return false;
 end
 
 -- Font Utils

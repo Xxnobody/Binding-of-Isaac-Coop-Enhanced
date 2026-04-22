@@ -101,7 +101,7 @@ function CoopTreasure.GetOwnedIndexes(player_index)
 end
 
 function CoopTreasure.CheckComplete()
-	for i,player_entity in ipairs(Utils.getMainPlayers()) do
+	for i,player_entity in ipairs(Utils.GetMainPlayers()) do
 		local player_index = player_entity.ControllerIndex + 1;
 		if CoopTreasure.GetOwnedAmount(player_index) < mod.Config.CoopTreasure.max then return false; end
 	end
@@ -189,22 +189,19 @@ function CoopTreasure:onRender()
 	if room_data.Assign > 1 and display > 0 and #room_data.Treasure.Items > 1 then
 		local player_sync = mod.Config.CoopTreasure.player_sync;
 		local scale = mod.Config.CoopTreasure.assign.scale;
-		for i,player_index in ipairs(room_data.Treasure.Assignments) do
-			player_index = math.abs(player_index);
-			if player_index > 0 and room_data.Treasure.Items[i][1] and #Isaac.FindInRadius(room_data.Treasure.Items[i][1].Position, (mod.GridSize / 2), EntityPartition.PICKUP) > 0 then
-				if game:GetFrameCount() % 15 == 0 then -- Update Data twice each second
-					local player_entity = Utils.getMainPlayerByController(player_index - 1);
-					if not player_entity then return; end
-						
+		for i,assignment_index in ipairs(room_data.Treasure.Assignments) do
+			local player_entity, player_index = Utils.GetMainPlayerByController(assignment_index - 1);
+			if player_entity and player_index > 0 and room_data.Treasure.Items[i][1] and #Isaac.FindInRadius(room_data.Treasure.Items[i][1].Position, (mod.GridSize / 2), EntityPartition.PICKUP) > 0 then
+				if game:GetFrameCount() % 15 == 0 then -- Update Data twice each second	
 					local player_config = player_sync == "Global" and mod.Config.players[player_index] or (mod.Config[player_sync] and mod.Config[player_sync].players[player_index] or mod.Config.CoopTreasure.players[player_index]);
-					local player_name = display > 1 and Utils.getPlayerName(player_entity, Utils.getMainPlayerIndex(player_entity), player_config.type, player_config.name, mod.Config.CoopLabels.tainted) or nil;
+					local player_name = display > 1 and Utils.GetPlayerName(player_entity, Utils.GetMainPlayerIndex(player_entity), player_config.type, player_config.name, mod.Config.CoopLabels.tainted) or nil;
 					local player_color = Colors[player_config.color].Value;
 					
 					local edge_multipliers = Vector((i % 2 == 0) and -1 or 1, i > 2 and -1 or 1);
 					local display_offset = (mod.Config.CoopTreasure.assign.offset + (#room_data.Treasure.Items[i] == 1 and Vector.Zero or Vector(room_data.MoreOptions.Offset.X / 2 - room_data.MoreOptions.Offset.Y / 2, room_data.MoreOptions.Offset.Y / 2))) * edge_multipliers;
 					local display_pos = Isaac.WorldToRenderPosition(room_data.Treasure.Items[i][1].Position + display_offset);
 					
-					local player_sprite = (display == 1 or display == 3) and Utils.getHeadSprite(nil,player_entity) or nil;
+					local player_sprite = (display == 1 or display == 3) and Utils.GetHeadSprite(nil,player_entity) or nil;
 					local player_sprite_pos = player_sprite and (display_pos + Vector(-1 * player_sprite.Scale.X,0) + mod.Config.CoopTreasure.assign.head.offset) or Vector.Zero;
 					
 					local name_pos = player_name and (mod.Config.CoopTreasure.assign.text.offset + Vector(display_pos.X - ((mod.Fonts.CoopTreasure.treasure:GetStringWidth(player_name) / 2) * (scale.X * mod.Config.CoopTreasure.assign.text.scale.X)),display_pos.Y)) or Vector.Zero;
@@ -279,7 +276,7 @@ function CoopTreasure:onRoom()
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_ROOM_DATA, room_data); -- Execute Post Room Data update Callbacks (room_data(table))
 	
 	-- Set Pedestal Assignments
-	local players = Utils.getMainPlayers();
+	local players = Utils.GetMainPlayers();
 	if room_data.Assign == CoopTreasure.AssignmentTypes.Auto then
 		for i,player_entity in pairs(players) do
 			room_data.Treasure.Assignments[i] = player_entity.ControllerIndex + 1;

@@ -23,7 +23,7 @@ function CoopHUD.SetVisible(force)
 	end
 end
 
-function CoopEnhanced.CoopHUD.gameStart(isCont, data)
+function CoopHUD.gameStart(isCont, data)
 	CoopEnhanced.CoopHUD.DATA.Players = {};
 	CoopEnhanced.CoopHUD.DATA.Joining = {Total = 0};
 	CoopEnhanced.CoopHUD.DATA.Timer = {};
@@ -33,18 +33,18 @@ function CoopEnhanced.CoopHUD.gameStart(isCont, data)
 	CoopEnhanced.CoopHUD.Misc.Wave = {[1] = {}};
 	CoopEnhanced.CoopHUD.Misc.Extra = {[1] = {},[2] = {}};
 	CoopHUD.isVisible = true;
-	if isCont then
-		if CoopEnhanced.CoopHUD then CoopEnhanced.CoopHUD.DATA.Players = data.CoopHUD.players; end
+	if isCont and data.CoopHUD then
+		if CoopEnhanced and CoopEnhanced.CoopHUD then CoopEnhanced.CoopHUD.DATA.Players = data.CoopHUD.players; end
 	end
 end
-function CoopEnhanced.CoopHUD.gameEnd(data)
+function CoopHUD.gameEnd(data)
 	if data == nil then data = {CoopHUD = {}} elseif data.CoopHUD == nil then data.CoopHUD = {}; end
 	data.CoopHUD.banner = CoopHUD.DATA.Banner;
 	data.CoopHUD.players = CoopHUD.DATA.Players;
 	return data;
 end
 
-function CoopEnhanced.CoopHUD.createBanner(name, desc, banner_type, display_bottom_paper)
+function CoopHUD.createBanner(name, desc, banner_type, display_bottom_paper)
 	local sprite = Sprite();
 	if banner_type == CoopHUD.BannerType.FORTUNE then sprite:Load(mod.Animations.Fortune, true) else sprite:Load(mod.Animations.Banner, true); end
 	local banner_timer = game:GetFrameCount() + (banner_type == CoopHUD.BannerType.FLOOR and 1800 or (30 * mod.Config.CoopHUD.banner.duration));
@@ -55,7 +55,7 @@ function CoopEnhanced.CoopHUD.createBanner(name, desc, banner_type, display_bott
 	CoopHUD.DATA.Banner = {Sprite = sprite, Name = name, Desc = desc, Curse = display_bottom_paper, Type = banner_type, Timer = banner_timer};
 end
 
-function CoopEnhanced.CoopHUD.getDataFromController(controller_index)
+function CoopHUD.getDataFromController(controller_index)
 	for i = #CoopHUD.DATA.Players, (#CoopHUD.DATA.Players * -1), -1 do
 		if CoopHUD.DATA.Players[i] and CoopHUD.DATA.Players[i].Controller == controller_index then
 			return CoopHUD.DATA.Players[i];
@@ -63,7 +63,7 @@ function CoopEnhanced.CoopHUD.getDataFromController(controller_index)
 	end
 	return nil, 0;
 end
-function CoopEnhanced.CoopHUD.getDataFromIndex(player_index)
+function CoopHUD.getDataFromIndex(player_index)
 	for i = #CoopHUD.DATA.Players, (#CoopHUD.DATA.Players * -1), -1 do
 		if CoopHUD.DATA.Players[i] and CoopHUD.DATA.Players[i].Index == player_index then
 			return CoopHUD.DATA.Players[i], i;
@@ -71,7 +71,7 @@ function CoopEnhanced.CoopHUD.getDataFromIndex(player_index)
 	end
 	return nil, 0;
 end
-function CoopEnhanced.CoopHUD.getDataFromEntity(player_entity)
+function CoopHUD.getDataFromEntity(player_entity)
 	if player_entity then
 		local player_id = Utils.GetPlayerID(player_entity);
 		for i = #CoopHUD.DATA.Players, (#CoopHUD.DATA.Players * -1), -1 do
@@ -82,7 +82,18 @@ function CoopEnhanced.CoopHUD.getDataFromEntity(player_entity)
 	end
 	return nil, 0;
 end
-function CoopEnhanced.CoopHUD.getCoopMenuSprites(joininig)
+
+function CoopHUD.InitNewPlayers(screen_dimensions)
+	if not mod.IsPlayerJoining() or mod.Config.CoopHUD.players.menu.display == 0 then return; end
+	for i,joining in pairs(mod.Players.Joining) do
+		if joining.Sprites == nil then
+			joining.Pos = Vector((joining.Index % 2) == 0 and (screen_dimensions.Max.X - (CoopHUD.Positions.Coop.X + mod.Config.CoopHUD.players.mirrored_offset.X + 8)) or CoopHUD.Positions.Coop.X, joining.Index > 2 and (screen_dimensions.Max.Y - (CoopHUD.Positions.Coop.Y + mod.Config.CoopHUD.offset.Y + mod.Config.CoopHUD.players.mirrored_offset.Y + (-5 * (1 - mod.Config.CoopHUD.players.menu.scale.Y)))) or CoopHUD.Positions.Coop.Y);
+			joining.Sprites = CoopHUD.getCoopMenuSprites(joining);
+		end
+		CoopHUD.RenderCoopMenuSprite(joining);
+	end
+end
+function CoopHUD.getCoopMenuSprites(joininig)
 	local scale = mod.Config.CoopHUD.players.menu.scale;
 	local opacity = mod.Config.CoopHUD.players.menu.opacity;
 	local rel_offset = mod.Config.CoopHUD.players.menu.rel_offset;
@@ -113,8 +124,7 @@ function CoopEnhanced.CoopHUD.getCoopMenuSprites(joininig)
 	
 	return sprites;
 end
-
-function CoopEnhanced.CoopHUD.RenderCoopMenuSprite(joining)
+function CoopHUD.RenderCoopMenuSprite(joining)
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_COOP_MENU_RENDER, joining, mod.Players.Unlocked); -- Execute pre Coop Menu rendering functions (Joining Player Data, Unlocked Characters Data)
 	
 	local sel = joining.Selected;
@@ -126,7 +136,7 @@ function CoopEnhanced.CoopHUD.RenderCoopMenuSprite(joining)
 		-- Render Extra Heads on the left/right
 		for i = #joining.Sprites, 2, -1 do
 			local joining_sprite = joining.Sprites[i];
-			local character_data = mod.Players.Unlocked[Utils.clampFlow(1, max, (sel + (i - 1)))];
+			local character_data = mod.Players.Unlocked[Utils.ClampFlow(1, max, (sel + (i - 1)))];
 			if joining_sprite.Sprite:GetFilename() ~= character_data.Sprite.Anm2 then
 				joining_sprite.Sprite:Load(character_data.Sprite.Anm2,false);
 				if character_data.Sprite.Sheets then 
@@ -139,7 +149,7 @@ function CoopEnhanced.CoopHUD.RenderCoopMenuSprite(joining)
 			joining_sprite.Sprite:SetFrame(character_data.Sprite.Animation,character_data.Sprite.Frame);
 			joining_sprite.Sprite:Render(main_pos + joining_sprite.Offset);
 			
-			character_data = mod.Players.Unlocked[Utils.clampFlow(1, max, (sel - (i - 1)))];
+			character_data = mod.Players.Unlocked[Utils.ClampFlow(1, max, (sel - (i - 1)))];
 			
 			if joining_sprite.Sprite:GetFilename() ~= character_data.Sprite.Anm2 then
 				joining_sprite.Sprite:Load(character_data.Sprite.Anm2,false);
@@ -157,7 +167,6 @@ function CoopEnhanced.CoopHUD.RenderCoopMenuSprite(joining)
 	
 	-- Render the main head
 	local main_sprite = joining.Sprites[1].Sprite;
-	local arrow_sprite = joining.Sprites[0].Sprite;
 	local character_data = mod.Players.Unlocked[sel];
 	if main_sprite:GetFilename() ~= character_data.Sprite.Anm2 then
 		main_sprite:Load(character_data.Sprite.Anm2,false);
@@ -169,59 +178,15 @@ function CoopEnhanced.CoopHUD.RenderCoopMenuSprite(joining)
 		main_sprite:LoadGraphics();
 	end
 	main_sprite:SetFrame(character_data.Sprite.Animation,character_data.Sprite.Frame);
-	main_sprite:SetOverlayFrame("Arrows",(mod.FrameCount < 30 and 1 or 0));
 	main_sprite:Render(main_pos);
 		
 	-- Render Arrows
+	local arrow_sprite = joining.Sprites[0].Sprite;
+	arrow_sprite:SetOverlayFrame("Arrows",(mod.FrameCount < 30 and 1 or 0));
 	arrow_sprite:RenderLayer(2,main_pos);
 	arrow_sprite.FlipX = true;
 	arrow_sprite:RenderLayer(2,main_pos);
 	arrow_sprite.FlipX = false;
-	arrow_sprite:SetOverlayFrame("Arrows",(mod.FrameCount < 30 and 1 or 0));
-end
-function CoopEnhanced.CoopHUD.IsPlayerJoining()
-	return CoopHUD.DATA.Joining and CoopHUD.DATA.Joining.Total and CoopHUD.DATA.Joining.Total > 0;
-end
-function CoopEnhanced.CoopHUD.getJoiningByController(controller_index)
-	for i,joining in pairs(CoopHUD.DATA.Joining) do
-		if joining.Controller == controller_index then
-			return joining, i;
-		end
-	end
-	return nil;
-end
-function CoopEnhanced.CoopHUD.InitNewPlayers()
-	if game:IsPaused() or game.Challenge > 0 then return; end
-	local max_controller_checks = 6;
-	for i = 1, max_controller_checks, 1 do
-		local controller_index = (i - 1);
-		if CoopHUD.DATA.Joining.Total < 4 and CoopEnhanced.CoopHUD.getDataFromController(controller_index) == nil then
-			if CoopHUD.DATA.Joining[i] == nil and Input.IsActionPressed(ButtonAction.ACTION_JOINMULTIPLAYER, controller_index) then
-				local screen_dimensions = Utils.GetScreenDimensions();
-				local joining = {Index = (mod.Players.Total + CoopHUD.DATA.Joining.Total + 1), Controller = controller_index, Selected = 1, Move = 0};
-				
-				joining.Pos = Vector((joining.Index % 2) == 0 and (screen_dimensions.Max.X - (CoopHUD.Positions.Coop.X + mod.Config.CoopHUD.players.mirrored_offset.X + 8)) or CoopHUD.Positions.Coop.X, joining.Index > 2 and (screen_dimensions.Max.Y - (CoopHUD.Positions.Coop.Y + mod.Config.CoopHUD.offset.Y + mod.Config.CoopHUD.players.mirrored_offset.Y + (25 * mod.Config.CoopHUD.players.menu.scale.Y))) or CoopHUD.Positions.Coop.Y);
-				joining.Sprites = CoopHUD.getCoopMenuSprites(joining);
-				CoopHUD.DATA.Joining[i] = joining;
-				CoopHUD.DATA.Joining.Total = (CoopHUD.DATA.Joining.Total or 0) + 1;
-			end
-		end
-	end
-	if not CoopHUD.IsPlayerJoining() then return; end
-	for i,joining in pairs(CoopHUD.DATA.Joining) do
-		if type(joining) ~= "table" then goto continue; end
-		local controller_index = joining.Controller;
-		if Input.IsActionTriggered(ButtonAction.ACTION_MENULEFT, controller_index) then joining.Selected = joining.Selected - 1; --joining.Move = joining.Move + 24;
-		elseif Input.IsActionTriggered(ButtonAction.ACTION_MENURIGHT, controller_index) then joining.Selected = joining.Selected + 1; --joining.Move = joining.Move - 24;
-		elseif Input.IsActionTriggered(ButtonAction.ACTION_MENUBACK, controller_index) or Input.IsActionTriggered(ButtonAction.ACTION_MENUCONFIRM, controller_index) then
-			CoopHUD.DATA.Joining[i] = nil;
-			CoopHUD.DATA.Joining.Total = (CoopHUD.DATA.Joining.Total or 1) - 1;
-			goto continue;
-		end
-		joining.Selected = Utils.clampFlow(1, #mod.Players.Unlocked, joining.Selected);
-		if mod.Config.CoopHUD.players.menu.display > 0 then CoopHUD.RenderCoopMenuSprite(joining); end
-		::continue::
-	end
 end
 
 local function minimapConfig(setting, value)
@@ -271,7 +236,6 @@ local function displayBanner(_ , name, description, isSticky, IsCurse)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_ITEM_TEXT_DISPLAY, displayBanner);
 
-
 local hotkey_timer = 0;
 local function onRender()
 	-- Renderer Checks
@@ -286,6 +250,7 @@ local function onRender()
 		return;
 	end
 	
+	local screen_dimensions = Utils.GetScreenDimensions();
 	mod.CoopHUD.Refresh = (mod.Config.CoopHUD.renderer.refresh == 1 or (CoopEnhanced.FrameCount % mod.Config.CoopHUD.renderer.refresh) == 0);
 	
 	if CoopHUD.DATA.Banner.Type == CoopHUD.BannerType.FORTUNE then -- Temperary fix until an API to get Fortune text is available
@@ -296,7 +261,7 @@ local function onRender()
 			return;
 		end
 	elseif Isaac:CanStartTrueCoop() and not game:IsPaused() and CoopHUD.isVisible then 
-		CoopHUD.InitNewPlayers();
+		CoopHUD.InitNewPlayers(screen_dimensions);
 		if mod.Config.CoopHUD.players.menu.display == 0 and CoopHUD.IsPlayerJoining() then hud:SetVisible(true); return; end
 	elseif game:GetRoom():GetType() == RoomType.ROOM_BOSS and game:GetRoom():IsFirstVisit() and game:GetRoom():GetFrameCount() < 5 then -- Hide all HUDs when entering a boss cutscene
 		hud:SetVisible(false);
@@ -348,8 +313,6 @@ local function onRender()
 	
 	-- EID 
 	if EID then EID.isHidden = mod.Config.CoopHUD.mods.EID.display == 3 or (mod.Config.CoopHUD.mods.EID.display == 2 and not CoopHUD.IsMapDown or (mod.Config.CoopHUD.mods.EID.display == 1 and CoopHUD.IsMapDown or false)); end
-	
-	local screen_dimensions = Utils.GetScreenDimensions();
 	
 	-- Render the various HUD elements
 	CoopHUD.RenderPlayers(screen_dimensions);

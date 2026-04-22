@@ -61,12 +61,12 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 			local index = i;
 			local player_index = 0;
 			local player_entity = Isaac.GetPlayer(i - 1);
-			local edge = {Pos = Utils.cloneTable(screen_dimensions.Min), Offset = Utils.cloneTable(mod.Config.CoopHUD.offset), Multipliers = Vector.One};
+			local edge = {Pos = Utils.CloneObject(screen_dimensions.Min), Offset = Utils.CloneObject(mod.Config.CoopHUD.offset), Multipliers = Vector.One};
 			
-			if mod.Twins[i] then
+			if mod.Players.Twins[i] then
 				index = -i;
 				num_twins = num_twins + 1;
-				player_index = mod.Twins[i];
+				player_index = mod.Players.Twins[i];
 				edge.Pos = edge.Pos + mod.Config.CoopHUD.players.twins.offset;
 				if mod.Config.CoopHUD.players.twins.offset_w_pockets and mod.CoopHUD.DATA.Players[player_index] and mod.CoopHUD.DATA.Players[player_index].Inventory.Pocket.Total > 0 then
 					edge.Pos.Y = edge.Pos.Y + mod.CoopHUD.DATA.Players[player_index].Inventory.Pocket.Total * (32 * mod.Config.CoopHUD.pocket[(mod.CoopHUD.DATA.Players[player_index].Inventory.Pocket.Total - 1)].scale.Y);
@@ -84,14 +84,14 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 			local player_config = player_sync == "Global" and mod.Config.players[player_index] or (mod.Config[player_sync] and mod.Config[player_sync].players[player_index] or mod.Config.CoopHUD.players[player_index]);
 			
 			if player_index == 0 or player_config == nil then break; end --Should never be Zero or above 4
-			local player_name = Utils.getPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.CoopHUD.tainted);
+			local player_name = Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.CoopHUD.tainted);
 			
 			if (player_index % 2) == 0 then
-				edge.Pos.X = screen_dimensions.Max.X - (edge.Offset.X + mod.Config.CoopHUD.players.mirrored_offset.X);
+				edge.Pos.X = screen_dimensions.Max.X - (edge.Pos.X + mod.Config.CoopHUD.players.mirrored_offset.X);
 				edge.Multipliers.X = -1;
 			end
 			if player_index > 2 then
-				edge.Pos.Y = screen_dimensions.Max.Y - (edge.Offset.Y + mod.Config.CoopHUD.players.mirrored_offset.Y);
+				edge.Pos.Y = screen_dimensions.Max.Y - (edge.Pos.Y + mod.Config.CoopHUD.players.mirrored_offset.Y);
 				edge.Multipliers.Y = -1;
 			end
 			
@@ -100,7 +100,7 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 					ID = Utils.GetPlayerID(player_entity),
 					Inventory = {Active = {[0] = {},[1] = {},},Trinket = {[0] = {},[1] = {}},Pocket = {[0] = {},[1] = {},[2] = {},[3] = {},Total = 0},Passive = {},Special = {}},
 					Stats = {Current = {},Updates = {},Data = {}},
-					Label = {Sprite = Utils.getHeadSprite(nil,player_entity)},
+					Label = {Sprite = Utils.GetHeadSprite(nil,player_entity)},
 					Health = {}
 				};
 				CoopHUD.Item.Inventory.Reload(mod.CoopHUD.DATA.Players[index],player_entity);

@@ -71,7 +71,7 @@ mod.CoopTreasure.DefaultConfig = {
 };
 
 function CoopEnhanced.CoopTreasure.ResetConfig()
-	mod.Config.CoopTreasure = Utils.cloneTable(mod.CoopTreasure.DefaultConfig);
+	mod.Config.CoopTreasure = Utils.CloneObject(mod.CoopTreasure.DefaultConfig);
 end
 if mod.Config.CoopTreasure == nil then mod.CoopTreasure.ResetConfig(); end
 
@@ -381,7 +381,7 @@ ModConfigMenu.AddSetting(
 		Type = ModConfigMenu.OptionType.NUMBER,
 		Minimum = 1,
 		Maximum = #fonts,
-		CurrentSetting = function() return Utils.getTableIndex(fonts, mod.Config.CoopTreasure.fonts.treasure); end,
+		CurrentSetting = function() return Utils.GetTableIndex(fonts, mod.Config.CoopTreasure.fonts.treasure); end,
 		Display = function() return 'Labels Font: ' .. mod.Config.CoopTreasure.fonts.treasure; end,
 		OnChange = function(n) mod.Config.CoopTreasure.fonts.treasure = fonts[n] Utils.LoadFonts(); end,
 		Info = {'Warning! Game might lag after changing fonts, please restart your game after changing this setting.'}

@@ -16,8 +16,8 @@ function Player.Render(player_number, screen_dimensions)
 	local player_entity = player.Entity.Ref:ToPlayer();
 	local isPlayerMapDown = CoopHUD.IsPlayerMapDown[player_data.Controller];
 	local isTwin = player_number < 0;
-	local mainTwin = not isTwin and Utils.getMainTwin(player_entity) or nil;
-	local isKeeper = Utils.IsKeeper(player_entity);
+	local mainTwin = not isTwin and Utils.GetMainTwin(player_entity) or nil;
+	local isKeeper = Utils.IsKeeper(player.Type);
 	local isBaby = Utils.IsBaby(player_entity);
 	local isTemporary = Utils.IsTemporary(player_entity);
 	local extra_scale = isTwin and mod.Config.CoopHUD.players.twins.scale or Vector.One;
@@ -52,7 +52,7 @@ function Player.Render(player_number, screen_dimensions)
 							stat.Scale = (stat.Scale or Vector.One) * scale;
 							stat.Color = Utils.ColorOpacity((mod.Config.CoopHUD.stats.text.colors and player.Color or Color.Default),opacity);
 							if slot > CoopHUD.StatType.SPEED then pos = pos + (mod.Config.CoopHUD.stats.rel_offset + Vector(0,seperation)) * edge_multipliers; end
-							stat.Pos = Utils.cloneTable(pos);
+							stat.Pos = Utils.CloneObject(pos);
 							stat.Render = not isTwin and player.Index < 3; -- Set whether the sprite image is rendered
 							stat.Edge = Vector(edge_multipliers.X, 1);
 							stat.Text.Pos = stat.Pos + (Vector(mod.Config.CoopHUD.stats.text.offset.X + (stat.Edge.X < 0 and mod.Fonts.CoopHUD.stats:GetStringWidth(stat.Text.Value) * mod.Config.CoopHUD.stats.text.scale.X or size), mod.Config.CoopHUD.stats.text.offset.Y) * stat.Edge);
@@ -95,7 +95,7 @@ function Player.Render(player_number, screen_dimensions)
 							else
 								pos = pos + Vector(deals.Anchor < 2 and (seperation * 3) or 0, deals.Anchor >= 2 and seperation or 0);
 							end
-							stat.Pos = Utils.cloneTable(pos);
+							stat.Pos = Utils.CloneObject(pos);
 							stat.Render = true;
 							stat.Edge = Vector(edge_multipliers.X, 1);
 							stat.Text.Pos = stat.Pos + (Vector(mod.Config.CoopHUD.stats.text.offset.X + (stat.Edge.X < 0 and mod.Fonts.CoopHUD.stats:GetStringWidth(stat.Text.Value) * mod.Config.CoopHUD.stats.text.scale.X or size), mod.Config.CoopHUD.stats.text.offset.Y) * stat.Edge);
@@ -280,7 +280,7 @@ function Player.Render(player_number, screen_dimensions)
 							
 					pos = edge_indexed + (offset + Vector((((anchor == 1 and ((player.Index > 2) and 2 or 1) or player.Index) * space.X) * scale.X), (-space.Y * mod.Config.CoopHUD.inventory.items.max) - (8 * scale.Y)));
 				else
-					local hasTwin = (mainTwin ~= nil or Utils.isMainTwin(player_entity));
+					local hasTwin = (mainTwin ~= nil or Utils.IsMainTwin(player_entity));
 					local twin_offset = (isTwin and ((mod.Config.CoopHUD.players.twins.offset * -1) + mod.Config.CoopHUD.inventory.items.twin_offset) or Vector.Zero);
 					local twins_offset = (mod.Config.CoopHUD.inventory.items.offset_w_twins and hasTwin and (mod.Config.CoopHUD.inventory.items.twins_offset * mod.Config.CoopHUD.players.twins.scale) or Vector.Zero);
 					local pocket_offset = (mod.Config.CoopHUD.inventory.items.offset_w_pockets and not hasTwin and pocket_total > 0 and (Vector(0,pocket_total * (20 * mod.Config.CoopHUD.pocket[(pocket_total - 1)].scale.Y))) or Vector.Zero);
@@ -335,7 +335,7 @@ function Player.Render(player_number, screen_dimensions)
 				if mod.Config.CoopHUD.players.heads.display then
 					local head_pos = player_data.Edge.Pos + ((CoopHUD.Positions.Active[ActiveSlot.SLOT_PRIMARY] + (Vector((player_data.Edge.Multipliers.X > 0 and -0.5 or 1),8) * mod.Config.CoopHUD.players.heads.scale) + mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].offset + mod.Config.CoopHUD.players.heads.offset + (player_entity:GetActiveItem(ActiveSlot.SLOT_PRIMARY) ~= 0 and not player_entity:IsCoopGhost() and (mod.Config.CoopHUD.players.heads.item_offset * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale) or Vector(0,-4))) * player_data.Edge.Multipliers);
 					local head_opacity = mod.Config.CoopHUD.players.heads.opacity;
-					local head_sprite = Utils.getHeadSprite(mod.CoopHUD.DATA.Players[player_number].Label.Sprite, player_entity);
+					local head_sprite = Utils.GetHeadSprite(mod.CoopHUD.DATA.Players[player_number].Label.Sprite, player_entity);
 					if head_sprite then
 						head_sprite.Color = mod.Config.CoopHUD.players.heads.sync.color and Utils.ConvertColorToColorize(CoopHUD.SkinColors[(player_entity:GetHeadColor())], head_opacity) or (mod.Config.CoopHUD.players.heads.color and Utils.ConvertColorToColorize(player.Color, head_opacity) or Utils.ColorOpacity(Color.Default, head_opacity));
 						head_sprite.Scale = mod.Config.CoopHUD.players.heads.sync.scale and player_entity.SpriteScale or mod.Config.CoopHUD.players.heads.scale;
@@ -346,7 +346,7 @@ function Player.Render(player_number, screen_dimensions)
 				-- Name under/over Active Items
 				if mod.Config.CoopHUD.players.names.display then
 					if not mod.CoopHUD.DATA.Players[player_number].Label then mod.CoopHUD.DATA.Players[player_number].Label = {}; end
-					local player_name = player.Config.type == 1 and (mainTwin ~= nil and (player.Name .. " & " .. Utils.getPlayerName(mainTwin, player.Index, player.Config.type, "", mod.Config.CoopHUD.tainted))) or player.Name;
+					local player_name = player.Config.type == 1 and (mainTwin ~= nil and (player.Name .. " & " .. Utils.GetPlayerName(mainTwin, player.Index, player.Config.type, "", mod.Config.CoopHUD.tainted))) or player.Name;
 					local name_size = Vector(mod.Fonts.CoopHUD.players:GetStringWidth(player_name),mod.Fonts.CoopHUD.players:GetBaselineHeight(player_name));
 					local max_scale = math.min(1,(50 / name_size.X));
 					local head_offset = mod.Config.CoopHUD.players.heads.display and mod.Config.CoopHUD.players.names.head_offset and player_entity:GetActiveItem(ActiveSlot.SLOT_PRIMARY) ~= 0 and not player_entity:IsCoopGhost() and ((mod.Config.CoopHUD.players.heads.item_offset.Y * (player_data.Edge.Multipliers.X > 0 and -1.5 or 1.5)) * mod.Config.CoopHUD.players.heads.scale.X) or 0;

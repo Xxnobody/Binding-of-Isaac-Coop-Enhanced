@@ -51,7 +51,7 @@ function Misc.GetPickups(screen_dimensions)
 	mod.CoopHUD.Misc.Pickups.Visible = (mod.Config.CoopHUD.misc.pickups.display == 0 or (mod.Config.CoopHUD.misc.pickups.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.pickups.display == 2 and not CoopHUD.IsMapDown or false)));
 	if not mod.CoopHUD.Misc.Pickups.Visible then return; end
 	
-	local pos = Utils.cloneTable(CoopHUD.Positions.Pickups);
+	local pos = Utils.CloneObject(CoopHUD.Positions.Pickups);
 	local offset = mod.Config.CoopHUD.offset;
 	local anchor = mod.Config.CoopHUD.misc.pickups.anchor;
 	local edge_multipliers = Vector(anchor < 3 and -1 or 1,anchor == 1 and -1 or 1);
@@ -87,7 +87,7 @@ function Misc.GetPickups(screen_dimensions)
 			local text_value = string.format('%02d', pickup.Value);
 			local text_pos = (pos + ((Vector((size + 2) - (anchor == 2 and (mod.Fonts.CoopHUD.pickups:GetStringWidth(string.rep("0",text_value:len())) * 2) or 0),1) * scale) + mod.Config.CoopHUD.misc.pickups.text_offset));
 			pickup_data.Sprite = pickup.Sprite;
-			pickup_data.Data = {Pos = Utils.cloneTable(pos), Text = {Pos = text_pos, Value = text_value, Scale = scale, Font = mod.Fonts.CoopHUD.pickups}, Scale = scale, Type = pickup.Type};
+			pickup_data.Data = {Pos = Utils.CloneObject(pos), Text = {Pos = text_pos, Value = text_value, Scale = scale, Font = mod.Fonts.CoopHUD.pickups}, Scale = scale, Type = pickup.Type};
 			seperation = (mod.Fonts.CoopHUD.pickups:GetStringWidth(text_value) + 2) * scale.X;
 		end
 		mod.CoopHUD.Misc.Pickups[i] = pickup_data;
@@ -187,7 +187,7 @@ function Misc.GetDifficulty(screen_dimensions)
 	mod.CoopHUD.Misc.Difficulty.Visible = (mod.Config.CoopHUD.misc.difficulty.display == 0 or (mod.Config.CoopHUD.misc.difficulty.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.difficulty.display == 2 and not CoopHUD.IsMapDown or false)));
 	if not mod.CoopHUD.Misc.Difficulty.Visible then return; end
 	
-	local pos = Utils.cloneTable(CoopHUD.Positions.Difficulty);
+	local pos = Utils.CloneObject(CoopHUD.Positions.Difficulty);
 	local offset = mod.Config.CoopHUD.offset;
 	local anchor = mod.Config.CoopHUD.misc.difficulty.anchor;
 	local scale = mod.Config.CoopHUD.misc.difficulty.scale;
@@ -223,7 +223,7 @@ function Misc.GetExtra(screen_dimensions)
 	mod.CoopHUD.Misc.Extra.Visible = (mod.Config.CoopHUD.misc.extra.display == 0 or (mod.Config.CoopHUD.misc.extra.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.extra.display == 2 and not CoopHUD.IsMapDown or false)));
 	if not mod.CoopHUD.Misc.Extra.Visible then return; end
 	
-	local pos = Utils.cloneTable(CoopHUD.Positions.Difficulty);
+	local pos = Utils.CloneObject(CoopHUD.Positions.Difficulty);
 	local anchor = mod.Config.CoopHUD.misc.extra.anchor;
 	local scale = mod.Config.CoopHUD.misc.extra.scale;
 	local size = 16 * scale.X;
@@ -249,7 +249,7 @@ function Misc.GetExtra(screen_dimensions)
 		
 	if not mod.UnlocksAllowed then
 		local sprite = Misc.GetSprite(mod.CoopHUD.Misc.Extra[1].Sprite, CoopHUD.MiscType.NO_ACHIEVEMENTS);
-		mod.CoopHUD.Misc.Extra[1] = {Sprite = sprite, Data = {Pos = Utils.cloneTable(pos), Scale = scale}};
+		mod.CoopHUD.Misc.Extra[1] = {Sprite = sprite, Data = {Pos = Utils.CloneObject(pos), Scale = scale}};
 	end
 	if game:GetVictoryLap() > 0 then
 		if not mod.UnlocksAllowed then pos.X = pos.X + size; end

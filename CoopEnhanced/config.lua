@@ -14,6 +14,7 @@ mod.DefaultConfig = {
 		CoopMarks = true,
 		CoopFixes = true,
 		CoopExtras = true,
+		CoopTwins = true,
 	},
 	players = {
 		[1] = {
@@ -38,7 +39,7 @@ mod.DefaultConfig = {
 		}
 	}
 };
-mod.Config = Utils.cloneTable(mod.DefaultConfig);
+mod.Config = Utils.CloneObject(mod.DefaultConfig);
 
 if ModConfigMenu == nil then return; end
 

@@ -18,7 +18,7 @@ mod.CoopFixes.DefaultConfig = {
 };
 	
 function mod.CoopFixes.ResetConfig()
-	mod.Config.CoopFixes = Utils.cloneTable(mod.CoopFixes.DefaultConfig);
+	mod.Config.CoopFixes = Utils.CloneObject(mod.CoopFixes.DefaultConfig);
 end
 if mod.Config.CoopFixes == nil then mod.CoopFixes.ResetConfig(); end
 

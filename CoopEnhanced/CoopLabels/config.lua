@@ -44,7 +44,7 @@ mod.CoopLabels.DefaultConfig = {
 };
 	
 function mod.CoopLabels.ResetConfig()
-	mod.Config.CoopLabels = Utils.cloneTable(mod.CoopLabels.DefaultConfig);
+	mod.Config.CoopLabels = Utils.CloneObject(mod.CoopLabels.DefaultConfig);
 end
 if mod.Config.CoopLabels == nil then CoopLabels.ResetConfig(); end
 
@@ -255,7 +255,7 @@ ModConfigMenu.AddSetting(
 		Type = ModConfigMenu.OptionType.NUMBER,
 		Minimum = 1,
 		Maximum = #fonts,
-		CurrentSetting = function() return Utils.getTableIndex(fonts, mod.Config.CoopLabels.fonts.labels); end,
+		CurrentSetting = function() return Utils.GetTableIndex(fonts, mod.Config.CoopLabels.fonts.labels); end,
 		Display = function() return 'Label Font: ' .. mod.Config.CoopLabels.fonts.labels; end,
 		OnChange = function(n) mod.Config.CoopLabels.fonts.labels = fonts[n] Utils.LoadFonts(); end,
 		Info = {'Warning! Game might lag after changing fonts, please restart your game after changing this setting.'}

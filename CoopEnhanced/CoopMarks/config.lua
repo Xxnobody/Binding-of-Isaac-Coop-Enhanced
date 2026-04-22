@@ -28,21 +28,25 @@ mod.CoopMarks.DefaultConfig = {
 			type = 0
 		}
 	},
+	display = 2,
 	coop_only = false,
 	coop_menu = true,
 	colors = false,
 	player_sync = "Global",
 	opacity = 1,
 	offset = Vector(0,0),
+	text_offset = Vector(0,0),
+	head_offset = Vector(0,0),
 	menu_offset = Vector(0,0),
 	rel_offset = Vector(0,0),
 	scale = Vector(0.5,0.5),
 	text_scale = Vector(1,1),
+	head_scale = Vector(1,1),
 	fonts = {mark = 'luaminioutlined',}
 };
 	
 function mod.CoopMarks.ResetConfig()
-	mod.Config.CoopMarks = Utils.cloneTable(mod.CoopMarks.DefaultConfig);
+	mod.Config.CoopMarks = Utils.CloneObject(mod.CoopMarks.DefaultConfig);
 end
 if mod.Config.CoopMarks == nil then CoopMarks.ResetConfig(); end
 
@@ -52,6 +56,17 @@ CoopMarks.MCM = {};
 CoopMarks.MCM.category = "Co-op Marks";
 CoopMarks.MCM.Info = "Co-op Completion Marks settings";
 
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0,
+		Maximum = 3,
+		CurrentSetting = function() return mod.Config.CoopMarks.display; end,
+		Display = function() return 'Display: ' .. (mod.Config.CoopMarks.display == 0 and "None" or (mod.Config.CoopMarks.display == 1 and "Head" or (mod.Config.CoopMarks.display == 2 and "Name" or "Head & Name"))); end,
+		OnChange = function(n) mod.Config.CoopMarks.display = n; end,
+	}
+);
 ModConfigMenu.AddSetting(
 	CoopMarks.MCM.category,
 	{
@@ -78,6 +93,42 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopMarks.offset.Y; end,
 		Display = function() return 'Offset (Y): ' .. mod.Config.CoopMarks.offset.Y; end,
 		OnChange = function(n) mod.Config.CoopMarks.offset.Y = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.text_offset.X; end,
+		Display = function() return 'Text Offset (X): ' .. mod.Config.CoopMarks.text_offset.X; end,
+		OnChange = function(n) mod.Config.CoopMarks.text_offset.X = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.text_offset.Y; end,
+		Display = function() return 'Text Offset (Y): ' .. mod.Config.CoopMarks.text_offset.Y; end,
+		OnChange = function(n) mod.Config.CoopMarks.text_offset.Y = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.head_offset.X; end,
+		Display = function() return 'Head Offset (X): ' .. mod.Config.CoopMarks.head_offset.X; end,
+		OnChange = function(n) mod.Config.CoopMarks.head_offset.X = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.head_offset.Y; end,
+		Display = function() return 'Head Offset (Y): ' .. mod.Config.CoopMarks.head_offset.Y; end,
+		OnChange = function(n) mod.Config.CoopMarks.head_offset.Y = n; end,
 	}
 );
 ModConfigMenu.AddSetting(
@@ -116,6 +167,16 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.text_scale.X * 100)); end,
 		Display = function() return 'Text Scale: ' .. string.format('%.0f', mod.Config.CoopMarks.text_scale.X * 100) .. '%'; end,
 		OnChange = function(n) mod.Config.CoopMarks.text_scale = Vector(n/100, n/100); end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0.0,
+		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.head_scale.X * 100)); end,
+		Display = function() return 'Head Scale: ' .. string.format('%.0f', mod.Config.CoopMarks.head_scale.X * 100) .. '%'; end,
+		OnChange = function(n) mod.Config.CoopMarks.head_scale = Vector(n/100, n/100); end,
 	}
 );
 ModConfigMenu.AddSetting(
@@ -231,7 +292,7 @@ ModConfigMenu.AddSetting(
 		Type = ModConfigMenu.OptionType.NUMBER,
 		Minimum = 1,
 		Maximum = #fonts,
-		CurrentSetting = function() return Utils.getTableIndex(fonts, mod.Config.CoopMarks.fonts.mark); end,
+		CurrentSetting = function() return Utils.GetTableIndex(fonts, mod.Config.CoopMarks.fonts.mark); end,
 		Display = function() return 'Label Font: ' .. mod.Config.CoopMarks.fonts.mark; end,
 		OnChange = function(n) mod.Config.CoopMarks.fonts.mark = fonts[n] Utils.LoadFonts(); end,
 		Info = {'Warning! Game might lag after changing fonts, please restart your game after changing this setting.'}

@@ -160,6 +160,10 @@ mod.HealthTypes = {
 	[8] = {Name = "Gold Heart", Total = 1},
 	[9] = {Name = "Broken Heart", Total = 1},
 };
+mod.TwinTypes = {
+	[PlayerType.PLAYER_JACOB] = true,
+	--[PlayerType.PLAYER_THEFORGOTTEN] = true,
+};
 mod.StageTypes = {
 	["Special"] = 0,
 	["Basement"] = 1,
@@ -210,3 +214,4 @@ mod.Controls = {
 	{Name = "Hold Map 3s", Buttons = Vector(ButtonAction.ACTION_MAP,180), Held = true},
 };
 mod.GridSize = 40;
+mod.MaxControllers = 6;

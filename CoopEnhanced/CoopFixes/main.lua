@@ -14,7 +14,7 @@ function CoopEnhanced.CoopFixes.gameStart(isCont, data)
 	if isCont and data and data.CoopFixes then
 		CoopFixes.DATA.Players = data.CoopFixes.players;
 		--CoopFixes.BackupAllPlayers(true);
-		if mod.Config.CoopFixes.rejoin then mod:AddCallback(ModCallbacks.MC_POST_UPDATE, CoopFixes.RejoinFix); end
+		if mod.Config.CoopFixes.rejoin then mod:AddCallback(ModCallbacks.MC_POST_RENDER, CoopFixes.RejoinFix); end
 	end
 end
 function CoopEnhanced.CoopFixes.gameEnd(data)
@@ -57,16 +57,20 @@ mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CoopFixes.JoinFix);
 --Rejoin Fix
 -- Fixes Characters changing type on rejoin when controller order changes
 function CoopFixes.RejoinFix() --Check if Controller Index is set wildly low/high (e.g. 4294967295 instead of 1)
-	if game:GetFrameCount() % 10 ~= 0 then return; end -- Check only every 10 frames or thrice a second
+	if Isaac:GetFrameCount() % 10 ~= 0 then return; end -- Check only every 10 frames or 6 times a second
 	if CustomHealthAPI and mod.Config.CoopFixes.rejoin then 
 		for i = 1, game:GetNumPlayers() do
 			local player_entity = Isaac.GetPlayer(i - 1);
-			if player_entity and (player_entity.ControllerIndex < 0 or player_entity.ControllerIndex > 5000) then return; end
+			if player_entity and (player_entity.ControllerIndex < 0 or player_entity.ControllerIndex > 5000) then
+				local player_id = Utils.GetPlayerID(player_entity);
+				--if player_id and CoopFixes.DATA.Players[player_id] then player_entity:SetControllerIndex(CoopFixes.DATA.Players[player_id].Data.Controller or 0); end
+				return;
+			end
 		end
 		CoopFixes.FixPlayers();
 		game:GetHUD():AssignPlayerHUDs();
 	end
-	mod:RemoveCallback(ModCallbacks.MC_POST_UPDATE, CoopFixes.RejoinFix);
+	mod:RemoveCallback(ModCallbacks.MC_POST_RENDER, CoopFixes.RejoinFix);
 end
 
 function CoopFixes.FixPlayers()
@@ -79,12 +83,24 @@ function CoopFixes.FixPlayers()
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.FIXES_PRE_REJOIN_EXECUTE, i, player_data, player_entity); -- Execute Pre Fix Player data Callbacks (player_index, player_data(table), player_entity(EntityPlayer))
 		-- Character type
 		if player_data.Type and player_entity:GetPlayerType() ~= player_data.Type then
-			mod.Debug("Player (" .. i .. ") has changed character(s) to " .. player_entity:GetName() .. " since last load, reseting to original character type " .. (Utils.getCharacterByType(player_data.Type).Name or "nil"),CoopFixes.Name);
+			mod.Debug("Player (" .. i .. ") has changed character(s) to " .. player_entity:GetName() .. " since last load, reseting to original character type " .. (Utils.GetCharacterByType(player_data.Type).Name or "nil"),CoopFixes.Name);
 			if CustomHealthAPI then CustomHealthAPI.Helper.ChangePlayerType(player_entity, player_data.Type); else player_entity:ChangePlayerType(player_data.Type); end
 		end
 		-- Character Health
-		if player_data.Health then
-			CustomHealthAPI.Helper.LoadPlayerHealthFromBackup(player_entity, player_data.Health);
+		if player_data.Health and CustomHealthAPI then
+			if CustomHealthAPI.Helper.LoadPlayerHealthFromBackup then
+				CustomHealthAPI.Helper.LoadPlayerHealthFromBackup(player_entity, player_data.Health);
+			else
+				CustomHealthAPI.Helper.CheckIfHealthOrderSet();
+				
+				local savetable = json.decode(player_data.Health)
+				local healthData = savetable.Mainplayers[CustomHealthAPI.Helper.GetPlayerIndex(player_entity)];
+				if healthData ~= nil then CustomHealthAPI.Helper.LoadHealthOfPlayerFromBackup(player_entity, healthData); end
+				
+				CustomHealthAPI.PersistentData.HiddenPlayerHealthBackup = savetable.Hidden or CustomHealthAPI.PersistentData.HiddenPlayerHealthBackup;
+				CustomHealthAPI.PersistentData.HiddenSubplayerHealthBackup = savetable.HiddenSub or CustomHealthAPI.PersistentData.HiddenSubplayerHealthBackup;
+				CustomHealthAPI.PersistentData.RestockInfo = savetable.RestockInfo or CustomHealthAPI.PersistentData.RestockInfo;
+			end
 		end
 		-- Active slots
 		for slot,active in pairs(player_data.Actives) do
@@ -129,7 +145,7 @@ function CoopFixes.LoadBackup(player_index, level_stage)
 		print("There is no player data with an index of " .. (player_index or "nil") .. ". Current player indexes are:");
 		for i = 1, game:GetNumPlayers(), 1 do
 			local player_entity = Isaac.GetPlayer(i - 1);
-			print("Player (" .. i .."): " .. player_entity:GetName() .. ", Index: " .. i .. (mod.Twins[i] and ", Subplayer of Player(" .. mod.Twins[i] .. ") (" .. Isaac.GetPlayer(mod.Twins[i]):GetName() or ""));
+			print("Player (" .. i .."): " .. player_entity:GetName() .. ", Index: " .. i .. (mod.Players.Twins[i] and ", Subplayer of Player(" .. mod.Players.Twins[i] .. ") (" .. Isaac.GetPlayer(mod.Players.Twins[i]):GetName() or ""));
 		end
 		return false;
 	end
@@ -143,7 +159,7 @@ function CoopFixes.LoadBackup(player_index, level_stage)
 	end
 	if level_stage > 0 then
 		if player_data.Backups and #player_data.Backups > 0 and player_data.Backups[level_stage] ~= nil then
-			player_data.Data = Utils.cloneTable(player_data.Backup[level_stage]);
+			player_data.Data = Utils.CloneObject(player_data.Backup[level_stage]);
 		else
 			print("There is no backup at the specified depth. Possible level stage backups include: ");
 			print("Initial: 0");
@@ -192,9 +208,10 @@ function CoopFixes.BackupPlayer(player_index,player_entity,save_floor)
 	end
 	
 	local health = CustomHealthAPI and CustomHealthAPI.Library.GetHealthBackup(player_entity) or nil;
+	local controller_index = (player_entity.ControllerIndex >= 0 and player_entity.ControllerIndex < 5000) and player_entity.ControllerIndex or (CoopFixes.DATA.Players[player_id].Data.Controller or 0);
 	
 	local player_backups = CoopFixes.DATA.Players[player_id].Backups or {};
-	local player_data = {Floor = game:GetLevel():GetName(), Actives = actives, Pockets = pockets, Type = player_entity:GetPlayerType(), Charge = {Blood = player_entity:GetBloodCharge(), Poop = player_entity:GetPoopMana(), Soul = player_entity:GetSoulCharge()}, Health = health};
+	local player_data = {Floor = game:GetLevel():GetName(), Actives = actives, Pockets = pockets, Type = player_entity:GetPlayerType(), Charge = {Blood = player_entity:GetBloodCharge(), Poop = player_entity:GetPoopMana(), Soul = player_entity:GetSoulCharge()}, Controller = controller_index, Health = health};
 
 	if save_floor then player_backups[game:GetLevel():GetStage()] = player_data; end
 	

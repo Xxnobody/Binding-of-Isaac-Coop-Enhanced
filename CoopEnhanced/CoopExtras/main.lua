@@ -66,7 +66,7 @@ function CoopExtras.CoopPrices(_,pickup)
 			local player_entity = Isaac.GetPlayer(i - 1);
 			local player_health = CustomHealthAPI.PersistentData.OverriddenFunctions.GetHearts(player_entity);
 			local player_distance = player_entity.Position:Distance(pickup.Position);
-			local isOwner = (not mod.Config.modules.CoopTreasure or mod.CoopTreasure.GetRoomAssignment(room_type) < 2 or mod.CoopTreasure.IsOwner(Utils.getMainPlayerIndex(player_entity),pickup));
+			local isOwner = (not mod.Config.modules.CoopTreasure or mod.CoopTreasure.GetRoomAssignment(room_type) < 2 or mod.CoopTreasure.IsOwner(Utils.GetMainPlayerIndex(player_entity),pickup));
 			if not player_entity:IsCoopGhost() and isOwner and player_health and (not distance or player_distance < distance) then
 				player, health, distance = player_entity, player_health, player_distance;
 			end

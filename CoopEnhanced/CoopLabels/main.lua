@@ -22,8 +22,8 @@ function CoopLabels.RenderLabels(_)
 			if not CoopLabels.DATA[i] then CoopLabels.DATA[i] = {}; end
 			CoopLabels.DATA[i].Data = {};
 			local player_index = i;
-			if mod.Twins[i] then
-				player_index = mod.Twins[i];
+			if mod.Players.Twins[i] then
+				player_index = mod.Players.Twins[i];
 				num_twins = num_twins + 1;
 			else
 				player_index = i - num_twins;
@@ -50,12 +50,12 @@ function CoopLabels.RenderLabels(_)
 			end
 			
 			-- Head
-			local head_sprite = mod.Config.CoopLabels.display == 1 or mod.Config.CoopLabels.display == 3 and Utils.getHeadSprite(CoopLabels.DATA[i].Sprite, player_entity) or nil;
-			if head_sprite then head_sprite.Color = mod.Config.CoopLabels.player_colors and player_color or Color.Default; end
+			local head_sprite = mod.Config.CoopLabels.display == 1 or mod.Config.CoopLabels.display == 3 and Utils.GetHeadSprite(CoopLabels.DATA[i].Sprite, player_entity) or nil;
+			if head_sprite then head_sprite.Color = (mod.Config.CoopLabels.player_colors and player_color or Color.Default); end
 			
 			-- Name
 			if mod.Config.CoopLabels.display > 1 then
-				local player_name = Utils.getPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.CoopLabels.tainted);
+				local player_name = Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.CoopLabels.tainted);
 				if player_name and player_name:len() > 0 then player_data.Text = {Value = player_name, Scale = mod.Config.CoopLabels.text_scale * scale} end
 			end
 			

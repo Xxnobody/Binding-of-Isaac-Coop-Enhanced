@@ -24,7 +24,7 @@ mod.CoopExtras.DefaultConfig = {
 };
 	
 function mod.CoopExtras.ResetConfig()
-	mod.Config.CoopExtras = Utils.cloneTable(mod.CoopExtras.DefaultConfig);
+	mod.Config.CoopExtras = Utils.CloneObject(mod.CoopExtras.DefaultConfig);
 end
 if mod.Config.CoopExtras == nil then CoopExtras.ResetConfig(); end
 

@@ -387,7 +387,7 @@ mod.CoopHUD.DefaultConfig = {
 };
 
 function mod.CoopHUD.ResetConfig()
-	mod.Config.CoopHUD = Utils.cloneTable(mod.CoopHUD.DefaultConfig);
+	mod.Config.CoopHUD = Utils.CloneObject(mod.CoopHUD.DefaultConfig);
 end
 if mod.Config.CoopHUD == nil then mod.CoopHUD.ResetConfig(); end
 
