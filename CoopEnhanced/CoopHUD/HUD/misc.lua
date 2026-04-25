@@ -96,7 +96,7 @@ function Misc.GetPickups(screen_dimensions)
 end
 
 function Misc.GetWave(screen_dimensions)
-	if not mod.CoopHUD.Misc.Wave then mod.CoopHUD.Misc.Wave = {[1] = {}}; end
+	if not mod.CoopHUD.Misc.Wave or not mod.CoopHUD.Misc.Wave[1] then mod.CoopHUD.Misc.Wave = {[1] = {}}; end
 	mod.CoopHUD.Misc.Wave[1].Data = {};
 		
 	local wave_type = game:GetRoom():GetType() == RoomType.ROOM_BOSSRUSH and CoopHUD.WaveType.BOSSRUSH or ((game:IsGreedMode() and stage ~= LevelStage.STAGE7_GREED and game:GetLevel():GetCurrentRoomIndex() == game:GetLevel():GetStartingRoomIndex() and (game.Difficulty == Difficulty.DIFFICULTY_GREEDIER and CoopHUD.WaveType.GREEDIER or CoopHUD.WaveType.GREED)) or (game:GetRoom():GetBossID() == BossType.GREAT_GIDEON and CoopHUD.WaveType.GIDEON or nil));
@@ -168,7 +168,7 @@ function Misc.GetWave(screen_dimensions)
 end
 
 function Misc.GetDifficulty(screen_dimensions)
-	if not mod.CoopHUD.Misc.Difficulty then mod.CoopHUD.Misc.Difficulty = {[1] = {}}; end
+	if not mod.CoopHUD.Misc.Difficulty or not mod.CoopHUD.Misc.Difficulty[1] then mod.CoopHUD.Misc.Difficulty = {[1] = {}}; end
 	mod.CoopHUD.Misc.Difficulty[1].Data = {};
 	
 	local diffMap = {
@@ -212,7 +212,7 @@ function Misc.GetDifficulty(screen_dimensions)
 end
 
 function Misc.GetExtra(screen_dimensions)
-	if not mod.CoopHUD.Misc.Extra then mod.CoopHUD.Misc.Extra = {[1] = {},[2] = {}}; end
+	if not mod.CoopHUD.Misc.Extra or not mod.CoopHUD.Misc.Extra[1] then mod.CoopHUD.Misc.Extra = {[1] = {},[2] = {}}; end
 	mod.CoopHUD.Misc.Extra[1].Data = {};
 	mod.CoopHUD.Misc.Extra[2].Data = {};
 	if mod.UnlocksAllowed and game:GetVictoryLap() == 0 then

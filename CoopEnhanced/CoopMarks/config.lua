@@ -32,6 +32,9 @@ mod.CoopMarks.DefaultConfig = {
 	coop_only = false,
 	coop_menu = true,
 	colors = false,
+	text_colors = true,
+	head_colors = false,
+	tint_amount = 0.5,
 	player_sync = "Global",
 	opacity = 1,
 	offset = Vector(0,0),
@@ -40,7 +43,7 @@ mod.CoopMarks.DefaultConfig = {
 	menu_offset = Vector(0,0),
 	rel_offset = Vector(0,0),
 	scale = Vector(0.5,0.5),
-	text_scale = Vector(1,1),
+	text_scale = Vector(1.5,1.5),
 	head_scale = Vector(1,1),
 	fonts = {mark = 'luaminioutlined',}
 };
@@ -71,10 +74,39 @@ ModConfigMenu.AddSetting(
 	CoopMarks.MCM.category,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopMarks.head_colors; end,
+		Display = function() return 'Text Colors: ' .. (mod.Config.CoopMarks.head_colors and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopMarks.head_colors = b; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopMarks.text_colors; end,
+		Display = function() return 'Text Colors: ' .. (mod.Config.CoopMarks.text_colors and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopMarks.text_colors = b; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopMarks.colors; end,
 		Display = function() return 'Mark Colors: ' .. (mod.Config.CoopMarks.colors and 'on' or 'off'); end,
 		OnChange = function(b) mod.Config.CoopMarks.colors = b; end,
 		Info = {'Enable to Tint each character mark sheet to their specific color.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0.0,
+		Maximum = 200.0,
+		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.tint_amount * 100)); end,
+		Display = function() return 'Tint Amount: ' .. string.format('%.0f', mod.Config.CoopMarks.tint_amount * 100) .. '%'; end,
+		OnChange = function(n) mod.Config.CoopMarks.tint_amount = n / 100; end,
 	}
 );
 ModConfigMenu.AddSetting(

@@ -1,5 +1,5 @@
 CoopEnhanced = RegisterMod("XxNobody Co-Op", 1);
-CoopEnhanced.Version = 1.1;
+CoopEnhanced.Version = 1.15;
 
 -- TO-DO
 -- - Animated Pickups Support ?
@@ -157,6 +157,7 @@ local function onGameStart(_, isCont)
 	for name,registry_func in pairs(CoopEnhanced.Registry.Modules) do
 		if CoopEnhanced.Config.modules[name] and CoopEnhanced[name].gameStart then CoopEnhanced[name].gameStart(isCont,data); end
 	end
+	if (CoopEnhanced:LoadData() == nil or CoopEnhanced:LoadData():len() == 0) then saveGame(true); end
 end
 CoopEnhanced:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, onGameStart);
 

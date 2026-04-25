@@ -52,7 +52,7 @@ CoopHUD.Item.Active.Special = { -- taken from coopHUD+ (Konoca)
 		sprite_data.Frame = ((item_data.Item.Desc.VarData - 1) + (15 * sprite_data.Frame));
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
-	[CollectibleType.COLLECTIBLE_EVERYTHING_JAR] = function(_,_,sprite_data,_)
+	[CollectibleType.COLLECTIBLE_EVERYTHING_JAR] = function(_,item_data,sprite_data,_)
 		local path = mod.Images.EverythingJar;
 		sprite_data.Animation = 'EverythingJar';
 		sprite_data.Frame = (item_data.Bar.Charge.Current + 1);
@@ -69,16 +69,16 @@ CoopHUD.Item.Active.Special = { -- taken from coopHUD+ (Konoca)
 	[CollectibleType.COLLECTIBLE_GLOWING_HOUR_GLASS] = function(_,item_data,sprite_data,_)
 		local path = mod.Images.GlowingHourGlass;
 		sprite_data.Animation = 'GlowingHourGlass';
-		sprite_data.Frame = ((3 - data.Item.Desc.VarData) + 1);
+		sprite_data.Frame = math.max(0,(3 - item_data.Item.Desc.VarData));
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
-	[CollectibleType.COLLECTIBLE_URN_OF_SOULS] = function(_,_,sprite_data,player_entity)
-		--print(player_entity:GetTotalActiveCharge(0))
-		--((21 * player_entity:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_URN_OF_SOULS)) + player_entity:GetUrnSouls() + 1)
-		
+	[CollectibleType.COLLECTIBLE_URN_OF_SOULS] = function(_,_,sprite_data,player_entity) -- currently player_entity:GetUrnSouls() is broken and returns the number 1065353216
 		local path = mod.Images.UrnOfSouls;
+		local jar_state = player_entity:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_URN_OF_SOULS); -- Returns 1 for closed, 2 for opened
 		sprite_data.Animation = 'SoulUrn';
-		sprite_data.Frame = (0); -- currently player_entity:GetUrnSouls() is broken and returns the number 1065353216 regardlesss of Urn amount
+		--print(player_entity:GetUrnSouls())
+		--sprite_data.Frame = ((21 * jar_state) + (player_entity:GetUrnSouls() + 1))
+		sprite_data.Frame = (0);
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
 	[CollectibleType.COLLECTIBLE_FLIP] = function(_,_,sprite_data,player_entity)

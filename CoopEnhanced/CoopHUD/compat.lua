@@ -5,8 +5,7 @@ local CoopHUD = CoopEnhanced.CoopHUD;
 local function configSetup()
 	if ModConfigMenu == nil then return; end
 	
-	if ClockPickupCounterXX then
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+	if ClockPickupCounterXX then -- Doesnt Work Yet
 		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Animated Pickups');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
@@ -19,10 +18,10 @@ local function configSetup()
 				Info = {'Animates the HUD pickups using Animated Pickups.'},
 			}
 		);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 	end
 	
 	if DIVIDED_VOID then
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Divided Void');
 		local valid_charges = {};
 		for i,_ in pairs(CoopHUD.Item.ChargeBar.Charge) do table.insert(valid_charges,i); end
@@ -121,10 +120,10 @@ local function configSetup()
 				Info = "Set the extra charge color.",
 			}
 		);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 	end
 	
 	if EID then
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'External Item Descriptions');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
@@ -138,10 +137,10 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.mods.EID.display = n; end,
 			}
 		);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 	end
 
 	if Epiphany then
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Epiphany');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
@@ -165,10 +164,10 @@ local function configSetup()
 				Info = {'Used for rendering any additional HUD elements for Epiphany Tarnished characters'},
 			}
 		);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 	end
 	
 	if HPBars then
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Enhanced Boss Bars');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
@@ -181,11 +180,11 @@ local function configSetup()
 				Info = {'Makes the health bar not cover HUD elements.'},
 			}
 		);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 	end
 	
 	
 	if IsaacReflourished then
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Isaac Reflourished');
 		ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Excited Timer');
 		ModConfigMenu.AddSetting(
@@ -319,10 +318,10 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.text_offset.Y = n; end,
 			}
 		);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 	end	
 	
 	if LowFirerateChargeBar then
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Low Firerate Chargebar');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
@@ -346,6 +345,7 @@ local function configSetup()
 				Info = {'Used for moving Jukebox title not in the way of the HUD'},
 			}
 		);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 	end
 	
 	if MinimapAPI then
@@ -401,6 +401,7 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.mods.mAPI.frame.Y = n; end,
 			}
 		);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
 	end
 end
 

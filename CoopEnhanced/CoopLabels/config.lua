@@ -31,6 +31,8 @@ mod.CoopLabels.DefaultConfig = {
 	display = 2,
 	player_sync = "Global",
 	opacity = 1,
+	tint_amount = 1,
+	tear_tint_amount = 1,
 	offset = Vector(0,0),
 	head_offset = Vector(0,0),
 	text_offset = Vector(0,0),
@@ -78,11 +80,33 @@ ModConfigMenu.AddSetting(
 ModConfigMenu.AddSetting(
 	CoopLabels.MCM.category,
 	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0.0,
+		Maximum = 200.0,
+		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopLabels.tint_amount * 100)); end,
+		Display = function() return 'Tint Amount: ' .. string.format('%.0f', mod.Config.CoopLabels.tint_amount * 100) .. '%'; end,
+		OnChange = function(n) mod.Config.CoopLabels.tint_amount = n / 100; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopLabels.MCM.category,
+	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopLabels.tear_colors; end,
 		Display = function() return 'Tear Colors: ' .. (mod.Config.CoopLabels.tear_colors and 'on' or 'off'); end,
 		OnChange = function(b) mod.Config.CoopLabels.tear_colors = b; end,
 		Info = {'Enable to Tint player tears to their color.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopLabels.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0.0,
+		Maximum = 200.0,
+		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopLabels.tear_tint_amount * 100)); end,
+		Display = function() return 'Tint Amount: ' .. string.format('%.0f', mod.Config.CoopLabels.tear_tint_amount * 100) .. '%'; end,
+		OnChange = function(n) mod.Config.CoopLabels.tear_tint_amount = n / 100; end,
 	}
 );
 ModConfigMenu.AddSetting(

@@ -294,9 +294,51 @@ for i = 1, 4 do
 		}
 	);
 end
+ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.players)
+ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.players, 'Player Offsets');
+for i = 1, 4 do
+	ModConfigMenu.AddSetting(
+		CoopHUD.MCM.title,
+		CoopHUD.MCM.categories.players,
+		{
+			Type = ModConfigMenu.OptionType.NUMBER,
+			CurrentSetting = function() return mod.Config.CoopHUD.players[i].offset.X; end,
+			Display = function() return 'Player ' .. tostring(i) ..' Offset (X): ' .. mod.Config.CoopHUD.players[i].offset.X; end,
+			OnChange = function(n) mod.Config.CoopHUD.players[i].offset.X = n; end,
+			Info = "Set the individual player offset.",
+		}
+	);
+	ModConfigMenu.AddSetting(
+		CoopHUD.MCM.title,
+		CoopHUD.MCM.categories.players,
+		{
+			Type = ModConfigMenu.OptionType.NUMBER,
+			CurrentSetting = function() return mod.Config.CoopHUD.players[i].offset.Y; end,
+			Display = function() return 'Player ' .. tostring(i) ..' Offset (Y): ' .. mod.Config.CoopHUD.players[i].offset.Y; end,
+			OnChange = function(n) mod.Config.CoopHUD.players[i].offset.Y = n; end,
+			Info = "Set the individual player offset.",
+		}
+	);
+end
+ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.players)
+ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.players, 'Player Scales');
+for i = 1, 4 do
+	ModConfigMenu.AddSetting(
+		CoopHUD.MCM.title,
+		CoopHUD.MCM.categories.players,
+		{
+			Type = ModConfigMenu.OptionType.NUMBER,
+			CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopHUD.players[i].scale.X * 100)); end,
+			Minimum = 0.0,
+			Display = function() return 'Player ' .. tostring(i) ..' Scale: ' ..  string.format('%.0f', mod.Config.CoopHUD.players[i].scale.X * 100) .. '%'; end,
+			OnChange = function(n) mod.Config.CoopHUD.players[i].scale = Vector(n/100, n/100); end,
+			Info = "Set the player HUD scale.",
+		}
+	);
+end
 
 ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.players);
-ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.players, 'Menu');
+ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.players, 'Character Select');
 ModConfigMenu.AddSetting(
 	CoopHUD.MCM.title,
 	CoopHUD.MCM.categories.players,

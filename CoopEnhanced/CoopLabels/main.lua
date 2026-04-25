@@ -18,7 +18,7 @@ function CoopLabels.RenderLabels(_)
 	local num_twins = 0;
 	for i = 1, game:GetNumPlayers(), 1 do
 		local player_entity = Isaac.GetPlayer(i - 1);
-		if (game:GetFrameCount() % 30) == 0 then -- Only update data once per second
+		if (game:GetFrameCount() % 15) == 0 then -- Only update data twice per second
 			if not CoopLabels.DATA[i] then CoopLabels.DATA[i] = {}; end
 			CoopLabels.DATA[i].Data = {};
 			local player_index = i;
@@ -37,13 +37,14 @@ function CoopLabels.RenderLabels(_)
 			
 			-- Tinted Players
 			if mod.Config.CoopLabels.player_colors then
-				player_entity:SetColor(Utils.ConvertColorToColorize(player_color), 60, 1, false, true);
+				player_entity:SetColor(Utils.ConvertColorToColorize(player_color,1,1,mod.Config.CoopLabels.tint_amount), 60, 1, false, true);
 			end
 			
 			-- Tinted Tears
 			if mod.Config.CoopLabels.tear_colors then
-				player_entity.LaserColor = player_color;
-				player_entity.TearColor = player_color;
+				local tear_color = Utils.ConvertColorToColorize(player_color,mod.Config.CoopLabels.tear_tint_amount);
+				player_entity.LaserColor = tear_color;
+				player_entity.TearColor = tear_color;
 			else
 				player_entity.LaserColor = Color.Default;
 				player_entity.TearColor = Color.Default;
@@ -51,7 +52,7 @@ function CoopLabels.RenderLabels(_)
 			
 			-- Head
 			local head_sprite = mod.Config.CoopLabels.display == 1 or mod.Config.CoopLabels.display == 3 and Utils.GetHeadSprite(CoopLabels.DATA[i].Sprite, player_entity) or nil;
-			if head_sprite then head_sprite.Color = (mod.Config.CoopLabels.player_colors and player_color or Color.Default); end
+			if head_sprite then head_sprite.Color = (mod.Config.CoopLabels.player_colors and Utils.ColorOpacity(player_color,mod.Config.CoopLabels.opacity) or Color.Default); end
 			
 			-- Name
 			if mod.Config.CoopLabels.display > 1 then

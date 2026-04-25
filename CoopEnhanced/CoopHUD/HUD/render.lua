@@ -86,14 +86,18 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 			if player_index == 0 or player_config == nil then break; end --Should never be Zero or above 4
 			local player_name = Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.CoopHUD.tainted);
 			
+			-- Edge Stuff
 			if (player_index % 2) == 0 then
+				edge.Offset.X = -edge.Offset.X;
 				edge.Pos.X = screen_dimensions.Max.X - (edge.Pos.X + mod.Config.CoopHUD.players.mirrored_offset.X);
 				edge.Multipliers.X = -1;
 			end
 			if player_index > 2 then
+				edge.Offset.Y = -edge.Offset.Y;
 				edge.Pos.Y = screen_dimensions.Max.Y - (edge.Pos.Y + mod.Config.CoopHUD.players.mirrored_offset.Y);
 				edge.Multipliers.Y = -1;
 			end
+			edge.Offset = edge.Offset + mod.Config.CoopHUD.players[player_index].offset;
 			
 			if not mod.CoopHUD.DATA.Players[index] then
 				mod.CoopHUD.DATA.Players[index] = {
@@ -106,7 +110,7 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 				CoopHUD.Item.Inventory.Reload(mod.CoopHUD.DATA.Players[index],player_entity);
 				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PLAYER_INIT, index, mod.CoopHUD.DATA.Players[index]); -- Execute Post Player Register Callbacks (index(number),player_data(table))
 			end
-			mod.CoopHUD.DATA.Players[index].Player = {Index = player_index,Config = player_config,Entity = EntityPtr(player_entity),Name = player_name,Type = player_entity:GetPlayerType(),Color = Colors[player_config.color].Value};
+			mod.CoopHUD.DATA.Players[index].Player = {Index = player_index,Config = player_config,Entity = EntityPtr(player_entity),Name = player_name,Type = player_entity:GetPlayerType(),Color = Colors[player_config.color].Value,Scale = mod.Config.CoopHUD.players[player_index].scale};
 			mod.CoopHUD.DATA.Players[index].Edge = edge;
 			mod.CoopHUD.DATA.Players[index].Index = i;
 			mod.CoopHUD.DATA.Players[index].Controller = player_entity.ControllerIndex;

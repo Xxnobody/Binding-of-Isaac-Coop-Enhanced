@@ -15,7 +15,6 @@ function CoopMarks.getMarks(player_entity, player_index, position)
 	local player_sync = mod.Config.CoopMarks.player_sync;
 	local screen_dimensions = Utils.GetScreenDimensions();
 	local completion_marks = Isaac.GetCompletionMarks(player_type);
-	local mark_pos = screen_dimensions.Center + ((Vector(60, -50) + mod.Config.CoopMarks.offset) * Vector(1 / mod.Config.CoopMarks.scale.X, 1 / mod.Config.CoopMarks.scale.Y));
 	if not completion_marks then return nil; end
 		
 	local player_config = player_sync == "Global" and mod.Config.players[player_index] or (mod.Config[player_sync] and mod.Config[player_sync].players[player_index] or mod.Config.CoopMarks.players[player_index]);
@@ -26,29 +25,27 @@ function CoopMarks.getMarks(player_entity, player_index, position)
 			
 	local player_data = {};
 	player_data.Total = 0;
-	player_data.Color = Utils.ConvertColorToFont(player_color, mod.Config.CoopMarks.opacity);
-	player_data.Pos = position or (player_index == 1 and nil or mark_pos + (Vector(0,(player_index - 1) * 80) + mod.Config.CoopMarks.rel_offset) * mod.Config.CoopMarks.scale.Y);
+	player_data.Scale = mod.Config.CoopMarks.scale;
+	player_data.Color = Utils.ConvertColorToColorize(player_color, mod.Config.CoopMarks.opacity, 1, mod.Config.CoopMarks.tint_amount);
+	
+	player_data.Pos = position or (player_index == 1 and (screen_dimensions.Center + Vector(-72, -85)) or ((screen_dimensions.Center + ((Vector(60, -50) + mod.Config.CoopMarks.offset) * Vector(1 / player_data.Scale.X, 1 / player_data.Scale.Y))) + (Vector(0,(player_index - 1) * 80) + mod.Config.CoopMarks.rel_offset) * player_data.Scale.Y));
 	
 	-- Text
 	if mod.Config.CoopMarks.display > 1 then 
-		player_data.Text = {Value = (Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, false)), Pos = (mod.Config.CoopMarks.text_offset + (player_index == 1 and screen_dimensions.Center + Vector(-36, -110) or player_data.Pos + Vector(18 * mod.Config.CoopMarks.text_scale.X, -16 * mod.Config.CoopMarks.text_scale.Y))), Scale = (player_index == 1 and Vector(1.5,1.5) or mod.Config.CoopMarks.text_scale)};
-		player_data.Text.Pos.X = player_data.Text.Pos.X - ((mod.Fonts.CoopMarks.mark:GetStringWidth(player_data.Text.Value) / 2) * player_data.Text.Scale.X);
+		local text_scale = (player_index == 1 and Vector(1.5,1.5) or mod.Config.CoopMarks.text_scale * player_data.Scale);
+		player_data.Text = {Value = (Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, false)), Pos = (player_data.Pos + (mod.Config.CoopMarks.text_offset + Vector(24, -16)) * text_scale), Scale = text_scale, Color = Utils.ConvertColorToFont(player_color, mod.Config.CoopMarks.opacity)};
+		player_data.Text.Pos.X = player_data.Text.Pos.X - ((mod.Fonts.CoopMarks.mark:GetStringWidth(player_data.Text.Value) / 2) * text_scale.X);
 	end
 	-- Head
-	if mod.Config.CoopLabels.display == 1 or mod.Config.CoopLabels.display == 3 then
-		player_data.Head = {Sprite = Utils.GetHeadSprite(nil, player_entity), Pos = (player_data.Text.Pos + (mod.Config.CoopMarks.head_offset - Vector(2,8)) * mod.Config.CoopMarks.head_scale)};
-		if player_data.Head.Sprite then
-			player_data.HeadSprite.Scale = mod.Config.CoopMarks.head_scale;
-			player_data.HeadSprite.Color = player_color;
-		end
+	if mod.Config.CoopMarks.display == 1 or mod.Config.CoopMarks.display == 3 then
+		local head_scale = (player_index == 1 and Vector(1,1) or mod.Config.CoopMarks.head_scale * player_data.Scale);
+		player_data.Head = {Sprite = Utils.GetHeadSprite(nil, player_entity), Pos = (player_data.Pos + (mod.Config.CoopMarks.head_offset + Vector(2,-10)) * head_scale), Scale = head_scale};
 	end
 	
 	if not player_data.Sprite then
 		local sprite = Sprite();
 		sprite:Load("gfx/ui/completion_widget.anm2",true);
 		sprite:Play("Idle");
-		sprite.Color = mod.Config.CoopMarks.colors and player_color or Color.Default;
-		sprite.Scale = mod.Config.CoopMarks.scale;
 		sprite:SetFrame(0);
 		for x = 0, 11, 1 do sprite:ReplaceSpritesheet(x,"gfx/ui/completion_widget_pause.png"); end
 		sprite:LoadGraphics();
@@ -77,7 +74,7 @@ end
 mod:AddCallback(ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER, CoopMarks.onPause);
 
 function CoopMarks.onRender()
-	if mod.Config.CoopMarks.coop_menu and not not Utils.IsPauseMenuOpen() then -- Render Marks w/ Co-op Character Select
+	if mod.Config.CoopMarks.coop_menu and not Utils.IsPauseMenuOpen() then -- Render Marks w/ Co-op Character Select
 		for i,joining in pairs(mod.Players.Joining) do
 			local character_data = mod.Players.Unlocked[joining.Selected];
 			if character_data.Type < 0 then goto continue; end
@@ -89,14 +86,20 @@ function CoopMarks.onRender()
 			if not player_data then goto continue; end
 			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.MARKS_PRE_RENDER, joining.Index, player_data, true); -- Execute Pre Marks Render Callbacks (player_index, player_data(table), isCoopSelectMenu(Boolean))
 			
+			player_data.Sprite.Scale = player_data.Scale;
+			player_data.Sprite.Color = mod.Config.CoopMarks.colors and player_data.Color or Color.Default;
 			player_data.Sprite:Render(player_data.Pos);
-			if player_data.Head and player_data.Head.Sprite then player_data.Head.Sprite:Render(player_data.Head.Pos); end
+			if player_data.Head and player_data.Head.Sprite then
+				player_data.Head.Sprite.Scale = player_data.Head.Scale;
+				player_data.Head.Sprite.Color = mod.Config.CoopMarks.head_colors and player_data.Color or Color.Default;
+				player_data.Head.Sprite:Render(player_data.Head.Pos);
+			end
 			if player_data.Text and player_data.Text.Value then
 				mod.Fonts.CoopMarks.mark:DrawStringScaled(
 					player_data.Text.Value,
 					player_data.Text.Pos.X, player_data.Text.Pos.Y,
 					player_data.Text.Scale.X, player_data.Text.Scale.Y,
-					player_data.Color, player_data.Text.Width or 0, player_data.Text.Center or true
+					player_data.Text.Color, player_data.Text.Width or 0, player_data.Text.Center or true
 				);
 			end
 			::continue::
@@ -107,17 +110,25 @@ function CoopMarks.onRender()
 		local player_data = CoopMarks.DATA[i];
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.MARKS_PRE_RENDER, i, player_data, false); -- Execute Pre Marks Render Callbacks (player_index, player_data(table), isCoopSelectMenu(Boolean))
 		if player_data and player_data.Total > 0 and (i > 1 or mod.Players.Total > 1 or not mod.Config.CoopMarks.coop_only) then -- Dont render if nothing has been completed, same as vanilla
-			if i > 1 then player_data.Sprite:Render(player_data.Pos); end
-			if player_data.Head and player_data.Head.Sprite then player_data.Head.Sprite:Render(player_data.Head.Pos); end
+			if i > 1 then
+				player_data.Sprite.Scale = player_data.Scale;
+				player_data.Sprite.Color = mod.Config.CoopMarks.colors and player_data.Color or Color.Default;
+				player_data.Sprite:Render(player_data.Pos);
+			end
+			if player_data.Head and player_data.Head.Sprite then
+				player_data.Head.Sprite.Scale = player_data.Head.Scale;
+				player_data.Head.Sprite.Color = mod.Config.CoopMarks.head_colors and player_data.Color or Color.Default;
+				player_data.Head.Sprite:Render(player_data.Head.Pos);
+			end
 			if player_data.Text and player_data.Text.Value then
 				mod.Fonts.CoopMarks.mark:DrawStringScaled(
 					player_data.Text.Value,
 					player_data.Text.Pos.X, player_data.Text.Pos.Y,
 					player_data.Text.Scale.X, player_data.Text.Scale.Y,
-					player_data.Color, player_data.Text.Width or 0, player_data.Text.Center or true
+					player_data.Text.Color, player_data.Text.Width or 0, player_data.Text.Center or true
 				);
 			end
 		end
 	end
 end
-mod:AddCallback(ModCallbacks.MC_GET_SHADER_PARAMS, CoopMarks.onRender);
+mod:AddCallback(ModCallbacks.MC_POST_PAUSE_SCREEN_RENDER, CoopMarks.onRender);

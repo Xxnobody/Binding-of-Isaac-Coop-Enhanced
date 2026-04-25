@@ -199,7 +199,7 @@ function Utils.GetHealthTypes()
 		local total = info.MaxHP and info.MaxHP > 0 and info.MaxHP or (info.AnimationName ~= nil and (type(info.AnimationName) == "table" and #info.AnimationName > 0 and #info.AnimationName or 1) or (info.AnimationNames ~= nil and (type(info.AnimationNames) == "table" and #info.AnimationNames > 0 and #info.AnimationNames or 1)));
 		table.insert(health_types,{Name = name, Total = total, Order = (info.SortOrder or 0)});
 	end
-	table.sort(health_types,function (a,b) return a.Order < b.Order end);
+	table.sort(health_types,function (a,b) return a.Name < b.Name end);
 	return health_types;
 end
 
@@ -247,28 +247,6 @@ function Utils.GetColorIndexByName(color_name)
 end
 
 -- Player/Character Utils
-local random_player = {Name = "Random", Type = PlayerType.PLAYER_POSSESSOR, Achievement = nil, Sprite = {Anm2 = mod.Animations.Coop, Animation = "Main", Frame = 0,Sheets = {[1] = mod.Images.Blank}}};
-function Utils.GetUnlockedCharacters(no_mods,no_random)
-	local characters = {mod.Characters[1]};
-	local last_achievement = 0;
-	for i,character in pairs(mod.Characters) do
-		if character.Achievement and character.Achievement ~= last_achievement and Isaac.GetPersistentGameData():Unlocked(character.Achievement) then
-			table.insert(characters,character);
-		end
-		last_achievement = character.Achievement;
-	end
-	if not no_mods then
-		for i,character in pairs(mod.CharactersModded) do
-			if not character.Achievement or (character.Achievement > 0 and character.Achievement ~= last_achievement and Isaac.GetPersistentGameData():Unlocked(character.Achievement)) then
-				table.insert(characters,character);
-			end
-			last_achievement = character.Achievement;
-		end
-	end
-	if not no_random and #characters > 1 then table.insert(characters,random_player); end
-	return characters;
-end
-
 function Utils.GetCharacterByType(player_type)
 	for i,character in pairs(mod.Characters) do
 		if character.Type == player_type then return character, i; end
@@ -432,6 +410,28 @@ function Utils.GetHeadSprite(sprite, player_entity, scale) -- Taken from coopHUD
 	end
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.POST_HEAD_SPRITE,sprite);
 	return sprite;
+end
+
+local random_player = {Name = "Random", Type = PlayerType.PLAYER_POSSESSOR, Achievement = nil, Sprite = {Anm2 = mod.Animations.Coop, Animation = "Main", Frame = 0,Sheets = {[1] = mod.Images.Blank}}};
+function Utils.GetUnlockedCharacters(no_mods,no_random)
+	local characters = {mod.Characters[1]};
+	local last_achievement = 0;
+	for i,character in pairs(mod.Characters) do
+		if character.Achievement and character.Achievement ~= last_achievement and Isaac.GetPersistentGameData():Unlocked(character.Achievement) then
+			table.insert(characters,character);
+		end
+		last_achievement = character.Achievement;
+	end
+	if not no_mods then
+		for i,character in pairs(mod.CharactersModded) do
+			if not character.Achievement or (character.Achievement > 0 and character.Achievement ~= last_achievement and Isaac.GetPersistentGameData():Unlocked(character.Achievement)) then
+				table.insert(characters,character);
+			end
+			last_achievement = character.Achievement;
+		end
+	end
+	if not no_random and #characters > 1 then table.insert(characters,random_player); end
+	return characters;
 end
 
 function Utils.GetDevilPrice(player_entity,player_health,collectible_type)

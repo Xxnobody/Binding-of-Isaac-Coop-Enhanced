@@ -25,19 +25,6 @@ function CoopTwins.GetTwin(twin_entity)
 	end
 end
 
-function CoopTwins.SetTwin(main_twin,controller_index)
-	local twin_entity = main_twin:GetOtherTwin();
-	local twin_pos = twin_entity.Position;
-	local twin_type = twin_entity:GetPlayerType();
-	
-	PlayerManager.RemoveCoPlayer(twin_entity);
-	
-	local new_twin = PlayerManager.SpawnCoPlayer2(twin_type);
-	new_twin.Position = twin_pos;
-	new_twin:SetControllerIndex(controller_index);
-	CoopTwins.DATA.Twins[Utils.GetPlayerID(main_twin)] = Utils.GetPlayerID(new_twin);
-	mod.RefreshFrameCount();
-end
 
 function CoopTwins.BirthrightJacobEsau(birth_twin)
 	local other_twin = CoopTwins.GetTwin(birth_twin);
@@ -58,18 +45,20 @@ function CoopTwins.onRender(_)
 		local joinable_twins = {};
 		local joinable_twin = nil;
 		for i,player_entity in pairs(PlayerManager.GetPlayers()) do
-			if mod.TwinTypes[player_entity:GetPlayerType()] and player_entity:GetOtherTwin() ~= nil then
+			if mod.TwinTypes[player_entity:GetPlayerType()] and player_entity:GetOtherTwin() ~= nil and CoopTwins.SetTwin[player_entity:GetPlayerType()] ~= nil then
 				table.insert(joinable_twins,player_entity);
 				if not joinable_twin and Input.IsActionPressed(ButtonAction.ACTION_DROP, player_entity.ControllerIndex) then joinable_twin = player_entity; end
 			end
 		end
+		if not CoopTwins.DATA.Joining or type(CoopTwins.DATA.Twins) ~= "table" then CoopTwins.DATA.Joining = {}; end
+		if not CoopTwins.DATA.Twins then CoopTwins.DATA.Twins = {}; end
 		for i = 1, CoopEnhanced.MaxControllers, 1 do
 			local controller_index = (i - 1);
 			local player_entity = Utils.GetPlayerByController(controller_index);
 			local twin_joining = CoopTwins.DATA.Joining[i];
 			if player_entity == nil and mod.GetJoiningByController(controller_index) == nil then 
 				if joinable_twin ~= nil and Input.IsActionPressed(ButtonAction.ACTION_JOINMULTIPLAYER, controller_index) then
-					CoopTwins.SetTwin(joinable_twin,controller_index);
+					CoopTwins.SetTwin[joinable_twin:GetPlayerType()](joinable_twin,controller_index);
 				elseif Input.IsActionPressed(ButtonAction.ACTION_DROP,controller_index) then
 					if twin_joining == nil then 
 						local player_index = CoopEnhanced.Players.Total + 1;
@@ -80,7 +69,7 @@ function CoopTwins.onRender(_)
 						CoopTwins.DATA.Joining[i] = twin_joining;
 					else
 						if Input.IsActionTriggered(ButtonAction.ACTION_MENUCONFIRM, controller_index) and joinable_twins[twin_joining.Selected] then
-							CoopTwins.SetTwin(joinable_twins[twin_joining.Selected],controller_index);
+							CoopTwins.SetTwin[joinable_twin:GetPlayerType()](joinable_twins[twin_joining.Selected],controller_index);
 						elseif Input.IsActionTriggered(ButtonAction.ACTION_MENULEFT, controller_index) then
 							twin_joining.Selected = twin_joining.Selected - 1; --joining.Move = joining.Move + 24;
 						elseif Input.IsActionTriggered(ButtonAction.ACTION_MENURIGHT, controller_index) then
@@ -109,6 +98,7 @@ function CoopTwins.onRender(_)
 end
 mod:AddPriorityCallback(ModCallbacks.MC_POST_RENDER, CallbackPriority.IMPORTANT, CoopTwins.onRender);
 
+-- Add item functions
 local function addCollectible(_, collectible_type, _, _, _, _, player_entity)
 	local item_functions = CoopTwins.ItemFunctions[collectible_type];
 	if not item_functions then return; end

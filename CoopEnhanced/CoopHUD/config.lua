@@ -127,21 +127,29 @@ mod.CoopHUD.DefaultConfig = {
 	
 	players = {
 		[1] = {
+			offset = Vector(0,0),
+			scale = Vector(1,1),
 			color = Utils.GetColorIndexByName("Red"),
 			name = "",
 			type = 0
 		},
 		[2] = {
+			offset = Vector(0,0),
+			scale = Vector(1,1),
 			color = Utils.GetColorIndexByName("Blue"),
 			name = "",
 			type = 0
 		},
 		[3] = {
+			offset = Vector(0,0),
+			scale = Vector(1,1),
 			color = Utils.GetColorIndexByName("Green"),
 			name = "",
 			type = 0
 		},
 		[4] = {
+			offset = Vector(0,0),
+			scale = Vector(1,1),
 			color = Utils.GetColorIndexByName("Yellow"),
 			name = "",
 			type = 0
