@@ -54,7 +54,7 @@ Here are each modules features. Each module can be totally disabled by the main 
 Several mods have been given built in support for most features:
 - [Angel Beggars](https://steamcommunity.com/sharedfiles/filedetails/?id=1832381849): Support for Angel Deal Coop Treasure generation.
 - [Divided-Void](https://steamcommunity.com/sharedfiles/filedetails/?id=2900644381): Full HUD support with extra features and customization options.
-- [Enhanced Boss]Bars (https://steamcommunity.com/sharedfiles/filedetails/?id=2635267643): HUD support with auto-padding for HUD elements.
+- [Enhanced Boss Bars](https://steamcommunity.com/sharedfiles/filedetails/?id=2635267643): HUD support with auto-padding for HUD elements.
 - [Edith (Restored)](https://steamcommunity.com/sharedfiles/filedetails/?id=3552120418): Some HUD support.
 - [Epiphany](https://steamcommunity.com/sharedfiles/filedetails/?id=3012430463): Some HUD support (Needs Testing).
 - [Fiend Folio](https://steamcommunity.com/sharedfiles/filedetails/?id=3012430463): Some HUD support (Needs Testing).
