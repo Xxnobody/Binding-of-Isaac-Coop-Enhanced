@@ -67,7 +67,8 @@ Several mods have been given built in support for most features:
 - Martha of Bethany (https://steamcommunity.com/sharedfiles/filedetails/?id=2987653166): Some HUD support.
 - Mei (https://steamcommunity.com/sharedfiles/filedetails/?id=842051906): Some HUD support.
 - Nemesis (https://steamcommunity.com/sharedfiles/filedetails/?id=2501339433): Some HUD support.
-- Revelations (https://steamcommunity.com/sharedfiles/filedetails/?id=2880387531): Some HUD support.
+- [Revelations](https://steamcommunity.com/sharedfiles/filedetails/?id=2880387531): Some HUD support.
+- ([Reverie](https://steamcommunity.com/sharedfiles/filedetails/?id=2538556220)): Some HUD support.
 - Samael (https://steamcommunity.com/sharedfiles/filedetails/?id=3897795840): Some HUD support.
 - Zodiac Planetariums (https://steamcommunity.com/sharedfiles/filedetails/?id=2516129211): Support for Planetarium Coop Treasure generation.
 
