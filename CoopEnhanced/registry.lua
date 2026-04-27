@@ -525,8 +525,17 @@ if not REPENTOGON then return; end
 -- Mod Compat Registry
 local function modCompats()
 	local anim2 = "gfx/ui/coop_menu.anm2";
+	if ANDROMEDA then
+		local mod_sprite = Utils.GetHeadSprite(nil,nil,Isaac.GetPlayerTypeByName("Andromeda"));
+		CoopEnhanced.AddCharacter("Andromeda",Isaac.GetPlayerTypeByName("Andromeda"),nil,{Anm2 = mod_sprite:GetFilename(),Animation = mod_sprite:GetAnimation(),Frame = 0});
+		mod_sprite = Utils.GetHeadSprite(nil,nil,Isaac.GetPlayerTypeByName("AndromedaB",true));
+		CoopEnhanced.AddCharacter("The Abandoned",Isaac.GetPlayerTypeByName("AndromedaB",true),Isaac.GetAchievementIdByName("Tainted Andromeda"),{Anm2 = mod_sprite:GetFilename(),Animation = mod_sprite:GetAnimation(),Frame = 0});
+	end
+	if BalatroJokers then
+		CoopEnhanced.AddCharacter("Jimbo",BalatroJokers.Enums.Players.JIMBO,nil,{Anm2 = anim2,Animation = "Balatro",Frame = 0});
+	end
 	if Epiphany then
-		CoopEnhanced.AddCharacter("Tarnished Characters",Epiphany.technical_character,nil,{Anm2 = anim2,Animation = "Epiphany",Frame = 0}); -- Door Sprite
+		CoopEnhanced.AddCharacter("Tarnished Characters",Isaac.GetPlayerTypeByName("[TECHNICAL] C-Side Detect"),nil,{Anm2 = anim2,Animation = "Epiphany",Frame = 0}); -- Door Sprite
 		
 		local epiphany_anm2 = "gfx/ui/coop/tr_coop_menu.anm2";
 		CoopEnhanced.AddCharacter("Tarnished Isaac",Epiphany.PlayerType.ISAAC,-1,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 1});
@@ -551,6 +560,10 @@ local function modCompats()
 		CoopEnhanced.AddCharacter("Edith",EdithRestored.Enums.PlayerType.EDITH,EdithRestored.Enums.Achievements.Characters.EDITH,{Anm2 = anim2,Animation = "Edith",Frame = 0});
 		CoopEnhanced.AddCharacter("The Restored",EdithRestored.Enums.PlayerType.EDITH_B,EdithRestored.Enums.Achievements.Characters.TAINTED,{Anm2 = anim2,Animation = "Edith",Frame = 1});
 	end
+	if ENAmod then
+		CoopEnhanced.AddCharacter("ENA",Isaac.GetPlayerTypeByName("ENA"),nil,{Anm2 = anim2,Animation = "ENA",Frame = 0});
+		CoopEnhanced.AddCharacter("The Worker",Isaac.GetPlayerTypeByName("ENA",true),Isaac.GetAchievementIdByName("Tainted ENA"),{Anm2 = anim2,Animation = "ENA",Frame = 1});
+	end
 	if FiendFolio then
 		CoopEnhanced.AddCharacter("Fiend",FiendFolio.PLAYER.FIEND,nil,{Anm2 = anim2,Animation = "Fiend",Frame = 0});
 		CoopEnhanced.AddCharacter("The Bastard",FiendFolio.PLAYER.BIEND,nil,{Anm2 = anim2,Animation = "Fiend",Frame = 1});
@@ -561,6 +574,11 @@ local function modCompats()
 		--CoopEnhanced.AddCharacter("Fient",FiendFolio.PLAYER.FIENT,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 5});
 		--CoopEnhanced.AddCharacter("Fend",FiendFolio.PLAYER.FEND,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 6});
 		--CoopEnhanced.AddCharacter("Peat",FiendFolio.PLAYER.PEAT,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 7});
+	end
+	if JosephMod then
+		
+		local mod_sprite = Utils.GetHeadSprite(nil,nil,JosephMod.enums.PlayerType.PLAYER_JOSEPH);
+		CoopEnhanced.AddCharacter("Joseph",JosephMod.enums.PlayerType.PLAYER_JOSEPH,nil,{Anm2 = mod_sprite:GetFilename(),Animation = mod_sprite:GetAnimation(),Frame = 0});
 	end
 	if _JERICHO_MOD then
 		CoopEnhanced.AddCharacter("Jericho",_JERICHO_MOD.Character.JERICHO,nil,{Anm2 = anim2,Animation = "Jericho",Frame = 0});
@@ -578,28 +596,38 @@ local function modCompats()
 		CoopEnhanced.AddCharacter("Nemesis",Isaac.GetPlayerTypeByName("Nemesis"),nil,{Anm2 = anim2,Animation = "Nemesis",Frame = 0});
 		CoopEnhanced.AddCharacter("The Ensorcelled",Isaac.GetPlayerTypeByName("Tainted Nemesis",true),nil,{Anm2 = anim2,Animation = "Nemesis",Frame = 1});
 	end
+	if NoahMod then
+		local mod_sprite = Utils.GetHeadSprite(nil,nil,NoahMod.Player.Noah.ID);
+		CoopEnhanced.AddCharacter("Noah",NoahMod.Player.Noah.ID,NoahMod.Enum.Unlock.NOAH,{Anm2 = mod_sprite:GetFilename(),Animation = mod_sprite:GetAnimation(),Frame = 0});
+		mod_sprite = Utils.GetHeadSprite(nil,nil,Isaac.GetPlayerTypeByName("Noah",true));
+		CoopEnhanced.AddCharacter("The Drowned",Isaac.GetPlayerTypeByName("Noah",true),Isaac.GetAchievementIdByName("Tainted Noah"),{Anm2 = mod_sprite:GetFilename(),Animation = mod_sprite:GetAnimation(),Frame = 0});
+	end
 	if Reverie then
 		for i,player in pairs(Reverie.Players) do
-			local player_config = EntityConfig.GetPlayer(player.Type);
-			local mod_sprite = player_config ~= nil and player_config:GetModdedCoopMenuSprite() or Sprite();
+			local mod_sprite = Utils.GetHeadSprite(nil,nil,player_type);
 			local achievment = player.Name:lower():find("hourai") and -1 or nil;
 			local sprite_data = {Anm2 = mod_sprite:GetFilename(), Animation = player.Name, Frame = 0};
 			CoopEnhanced.AddCharacter(player.Name,player.Type,achievment,sprite_data);
 		end
 	end
-	if SamaelMod then
-		CoopEnhanced.AddCharacter("Samael",SamaelMod.Lib.SamaelId,nil,{Anm2 = anim2,Animation = "Samael",Frame = 0});
-		CoopEnhanced.AddCharacter("The Inevitable",SamaelMod.Lib.TaintedSamaelId,nil,{Anm2 = anim2,Animation = "Samael",Frame = 1});
-	end
 	if REVEL then
 		CoopEnhanced.AddCharacter("Sarah",REVEL.CHAR.SARAH.Type,nil,{Anm2 = anim2,Animation = "Revelations",Frame = 0});
 		CoopEnhanced.AddCharacter("Dante",REVEL.CHAR.DANTE.Type,nil,{Anm2 = anim2,Animation = "Revelations",Frame = 1});
 	end
+	if SamaelMod then
+		CoopEnhanced.AddCharacter("Samael",SamaelMod.Lib.SamaelId,nil,{Anm2 = anim2,Animation = "Samael",Frame = 0});
+		CoopEnhanced.AddCharacter("The Inevitable",SamaelMod.Lib.TaintedSamaelId,nil,{Anm2 = anim2,Animation = "Samael",Frame = 1});
+	end
+	if TheSerpent then
+		local mod_sprite = Utils.GetHeadSprite(nil,nil,TheSerpent.Player.Serpent.ID);
+		CoopEnhanced.AddCharacter("The Serpent",TheSerpent.Player.Serpent.ID,TheSerpent.Player.Serpent.ACHIEVEMENT,{Anm2 = mod_sprite:GetFilename(),Animation = "The Serpent",Frame = 0});
+		mod_sprite = Utils.GetHeadSprite(nil,nil,TheSerpent.Player.SerpentB.ID);
+		CoopEnhanced.AddCharacter("The Banished",TheSerpent.Player.SerpentB.ID,TheSerpent.Player.SerpentB.ACHIEVEMENT,{Anm2 = mod_sprite:GetFilename(),Animation = "The Serpent",Frame = 0});
+	end
 	if XMLData.GetModById("2785553778") and XMLData.GetModById("2785553778").enabled == "true" then
 		for i,player_name in pairs({"Zach","Tainted Zach"}) do
 			local player_type = Isaac.GetPlayerTypeByName(player_name,player_name:find("Tainted"));
-			local player_config = EntityConfig.GetPlayer(player_type);
-			local mod_sprite = player_config ~= nil and player_config:GetModdedCoopMenuSprite() or Sprite();
+			local mod_sprite = Utils.GetHeadSprite(nil,nil,player_type);
 			local sprite_data = {Anm2 = mod_sprite:GetFilename(), Animation = player_name, Frame = 0};
 			CoopEnhanced.AddCharacter(player_name,player_type,nil,sprite_data);
 		end

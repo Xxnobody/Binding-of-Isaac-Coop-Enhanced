@@ -8,7 +8,7 @@ if not REPENTOGON then return; end
 
 local function ModCompat()
 	if Epiphany then
-		CoopMarks.IgnoredCharacters[Epiphany.technical_character] = true;
+		CoopMarks.IgnoredCharacters[Isaac.GetPlayerTypeByName("[TECHNICAL] C-Side Detect")] = true;
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_MODS_LOADED, ModCompat);

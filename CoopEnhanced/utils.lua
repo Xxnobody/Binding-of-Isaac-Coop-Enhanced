@@ -176,6 +176,7 @@ function Utils.CloneSprite(sprite,sprite_data)
 			new_sprite:ReplaceSpritesheet(id,sheet);
 		end
 	end
+	sprite_data.Frame = math.max(0,sprite_data.Frame);
 	new_sprite:LoadGraphics();
 	new_sprite:SetFrame(sprite_data.Animation, sprite_data.Frame);
 	return new_sprite;
@@ -422,9 +423,9 @@ function Utils.GetPlayerName(player_entity, player_index, name_type, custom_name
 	return name_type == 0 and "P" .. player_index or (name_type == 1 and char_name or custom_name);
 end
 
-function Utils.GetHeadSprite(sprite, player_entity, scale) -- Taken from coopHUD *WIP*, credit to Srokks, modified by xxnobody
+function Utils.GetHeadSprite(sprite, player_entity, player_type) -- Taken from coopHUD *WIP*, credit to Srokks, modified by xxnobody
 	local isBaby = Utils.IsBaby(player_entity);
-	local player_type = isBaby and player_entity.BabySkin or player_entity:GetPlayerType();
+	player_type = player_type or player_entity~= nil and (isBaby and player_entity.BabySkin or player_entity:GetPlayerType()) or -1;
 	if isBaby and player_type > 60 then
 		player_type = 32;
 	end
@@ -443,7 +444,6 @@ function Utils.GetHeadSprite(sprite, player_entity, scale) -- Taken from coopHUD
 				mod_sprite:ReplaceSpritesheet(id,sheet);
 			end
 		end
-		sprite.Scale = scale or Vector.One;
 		sprite:LoadGraphics();
 		sprite:SetFrame(character_data.Sprite.Animation, character_data.Sprite.Frame);
 	elseif player_type >= 0 then
@@ -452,7 +452,6 @@ function Utils.GetHeadSprite(sprite, player_entity, scale) -- Taken from coopHUD
 			sprite:Load(mod.Animations.Coop, true);
 			sprite:ReplaceSpritesheet(1, mod.Images.Blank); -- Hide Baby spritesheet
 		end
-		sprite.Scale = scale or Vector.One;
 		local frame = player_type + 1; -- +1 because 0 is Frame Random
 		local animation = "Main";
 		if sprite:GetFilename() ~= mod_anim and Utils.HasTwin(player_type) and (player_entity and player_entity:GetOtherTwin() == nil or player_type == PlayerType.PLAYER_LAZARUS2_B) then
@@ -535,7 +534,7 @@ function Utils.IsPlayerDying(player_entity) -- Taken from LibraryExpanded
 	return player_entity:GetSprite():GetAnimation():sub(-#"Death") == "Death";
 end
 function Utils.IsBaby(player_entity)
-	if not REPENTOGON then return false; end
+	if not REPENTOGON or not player_entity then return false; end
 	return player_entity.BabySkin ~= BabySubType.BABY_UNASSIGNED;
 end
 function Utils.IsIllusion(player_entity)
