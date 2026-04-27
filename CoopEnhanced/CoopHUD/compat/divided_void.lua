@@ -19,7 +19,7 @@ function CoopHUD.DividedVoid()
 	local SubChargeSprite = nil;
 
 	local function RenderVoid(sprite,item_data,sprite_data,player_entity)
-		DIVIDED_VOID.MaxCharge = valid_charges[mod.Config.CoopHUD.mods.DIVOID.max_charge];
+		DIVIDED_VOID.MaxCharge = valid_charges[mod.Config.CoopHUD.compat.DIVOID.max_charge];
 
 		local void_data = DIVIDED_VOID.PlayerswithVoid and DIVIDED_VOID.PlayerswithVoid[player_entity.Index];
 		if void_data then
@@ -37,15 +37,15 @@ function CoopHUD.DividedVoid()
 			if void_data.frame then	sprite_data.Frame = void_data.frame; end
 
 			if item_data.Bar.Display then
-				local bar_pos = item_data.Bar.Pos + (Vector(4,2) * item_data.Bar.Scale) + Vector(mod.Config.CoopHUD.mods.DIVOID.offset.X * (item_data.Bar.Flip and -1 or 1),mod.Config.CoopHUD.mods.DIVOID.offset.Y);
-				local opacity = mod.Config.CoopHUD.mods.DIVOID.opacity;
+				local bar_pos = item_data.Bar.Pos + (Vector(4,2) * item_data.Bar.Scale) + Vector(mod.Config.CoopHUD.compat.DIVOID.offset.X * (item_data.Bar.Flip and -1 or 1),mod.Config.CoopHUD.compat.DIVOID.offset.Y);
+				local opacity = mod.Config.CoopHUD.compat.DIVOID.opacity;
 				local current_charge = void_data.subcharge;
 				local max_charge = DIVIDED_VOID.MaxCharge;
 				local extra_charge = math.max(0,current_charge - max_charge);
 				local BarExtra = {Display = item_data.Bar.Display, Pos = bar_pos, Charge = {Current = current_charge, Max = max_charge, Extra = extra_charge}, Scale = item_data.Bar.Scale};
 				
-				local charge_color = mod.Config.CoopHUD.mods.DIVOID.colorize == 0 and Color(0.75,0.75,0.75,opacity) or (mod.Config.CoopHUD.mods.DIVOID.colorize == 1 and DIVIDED_VOID.ChargeColor or (mod.Config.CoopHUD.mods.DIVOID.colorize == 2 and Utils.ConvertColorToColorize(player_data.Player.Color,item_data.Color.A) or Utils.ConvertColorToColorize(mod.Colors[mod.Config.CoopHUD.mods.DIVOID.color].Value,opacity)));
-				local chargeextra_color = mod.Config.CoopHUD.mods.DIVOID.colorize == 0 and Utils.ColorBrighthness(CoopHUD.Item.ChargeBar.ExtraColor,0.75) or (mod.Config.CoopHUD.mods.DIVOID.colorize == 1 and DIVIDED_VOID.ExtraChargeColor or (mod.Config.CoopHUD.mods.DIVOID.colorize == 2 and Utils.ConvertColorToColorize(Color.Lerp(player_data.Player.Color,Utils.GetColorByName("Yellow"),0.75)) or Utils.ConvertColorToColorize(mod.Colors[mod.Config.CoopHUD.mods.DIVOID.color_extra].Value)));
+				local charge_color = mod.Config.CoopHUD.compat.DIVOID.colorize == 0 and Color(0.75,0.75,0.75,opacity) or (mod.Config.CoopHUD.compat.DIVOID.colorize == 1 and DIVIDED_VOID.ChargeColor or (mod.Config.CoopHUD.compat.DIVOID.colorize == 2 and Utils.ConvertColorToColorize(player_data.Player.Color,item_data.Color.A) or Utils.ConvertColorToColorize(mod.Colors[mod.Config.CoopHUD.compat.DIVOID.color].Value,opacity)));
+				local chargeextra_color = mod.Config.CoopHUD.compat.DIVOID.colorize == 0 and Utils.ColorBrighthness(CoopHUD.Item.ChargeBar.ExtraColor,0.75) or (mod.Config.CoopHUD.compat.DIVOID.colorize == 1 and DIVIDED_VOID.ExtraChargeColor or (mod.Config.CoopHUD.compat.DIVOID.colorize == 2 and Utils.ConvertColorToColorize(Color.Lerp(player_data.Player.Color,Utils.GetColorByName("Yellow"),0.75)) or Utils.ConvertColorToColorize(mod.Colors[mod.Config.CoopHUD.compat.DIVOID.color_extra].Value)));
 				
 				if not isPocket then
 					SubChargeSprite.Offset = Vector(2,0); -- Fixes weird rendering
@@ -57,7 +57,7 @@ function CoopHUD.DividedVoid()
 				SubChargeSprite.overlay.Scale = item_data.Bar.Scale;
 				SubChargeSprite.extra.Scale = item_data.Bar.Scale;
 				
-				if mod.Config.CoopHUD.mods.DIVOID.display == 0 and void_data.mode ~= 0 then
+				if mod.Config.CoopHUD.compat.DIVOID.display == 0 and void_data.mode ~= 0 then
 					SubChargeSprite.charge.Color = COOP_DATA.ChargeSprite.charge.Color;
 					SubChargeSprite.extra.Color = COOP_DATA.ChargeSprite.extra.Color;
 					COOP_DATA.ChargeSprite.charge.Color = charge_color;

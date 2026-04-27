@@ -32,9 +32,9 @@ function CoopExtras.GreedRevive(_)
 	local room = game:GetRoom();
 	if mod.Config.CoopExtras.greed_revive and game:IsGreedMode() and room:GetType() == RoomType.ROOM_SHOP and game:GetLevel():GetCurrentRoomDesc().VisitedCount <= 1 and Game():GetLevel():GetStage() ~= LevelStage.STAGE1_GREED and Game():GetLevel():GetStage() ~= LevelStage.STAGE7_GREED then
 		local revive_pos = room:GetCenterPos() + Vector(0,mod.GridSize / 2);
-		revive_pos = Utils.GetSafeSpawnPosition(game:GetPlayer().Position, revive_pos, {0,1,2});
+		revive_pos = Utils.GetSafeSpawnPosition(game:GetPlayer(0).Position, revive_pos, {0,1,2});
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GREED_REVIVE, revive_pos); -- Execute Pre Spawn Revive Machine Callbacks (revive_pos(Vector))
-		local revive_machine = Isaac.Spawn(EntityType.ENTITY_SLOT, 19, -1, revive_pos, Vector.Zero, game:GetPlayer());
+		local revive_machine = Isaac.Spawn(EntityType.ENTITY_SLOT, 19, -1, revive_pos, Vector.Zero, game:GetPlayer(0));
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_GREED_REVIVE, revive_machine); -- Execute Post Spawn Revive Machine Callbacks (revive_machine(Entity))
 	end
 end
@@ -77,7 +77,7 @@ function CoopExtras.CoopPrices(_,pickup)
 			elseif player:GetPlayerType() == PlayerType.PLAYER_KEEPER_B then
 				pickup.AutoUpdatePrice = true;
 				pickup.ShopItemId = -1;
-				price = Isaac.GetItemConfig():GetCollectible(pickup.SubType).ShopPrice / (PlayerManager.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
+				price = Isaac.GetItemConfig():GetCollectible(pickup.SubType).ShopPrice / (Utils.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
 			end
 		end
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_PRICE_DATA, price); -- Execute Post item Pricing Callbacks (price(int))
@@ -105,7 +105,7 @@ function CoopExtras:onGhostPickup(pickup_entity, entity)
 	if mod.Config.CoopExtras.ghost_flight.interact == 4 or mod.Config.CoopExtras.ghost_flight.shopping and pickup_entity.Price ~= 0 then return true; end
 	
 	local other_pos = nil;
-	for i,player in pairs(PlayerManager.GetPlayers()) do
+	for i,player in pairs(Utils.GetPlayers()) do
 		if not player:IsCoopGhost() and (not other_pos or player_entity.Position:Distance(player.Position) < player_entity.Position:Distance(other_pos)) then
 			other_pos = player.Position;
 			if player.CanFly then return; end
@@ -115,53 +115,56 @@ function CoopExtras:onGhostPickup(pickup_entity, entity)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, CoopExtras.onGhostPickup);
 
-function CoopExtras:onGhostChest(chest_type,player_entity)
-	if not player_entity or not player_entity:IsCoopGhost() then return; end
-	local canOpen = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_CHEST, player_entity, chest_type); -- Execute Pre Ghost Chest Callbacks (player_entity(EntityPlayer), chest_type(PickupVariant)) Return true to allow opening
-	if not canOpen and mod.Config.CoopExtras.ghost_flight.chests then return false; end
-end
-mod:AddCallback(ModCallbacks.MC_PRE_OPEN_CHEST, CoopExtras.onGhostChest);
+if REPENTOGON then
+	function CoopExtras:onGhostCollide(player_entity, entity)
+		local enemy_entity = entity:ToNPC();
+		if not player_entity:IsCoopGhost() or not enemy_entity then return; end
+		local canCollide = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_COLLISION, player_entity, enemy_entity); -- Execute Pre item Pricing Callbacks (player_entity(EntityPlayer), enemy_entity(EntityNPC))
+		if canCollide then return; end
+		if mod.Config.CoopExtras.ghost_flight.interact == 4 then return true; end
+		if enemy_entity:GetBossID() > 0 and mod.Config.CoopExtras.ghost_flight.interact >= 3 then return true; end
+		if enemy_entity:GetBossID() == 0 and mod.Config.CoopExtras.ghost_flight.interact >= 1 then return true; end
+	end
+	mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, CoopExtras.onGhostCollide);
 
-function CoopExtras:onGhostCollide(player_entity, entity)
-	local enemy_entity = entity:ToNPC();
-	if not player_entity:IsCoopGhost() or not enemy_entity then return; end
-	local canCollide = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_COLLISION, player_entity, enemy_entity); -- Execute Pre item Pricing Callbacks (player_entity(EntityPlayer), enemy_entity(EntityNPC))
-	if canCollide then return; end
-	if mod.Config.CoopExtras.ghost_flight.interact == 4 then return true; end
-	if enemy_entity:GetBossID() > 0 and mod.Config.CoopExtras.ghost_flight.interact >= 3 then return true; end
-	if enemy_entity:GetBossID() == 0 and mod.Config.CoopExtras.ghost_flight.interact >= 1 then return true; end
-end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, CoopExtras.onGhostCollide);
+	function CoopExtras:onGhostButton(player_entity, grid_index, grid_entity)
+		if not grid_entity or not grid_entity:GetType() ~= GridEntityType.GRID_PRESSURE_PLATE or not player_entity:IsCoopGhost() then return; end
+		local canActivate = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_BUTTON, player_entity, grid_entity:ToPressurePlate()); -- Execute Pre item Pricing Callbacks (player_entity(EntityPlayer), grid_entity(GridEntityPressurePlate))
+		if canActivate then return; end
+		return true;
+	end
+	mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, CoopExtras.onGhostButton);
 
-function CoopExtras:onGhostButton(player_entity, grid_index, grid_entity)
-	if not grid_entity or not grid_entity:GetType() ~= GridEntityType.GRID_PRESSURE_PLATE or not player_entity:IsCoopGhost() then return; end
-	local canActivate = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_BUTTON, player_entity, grid_entity:ToPressurePlate()); -- Execute Pre item Pricing Callbacks (player_entity(EntityPlayer), grid_entity(GridEntityPressurePlate))
-	if canActivate then return; end
-	return true;
+	function CoopExtras:onGhostChest(chest_type,player_entity)
+		if not player_entity or not player_entity:IsCoopGhost() then return; end
+		local canOpen = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_GHOST_CHEST, player_entity, chest_type); -- Execute Pre Ghost Chest Callbacks (player_entity(EntityPlayer), chest_type(PickupVariant)) Return true to allow opening
+		if not canOpen and mod.Config.CoopExtras.ghost_flight.chests then return false; end
+	end
+	mod:AddCallback(ModCallbacks.MC_PRE_OPEN_CHEST, CoopExtras.onGhostChest);
 end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, CoopExtras.onGhostButton);
-
 
 -- Coop Sacrificial Revive
-function CoopExtras:sacrificalRevive(player_entity, damage, damage_flags)
-	if not mod.Config.CoopExtras.sacrifice_revive.enabled or game:GetRoom():GetType() ~= RoomType.ROOM_SACRIFICE or (damage_flags & DamageFlag.DAMAGE_SPIKES == 0) or (damage_flags & DamageFlag.DAMAGE_NO_PENALTIES == 0) then return; end
-	local revive_chance = CoopExtras.DATA.ReviveChance or 0;
-	local ghost_entity = nil;
-	for i,player in pairs(PlayerManager.GetPlayers()) do
-		if player:IsCoopGhost() and (not ghost_entity or player_entity.Position:Distance(player.Position) < player_entity.Position:Distance(other_pos)) then
-			ghost_entity = player;
+if REPENTOGON then
+	function CoopExtras:sacrificalRevive(player_entity, damage, damage_flags)
+		if not mod.Config.CoopExtras.sacrifice_revive.enabled or game:GetRoom():GetType() ~= RoomType.ROOM_SACRIFICE or (damage_flags & DamageFlag.DAMAGE_SPIKES == 0) or (damage_flags & DamageFlag.DAMAGE_NO_PENALTIES == 0) then return; end
+		local revive_chance = CoopExtras.DATA.ReviveChance or 0;
+		local ghost_entity = nil;
+		for i,player in pairs(Utils.GetPlayers()) do
+			if player:IsCoopGhost() and (not ghost_entity or player_entity.Position:Distance(player.Position) < player_entity.Position:Distance(other_pos)) then
+				ghost_entity = player;
+			end
 		end
+		if not ghost_entity then return; end
+		local rng = RNG(math.max(1,game:GetRoom():GetSpawnSeed()));
+		local revive_check = rng:RandomInt(0,100);
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_SACRIFICE_REVIVE, player_entity, ghost_entity, revive_chance, revive_check);
+		if revive_check <= revive_chance then
+			revive_chance = 0;
+			ghost_entity:ReviveCoopGhost();
+		elseif mod.Config.CoopExtras.sacrifice_revive.increase then
+			revive_chance = math.min(100,revive_chance + mod.Config.CoopExtras.sacrifice_revive.chance);
+		end
+		CoopExtras.DATA.ReviveChance = revive_chance;
 	end
-	if not ghost_entity then return; end
-	local rng = RNG(math.max(1,game:GetRoom():GetSpawnSeed()));
-	local revive_check = rng:RandomInt(0,100);
-	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_SACRIFICE_REVIVE, player_entity, ghost_entity, revive_chance, revive_check);
-	if revive_check <= revive_chance then
-		revive_chance = 0;
-		ghost_entity:ReviveCoopGhost();
-	elseif mod.Config.CoopExtras.sacrifice_revive.increase then
-		revive_chance = math.min(100,revive_chance + mod.Config.CoopExtras.sacrifice_revive.chance);
-	end
-	CoopExtras.DATA.ReviveChance = revive_chance;
+	mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, CoopExtras.sacrificalRevive);
 end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, CoopExtras.sacrificalRevive);

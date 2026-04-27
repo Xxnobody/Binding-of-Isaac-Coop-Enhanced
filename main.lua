@@ -1,4 +1,4 @@
-CoopEnhanced = RegisterMod("XxNobody Co-Op", 1);
+CoopEnhanced = RegisterMod("Co-Op Enhanced", 1);
 CoopEnhanced.Version = 1.15;
 
 -- TO-DO
@@ -17,23 +17,23 @@ CoopEnhanced.Registry = {Callbacks = {}, Commands = {}};
 CoopEnhanced.Callbacks = {NUM_CALLBACKS = 0};
 
 -- Functions
-function CoopEnhanced.Debug(msg,module);
-	if not CoopEnhanced.Config.debug or not msg then return; end
-	module = module or "Co-op Enhanced";
-	if type(msg) == "table" then
-		print(module .. " Debug: ");
-		CoopEnhanced.Utils.PrintTable(msg);
-	else
-		print(module .. " Debug: " .. msg);
-	end
+function CoopEnhanced.Debug(msg,modul);
+	if not CoopEnhanced.Config.debug then return; end
+	modul = modul or CoopEnhanced.Name;
+	msg = CoopEnhanced.Utils.Stringify(msg);
+	
+	print(modul .. " Debug: " .. msg);
+	Isaac.DebugString(msg);
 end
 
  -- Add Modded Character data (Name, Type, Unlock Achievement ID (ID if one exists, nil for none, 0 to represent not unlocked, -ID for non existent achievments), Sprite Data (Can be a Sprite or a table))
  -- - Sprite data can include Spritesheet data, so if you wish to change a spritesheet add it to Sheets as [sheet_id] = "path/to/png" (i.e. Sheets = {[0] = "Blank.png"})
-function CoopEnhanced.AddCharacter(name,type,achievement,sprite)
+function CoopEnhanced.AddCharacter(name,player_type,achievement,sprite)
+	if REPENTOGON == nil then return; end
 	local sprite_data = sprite;
-	if sprite.GetAnimation then sprite_data = {Anm2 = sprite:GetFilename(), Frame = sprite:GetFrame(), Animation = sprite:GetAnimation(), Sheets = {}};	end
-	local character_entry = {Name = name, Type = type, Achievement = achievement,Sprite = sprite_data};
+	if sprite.PlaybackSpeed then sprite_data = {Anm2 = sprite:GetFilename(), Frame = sprite:GetFrame(), Animation = sprite:GetAnimation(), Sheets = {}}; end
+	local character_entry = {Name = name, Type = (player_type or -1), Achievement = achievement,Sprite = sprite_data};
+	CoopEnhanced.Debug(character_entry);
 	table.insert(CoopEnhanced.CharactersModded,character_entry);
 	table.sort(CoopEnhanced.CharactersModded,function (a,b) return a.Type < b.Type end);
 end
@@ -75,8 +75,7 @@ local function onUpdate()
 		CoopEnhanced.Players.Unlocked = CoopEnhanced.Utils.GetUnlockedCharacters();
 	end
 	CoopEnhanced.FrameCount = CoopEnhanced.FrameCount > 60 and 1 or CoopEnhanced.FrameCount + 1;
-	
-	if not Game():IsPaused() and Isaac:CanStartTrueCoop() and CoopEnhanced.Challenge.ID == Challenge.CHALLENGE_NULL then
+	if not Game():IsPaused() and CoopEnhanced.Utils.CanStartCoop() and CoopEnhanced.Challenge.ID == Challenge.CHALLENGE_NULL then
 		local joining_total = CoopEnhanced.GetJoiningTotal();
 		for i = 1, CoopEnhanced.MaxControllers, 1 do
 			local controller_index = (i - 1);
@@ -149,15 +148,16 @@ local function onGameStart(_, isCont)
 
 	CoopEnhanced.Utils.LoadFonts();
 	
+	CoopEnhanced.Players.Joining = {};
+	
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.LOAD_GAME_DATA,data);
 
-	CoopEnhanced.UnlocksAllowed = not Game():AchievementUnlocksDisallowed();
-	CoopEnhanced.Challenge = {ID = Isaac:GetChallenge(), IsDaily = (Game():GetChallengeParams():GetName() == DailyChallenge.GetChallengeParams():GetName()), Params = Game():GetChallengeParams()};
+	CoopEnhanced.UnlocksAllowed = REPENTOGON ~= nil and not Game():AchievementUnlocksDisallowed() or true;
+	CoopEnhanced.Challenge = REPENTOGON ~= nil and {ID = Isaac:GetChallenge(), IsDaily = (Game():GetChallengeParams():GetName() == DailyChallenge.GetChallengeParams():GetName()), Params = Game():GetChallengeParams()} or {ID = Isaac:GetChallenge()};
 
 	for name,registry_func in pairs(CoopEnhanced.Registry.Modules) do
-		if CoopEnhanced.Config.modules[name] and CoopEnhanced[name].gameStart then CoopEnhanced[name].gameStart(isCont,data); end
+		if CoopEnhanced.Config.modules[name] and CoopEnhanced[name] and CoopEnhanced[name].gameStart then CoopEnhanced[name].gameStart(isCont,data); end
 	end
-	if (CoopEnhanced:LoadData() == nil or CoopEnhanced:LoadData():len() == 0) then saveGame(true); end
 end
 CoopEnhanced:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, onGameStart);
 
@@ -166,7 +166,7 @@ local function saveGame(doSave)
 
 	if doSave then
 		for name,registry_func in pairs(CoopEnhanced.Registry.Modules) do
-			if CoopEnhanced.Config.modules[name] and CoopEnhanced[name].gameEnd then CoopEnhanced[name].gameEnd(data); end
+			if CoopEnhanced.Config.modules[name] and CoopEnhanced[name] and CoopEnhanced[name].gameEnd then CoopEnhanced[name].gameEnd(data); end
 		end
 	end
 	
@@ -195,4 +195,4 @@ local function onNewFloor(_)
 end
 CoopEnhanced:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, onNewFloor)
 
-print("Co-Op Enhanced Mod - v"..CoopEnhanced.Version);
+print("Co-op Enhanced Mod - v"..CoopEnhanced.Version);

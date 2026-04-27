@@ -10,7 +10,7 @@ mod.CoopTwins.DefaultConfig = {
 };
 	
 function mod.CoopTwins.ResetConfig()
-	mod.Config.CoopTwins = Utils.CloneObject(mod.CoopTwins.DefaultConfig);
+	mod.Config.CoopTwins = Utils.Clone(mod.CoopTwins.DefaultConfig);
 end
 if mod.Config.CoopTwins == nil then CoopTwins.ResetConfig(); end
 

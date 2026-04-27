@@ -15,7 +15,7 @@ function CoopHUD.Jericho()
 
 	local function JerichoBlessingStat(stats, _, player_number)
 		if player_number ~= 1 then return end
-		if not PlayerManager.AnyoneIsPlayerType(_JERICHO_MOD.Character.JERICHO) then return end
+		if not Utils.AnyoneIsPlayerType(_JERICHO_MOD.Character.JERICHO) then return end
 
 		if Game():GetLevel():GetCurses() == LevelCurse.CURSE_NONE then return end
 
@@ -28,7 +28,7 @@ function CoopHUD.Jericho()
 
 	local iconSprite = Sprite("gfx/ui/mapitemicons2.anm2", true)
 	local function JerichoCurseIcon(screen_dimensions, _)
-		if not PlayerManager.AnyoneIsPlayerType(_JERICHO_MOD.Character.JERICHO) then return end
+		if not Utils.AnyoneIsPlayerType(_JERICHO_MOD.Character.JERICHO) then return end
 
 		local level = game:GetLevel()
 		local curse = level:GetCurses()

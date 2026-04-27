@@ -10,7 +10,7 @@ mod.CoopExtras.DefaultConfig = {
 	greed_revive = true,
 	sacrifice_revive = {
 		enabled = true,
-		chance = 25.0,
+		chance = 0.25,
 		increase = true,
 	},
 	ghost_flight = {
@@ -24,7 +24,7 @@ mod.CoopExtras.DefaultConfig = {
 };
 	
 function mod.CoopExtras.ResetConfig()
-	mod.Config.CoopExtras = Utils.CloneObject(mod.CoopExtras.DefaultConfig);
+	mod.Config.CoopExtras = Utils.Clone(mod.CoopExtras.DefaultConfig);
 end
 if mod.Config.CoopExtras == nil then CoopExtras.ResetConfig(); end
 
@@ -83,20 +83,20 @@ ModConfigMenu.AddSetting(
 	CoopExtras.MCM.category,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopExtras.ghost_flight.chests; end,
-		Display = function() return 'Heavy Locks: ' .. (mod.Config.CoopExtras.ghost_flight.chests and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopExtras.ghost_flight.chests = b; end,
-		Info = {'Co-op players cannot open chests, only push them.'},
+		CurrentSetting = function() return mod.Config.CoopExtras.ghost_flight.shopping; end,
+		Display = function() return 'Broke Ghosts: ' .. (mod.Config.CoopExtras.ghost_flight.shopping and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopExtras.ghost_flight.shopping = b; end,
+		Info = {'Co-op players cannot buy anything from shops.'},
 	}
 );
 ModConfigMenu.AddSetting(
 	CoopExtras.MCM.category,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopExtras.ghost_flight.shopping; end,
-		Display = function() return 'Broke Ghosts: ' .. (mod.Config.CoopExtras.ghost_flight.shopping and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopExtras.ghost_flight.shopping = b; end,
-		Info = {'Co-op players cannot buy anything from shops.'},
+		CurrentSetting = function() return mod.Config.CoopExtras.ghost_flight.chests; end,
+		Display = function() return 'Heavy Locks: ' .. (mod.Config.CoopExtras.ghost_flight.chests and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopExtras.ghost_flight.chests = b; end,
+		Info = {'Co-op players cannot open chests, only push them. (Requires REPENTOGON)'},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -108,6 +108,40 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopExtras.ghost_flight.interact; end,
 		Display = function() return 'Prevent Touching: ' .. (mod.Config.CoopExtras.ghost_flight.interact == 0 and "None" or (mod.Config.CoopExtras.ghost_flight.interact == 1 and "Enemies" or (mod.Config.CoopExtras.ghost_flight.interact == 2 and "Bosses" or (mod.Config.CoopExtras.ghost_flight.interact == 3 and "Enemies & Bosses" or "Everything")))); end,
 		OnChange = function(n) mod.Config.CoopExtras.ghost_flight.interact = n; end,
-		Info = {'Co-op Ghost players cannot interact with enemies, and thus cannot block them. Everything means pickups as well.'},
+		Info = {'Co-op Ghost players cannot interact with enemies, and thus cannot block them. Everything means pickups as well.  (Requires REPENTOGON)'},
+	}
+);
+
+ModConfigMenu.AddSpace(CoopExtras.MCM.category)
+ModConfigMenu.AddSetting(
+	CoopExtras.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopExtras.sacrifice_revive.enabled; end,
+		Display = function() return 'Sacrificial Revives: ' .. (mod.Config.CoopExtras.sacrifice_revive.enabled and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopExtras.sacrifice_revive.enabled = b; end,
+		Info = {'Revive players using sacrifice rooms. (Requires REPENTOGON)'},
+	}
+);
+ModConfigMenu.AddSpace(CoopExtras.MCM.category)
+ModConfigMenu.AddSetting(
+	CoopExtras.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopExtras.sacrifice_revive.increase; end,
+		Display = function() return 'Chance Increases: ' .. (mod.Config.CoopExtras.sacrifice_revive.increase and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopExtras.sacrifice_revive.increase = b; end,
+		Info = {'Enable to have the base chance increase after each sacrifice.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopExtras.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0.0,
+		Maximum = 100.0,
+		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopExtras.sacrifice_revive.chance * 100)); end,
+		Display = function() return 'Revival Chance: ' .. string.format('%.0f', mod.Config.CoopExtras.sacrifice_revive.chance * 100) .. '%'; end,
+		OnChange = function(n) mod.Config.CoopExtras.sacrifice_revive.chance = n / 100; end,
 	}
 );

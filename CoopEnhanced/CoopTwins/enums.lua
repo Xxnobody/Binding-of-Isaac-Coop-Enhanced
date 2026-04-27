@@ -8,12 +8,19 @@ CoopTwins.SetTwin = {
 		local twin_entity = main_twin:GetOtherTwin();
 		local twin_pos = twin_entity.Position;
 		local twin_type = twin_entity:GetPlayerType();
+		local new_twin = nil;
 		
-		PlayerManager.RemoveCoPlayer(twin_entity);
+		if REPENTOGON then
+			PlayerManager.RemoveCoPlayer(twin_entity);
+			new_twin = PlayerManager.SpawnCoPlayer2(twin_type);
+			new_twin:SetControllerIndex(controller_index);
+		else
+			twin_entity:Remove();
+			Isaac.ExecuteCommand("addplayer " .. twin_type .. " " .. controller_index);
+			new_twin = Utils.GetPlayerByController(controller_index);
+		end
 		
-		local new_twin = PlayerManager.SpawnCoPlayer2(twin_type);
 		new_twin.Position = twin_pos;
-		new_twin:SetControllerIndex(controller_index);
 		CoopTwins.DATA.Twins[Utils.GetPlayerID(main_twin)] = Utils.GetPlayerID(new_twin);
 		mod.RefreshFrameCount();
 	end,

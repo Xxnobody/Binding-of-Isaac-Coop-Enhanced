@@ -52,7 +52,7 @@ function Player.Render(player_number, screen_dimensions)
 							stat.Scale = (stat.Scale or Vector.One) * scale;
 							stat.Color = Utils.ColorOpacity((mod.Config.CoopHUD.stats.text.colors and player.Color or Color.Default),opacity);
 							if slot > CoopHUD.StatType.SPEED then pos = pos + (mod.Config.CoopHUD.stats.rel_offset + Vector(0,seperation)) * edge_multipliers; end
-							stat.Pos = Utils.CloneObject(pos);
+							stat.Pos = Utils.Clone(pos);
 							stat.Render = not isTwin and player.Index < 3; -- Set whether the sprite image is rendered
 							stat.Edge = Vector(edge_multipliers.X, 1);
 							stat.Text.Pos = stat.Pos + (Vector(mod.Config.CoopHUD.stats.text.offset.X + (stat.Edge.X < 0 and mod.Fonts.CoopHUD.stats:GetStringWidth(stat.Text.Value) * mod.Config.CoopHUD.stats.text.scale.X or size), mod.Config.CoopHUD.stats.text.offset.Y) * stat.Edge);
@@ -95,7 +95,7 @@ function Player.Render(player_number, screen_dimensions)
 							else
 								pos = pos + Vector(deals.Anchor < 2 and (seperation * 3) or 0, deals.Anchor >= 2 and seperation or 0);
 							end
-							stat.Pos = Utils.CloneObject(pos);
+							stat.Pos = Utils.Clone(pos);
 							stat.Render = true;
 							stat.Edge = Vector(edge_multipliers.X, 1);
 							stat.Text.Pos = stat.Pos + (Vector(mod.Config.CoopHUD.stats.text.offset.X + (stat.Edge.X < 0 and mod.Fonts.CoopHUD.stats:GetStringWidth(stat.Text.Value) * mod.Config.CoopHUD.stats.text.scale.X or size), mod.Config.CoopHUD.stats.text.offset.Y) * stat.Edge);
@@ -353,7 +353,7 @@ function Player.Render(player_number, screen_dimensions)
 					local scale = ((mod.Config.CoopHUD.players.names.scale * extra_scale) * max_scale);
 					local head_offset = mod.Config.CoopHUD.players.heads.display and mod.Config.CoopHUD.players.names.head_offset and player_entity:GetActiveItem(ActiveSlot.SLOT_PRIMARY) ~= 0 and not player_entity:IsCoopGhost() and ((mod.Config.CoopHUD.players.heads.item_offset.Y * (player_data.Edge.Multipliers.X > 0 and -1.5 or 1.5)) * mod.CoopHUD.DATA.Players[player_number].Label.Scale.X) or 0;
 					local item_pos = player_data.Edge.Pos + player_data.Edge.Offset + ((CoopHUD.Positions.Active[ActiveSlot.SLOT_PRIMARY] + mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].offset) * player_data.Edge.Multipliers)
-					local name_pos = Vector(item_pos.X - ((head_offset * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale.X) + (8 - mod.Config.CoopHUD.players.names.offset.X) * player_data.Edge.Multipliers.X), item_pos.Y + (((mod.Config.CoopHUD.players.names.offset.Y + 2) * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale.Y) * player_data.Edge.Multipliers.Y)) * scale;
+					local name_pos = Vector(item_pos.X - ((head_offset * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale.X) + (8 - mod.Config.CoopHUD.players.names.offset.X) * player_data.Edge.Multipliers.X), item_pos.Y + (((mod.Config.CoopHUD.players.names.offset.Y + 2) * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale.Y) * player_data.Edge.Multipliers.Y)) * extra_scale;
 					if player_data.Edge.Multipliers.X < 0 then name_pos.X = name_pos.X - (name_size.X * max_scale); end
 					if player_data.Edge.Multipliers.Y < 0 then name_pos.Y = name_pos.Y - (name_size.Y * max_scale); end
 					name_pos.X = math.min((screen_dimensions.Max.X - name_size.X),math.max(screen_dimensions.Min.X,name_pos.X)); -- Prevent it from leaving the screen

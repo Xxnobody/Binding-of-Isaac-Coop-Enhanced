@@ -4,8 +4,11 @@ local CoopTreasure = CoopEnhanced.CoopTreasure;
 local Utils = mod.Utils;
 local game = Game();
 
+if not REPENTOGON then return; end
+
 local function ModCompat()
-	if XMLData.GetModById("Angel Beggar") ~= nil then
+	local AngelBeggar = XMLData.GetModById("1832381849");
+	if AngelBeggar and AngelBeggar.enabled == "true" then
 		CoopEnhanced.CoopTreasure.AngelBeggar = {Variants = {}};
 		local set = RoomConfig.GetStage(StbType.SPECIAL_ROOMS):GetRoomSet(0);
 		for i = 1, set.Size, 1 do

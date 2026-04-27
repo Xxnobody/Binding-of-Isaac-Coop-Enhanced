@@ -40,31 +40,29 @@ end
 function Utils.decodeData(data) -- Taken from CoopHUD+, credit to Kona
 	local new_data = {}
 	for key, value in pairs(data) do
-		local num = tonumber(key);
-		if type(key) == 'string' and num ~= nil then
-			key = num;
+		if type(key) == 'string' then
+			if tonumber(key) ~= nil then key = tonumber(key);
+			elseif key:sub(-1) == "Y" then goto skip_decode;
+			elseif key:sub(-1) == "X" then
+				key = key:sub(1, -2);
+				if type(data[key.."Y"]) ~= "number" then goto skip_decode; end
+				value = Vector(value, data[key.."Y"]);
+			end
 		end
-		if type(value) == 'table' then
+		if type(value) == "table" then
 			value = Utils.decodeData(value);
-		end
-		if type(key) == 'string' and key:sub(-1) == 'Y' then
-			goto skip_decode;
-		end
-		if type(key) == 'string' and key:sub(-1) == 'X' then
-			key = key:sub(1, -2);
-			if type(data[key..'Y']) ~= "number" then goto skip_decode; end
-			value = Vector(value, data[key..'Y']);
 		end
 		new_data[key] = value;
 		::skip_decode::
 	end
 	return new_data;
 end
-function Utils.ensureCompatibility(data1, data2)
+function Utils.ensureCompatibility(default, data)
 	local new_config = {};
-	for key, value in pairs(data1) do
-		local new_value = (type(data2) == "table" or type(data2) == "userdata") and data2[key] or value;
-		if type(value) == 'table' then
+	for key, value in pairs(default) do
+		local new_value = type(data) == "table" and data[key];
+		if type(new_value) ~= type(value) then new_value = value;
+		elseif type(new_value) == "table" then
 			new_value = Utils.ensureCompatibility(value, new_value);
 		end
 		new_config[key] = new_value;
@@ -72,6 +70,16 @@ function Utils.ensureCompatibility(data1, data2)
 	return new_config;
 end
 
+function Utils.GetLocalizedString(category, input, language)
+	if not input or input:sub(1, 1) ~= '#' then return input; end
+	language = type(language) == "number" and language or Language.ENGLISH;
+	if REPENTOGON and category then
+		input = Isaac.GetLocalizedString(category,input,language);
+	else
+		input = name:sub(2, -5):gsub('_', ' '):lower():gsub('%f[%a].', string.upper);
+	end
+	return input;
+end
 function Utils.ClampFlow(min, max, val, step)
 	min = min or -4294967295;
 	max = max or 4294967295;
@@ -101,39 +109,35 @@ function Utils.ShiftTable(tbl,step)
 	end
 	return new_tbl;
 end
-function Utils.PrintTable(var, level)
+function Utils.Stringify(var, level)
 	local output = "";
-	level = level or 0;
-	level = level + 1;
+	level = (level or 0) + 1;
 	if type(var) == "table" then
 		output = output .. "{";
 		for key, value in pairs(var) do
-			output = output .. "\n" .. string.rep("\t", level) .. string.format("[%s] = ", key) .. Utils.PrintTable(value, level) .. ",";
+			output = output .. "\n" .. string.rep("\t", level) .. string.format("[%s] = ", key) .. Utils.Stringify(value, level) .. ",";
 		end
 		output = output .. "\n" .. string.rep("\t", level - 1) .. "}";
 	elseif type(var) == "userdata" then
 		if var.X then output = output .. "Vector(" .. var.X .. "," .. var.Y .. ")"; 
 		elseif var.PlaybackSpeed then
-			output = output .. "Sprite(Anm2 = '" .. var:GetFilename() .. "', Animation = '" .. var:GetAnimation() .. "', Frame = " .. var:GetFrame() .. ", Playing = " .. var:IsPlaying() .. ")"
+			output = output .. "Sprite(Anm2 = '" .. var:GetFilename() .. "', Animation = '" .. var:GetAnimation() .. "', Frame = " .. var:GetFrame() .. ", Overlay Animation = '" .. var:GetOverlayAnimation() .. "', Overlay Frame = " .. var:GetOverlayFrame() .. ", Scale = Vector(" .. var.Scale.X .. ", " .. var.Scale.Y .. ") , Playing = " .. tostring(var:IsPlaying()) .. ", Finished = " .. tostring(var:IsFinished()) .. ")";
 		end
 	elseif type(var) == "function" then
 		output = output .. "function(" .. tostring(var) .. ")";
 	else
-		output = output .. var;
+		output = output .. tostring(var or "nil");
 	end
 	level = level - 1;
-	if level ~= 0 then
-		return output;
-	end
-	print(output);
+	return output;
 end
 
-function Utils.CloneObject(val)
+function Utils.Clone(val)
 	local new_tbl = {};
 	if type(val) == "table" then
 		for k, v in pairs(val) do
 			if type(v) == "table" or type(v) == "userdata" then
-				new_tbl[k] = Utils.CloneObject(v);
+				new_tbl[k] = Utils.Clone(v);
 			else
 				new_tbl[k] = v;
 			end
@@ -183,13 +187,17 @@ end
 
 -- Game Utilities
 function Utils.IsPauseMenuOpen()
-	return game:IsPauseMenuOpen() or Utils.IsMCMenuOpen() or Utils.IsDSSMenuOpen();
+	return (REPENTOGON ~= nil and game:IsPauseMenuOpen()) or game:IsPaused() or Utils.IsMCMenuOpen() or Utils.IsDSSMenuOpen();
 end
 function Utils.IsMCMenuOpen()
-	return ModConfigMenu and ModConfigMenu.IsVisible;
+	return ModConfigMenu ~= nil and ModConfigMenu.IsVisible;
 end
 function Utils.IsDSSMenuOpen()
-	return DeadSeaScrollsMenu and DeadSeaScrollsMenu.IsOpen();
+	return DeadSeaScrollsMenu ~= nil and DeadSeaScrollsMenu.IsOpen();
+end
+
+function Utils.CanStartCoop()
+	return REPENTOGON ~= nil and Isaac.CanStartTrueCoop() or Game():GetStateFlag(GameStateFlag.STATE_BOSSPOOL_SWITCHED);
 end
 
 function Utils.GetHealthTypes()
@@ -247,21 +255,79 @@ function Utils.GetColorIndexByName(color_name)
 end
 
 -- Player/Character Utils
-function Utils.GetCharacterByType(player_type)
-	for i,character in pairs(mod.Characters) do
-		if character.Type == player_type then return character, i; end
+function Utils.GetPlayers()
+	if REPENTOGON then return PlayerManager.GetPlayers(); end
+	local players = {};
+	for i = 1, game:GetNumPlayers(), 1 do
+		local player_entity = Isaac.GetPlayer(i - 1);
+		if player_entity then table.insert(players,player_entity); end
 	end
-	for i,character in pairs(mod.CharactersModded) do
-		if character.Type == player_type then return character, #mod.Characters + i; end
+	return players;
+end
+function Utils.AnyoneIsPlayerType(player_type)
+	if REPENTOGON then return PlayerManager.AnyoneIsPlayerType(player_type); end
+	for i,ptype in pairs(mod.Players.Types) do
+		if player_type == ptype then return true; end
+	end
+	return false;
+end
+function Utils.AnyoneIsNotPlayerType(player_type)
+	for i,ptype in pairs(mod.Players.Types) do
+		if player_type ~= ptype then return true; end
+	end
+	return false;
+end
+function Utils.AnyoneHasCollectible(collectible_type)
+	if REPENTOGON then return PlayerManager.AnyoneHasCollectible(collectible_type); end
+	for i,player_entity in pairs(Utils.GetPlayers()) do
+		if player_entity:HasCollectible(collectible_type) then return true; end
+	end
+	return false;
+end
+function Utils.AnyoneHasTrinket(trinket_type)
+	if REPENTOGON then return PlayerManager.AnyoneHasTrinket(trinket_type); end
+	for i,player_entity in pairs(Utils.GetPlayers()) do
+		if player_entity:HasTrinket(trinket_type) then return true; end
+	end
+	return false;
+end
+function Utils.GetNumCollectibles(collectible_type)
+	if REPENTOGON then return PlayerManager.GetNumCollectibles(collectible_type); end
+	local total = 0;
+	for i,player_entity in pairs(Utils.GetPlayers()) do
+		if player_entity:HasCollectible(collectible_type) then total = total + 1; end
+	end
+	return total;
+end
+function Utils.IsCoopPlay()
+	if REPENTOGON then return PlayerManager.IsCoopPlay(); end
+	if mod.Players.Total > 1 then
+		for i = 2, game:GetNumPlayers(), 1 do
+			if not mod.Players.Twins[i] then return true; end
+		end
+	end
+	return false;
+end
+
+function Utils.GetCharacterByType(player_type)
+	if REPENTOGON then
+		for i,character in pairs(mod.Characters) do
+			if character.Type == player_type then return character, i; end
+		end
+		for i,character in pairs(mod.CharactersModded) do
+			if character.Type == player_type then return character, #mod.Characters + i; end
+		end
 	end
 	return {},-1;
 end
 function Utils.GetCharacterByName(player_name)
-	for i,character in pairs(mod.Characters) do
-		if character.Name == player_name then return character, i; end
-	end
-	for i,character in pairs(CharactersModded) do
-		if character.Name == player_name then return  character, #mod.Characters + i; end
+	if REPENTOGON then
+		for i,character in pairs(mod.Characters) do
+			if character.Name == player_name then return character, i; end
+		end
+		for i,character in pairs(CharactersModded) do
+			if character.Name == player_name then return character, #mod.Characters + i; end
+		end
 	end
 	return {},-1;
 end
@@ -271,7 +337,7 @@ function Utils.GetPlayerID(player_entity) -- Taken from CustomHealthAPI
 	return ("UUID-" .. tostring(rng:GetSeed()));
 end
 function Utils.GetPlayerByID(player_id)
-	for i,player_entity in pairs(PlayerManager.GetPlayers()) do
+	for i,player_entity in pairs(Utils.GetPlayers()) do
 		local player_entity = Isaac.GetPlayer(i - 1);
 		if Utils.GetPlayerID(player_entity) == player_id then return player_entity; end
 	end
@@ -335,16 +401,14 @@ function Utils.GetMainPlayerByController(controller_index)
 	return nil,0;
 end
 function Utils.GetPlayerByController(controller_index)
-	for i = 1, game:GetNumPlayers(), 1 do
-		local player_entity = Isaac.GetPlayer(i - 1);
+	for i,player_entity in pairs(Utils.GetPlayers()) do
 		if player_entity.ControllerIndex == controller_index then return player_entity; end
 	end
 	return nil;
 end
 function Utils.GetPlayersByController(controller_index)
 	local players = {};
-	for i = 1, game:GetNumPlayers(), 1 do
-		local player_entity = Isaac.GetPlayer(i - 1);
+	for i,player_entity in pairs(Utils.GetPlayers()) do
 		if player_entity.ControllerIndex == controller_index then table.insert(players,player_entity); end
 	end
 	return players;
@@ -353,8 +417,8 @@ function Utils.GetPlayerName(player_entity, player_index, name_type, custom_name
 	if not player_entity then return ""; end
 	local player_type = player_entity:GetPlayerType();
 	local character = Utils.GetCharacterByType(player_type);
-	if not character then return "???"; end
-	local char_name = Utils.IsTainted(player_entity) and (full_tainted and character.Name or "T. " .. player_entity:GetName()) or character.Name;
+	local char_name = Utils.IsTainted(player_type) and (full_tainted and character and character.Name or "T. " .. player_entity:GetName()) or player_entity:GetName();
+	char_name = char_name:len() > 0 and Utils.GetLocalizedString("players", char_name, Language.ENGLISH) or "";
 	return name_type == 0 and "P" .. player_index or (name_type == 1 and char_name or custom_name);
 end
 
@@ -368,9 +432,9 @@ function Utils.GetHeadSprite(sprite, player_entity, scale) -- Taken from coopHUD
 	local mod_anim = "gfx/ui/coop_menu.anm2";
 	if player_type > PlayerType.PLAYER_THESOUL_B then -- Modded Characters
 		sprite = Sprite();
+		local mod_sprite = EntityConfig.GetPlayer(player_type):GetModdedCoopMenuSprite();
 		if not character_data or not character_data.Sprite then 
 			character_data.Sprite = {};
-			local mod_sprite = EntityConfig.GetPlayer(player_type):GetModdedCoopMenuSprite();
 			Utils.CloneSprite(mod_sprite,character_data.Sprite);
 		end
 		sprite:Load(character_data.Sprite.Anm2, true);
@@ -391,7 +455,7 @@ function Utils.GetHeadSprite(sprite, player_entity, scale) -- Taken from coopHUD
 		sprite.Scale = scale or Vector.One;
 		local frame = player_type + 1; -- +1 because 0 is Frame Random
 		local animation = "Main";
-		if sprite:GetFilename() ~= mod_anim and Utils.HasTwin(player_type) and (player_entity:GetOtherTwin() == nil or player_type == PlayerType.PLAYER_LAZARUS2_B) then
+		if sprite:GetFilename() ~= mod_anim and Utils.HasTwin(player_type) and (player_entity and player_entity:GetOtherTwin() == nil or player_type == PlayerType.PLAYER_LAZARUS2_B) then
 			sprite:Load(mod_anim,true);
 			animation = "Twins";
 			if player_type == PlayerType.PLAYER_JACOB then frame = 0;
@@ -414,6 +478,7 @@ end
 
 local random_player = {Name = "Random", Type = PlayerType.PLAYER_POSSESSOR, Achievement = nil, Sprite = {Anm2 = mod.Animations.Coop, Animation = "Main", Frame = 0,Sheets = {[1] = mod.Images.Blank}}};
 function Utils.GetUnlockedCharacters(no_mods,no_random)
+	if not REPENTOGON then return {}; end
 	local characters = {mod.Characters[1]};
 	local last_achievement = 0;
 	for i,character in pairs(mod.Characters) do
@@ -441,7 +506,7 @@ function Utils.GetDevilPrice(player_entity,player_health,collectible_type)
 	local devil_price = player_entity:HasTrinket(TrinketType.TRINKET_JUDAS_TONGUE) and 1 or Isaac.GetItemConfig():GetCollectible(collectible_type).DevilPrice;
 	if player_entity:HasTrinket(TrinketType.TRINKET_YOUR_SOUL) or Utils.IsLost(player_type) then price = PickupPrice.PRICE_SOUL;
 	elseif Utils.IsKeeper(player_type) then 
-		price = (15 * devil_price) / (PlayerManager.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
+		price = (15 * devil_price) / (Utils.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
 	elseif player_health < 1 and not CustomHealthAPI.Helper.PlayerIsSoulHeartOnly(player_entity,true) then price = PickupPrice.PRICE_THREE_SOULHEARTS; else
 		if devil_price == 1 then
 			if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_ONE_SOUL_HEART;
@@ -470,19 +535,15 @@ function Utils.IsPlayerDying(player_entity) -- Taken from LibraryExpanded
 	return player_entity:GetSprite():GetAnimation():sub(-#"Death") == "Death";
 end
 function Utils.IsBaby(player_entity)
+	if not REPENTOGON then return false; end
 	return player_entity.BabySkin ~= BabySubType.BABY_UNASSIGNED;
 end
 function Utils.IsIllusion(player_entity)
-	return IllusionMod and IllusionMod.GetData(player_entity).IsIllusion;
+	return IllusionMod ~= nil and IllusionMod.GetData(player_entity).IsIllusion;
 end
 function Utils.IsTemporary(player_entity)
 	local player_type = player_entity:GetPlayerType()
 	return Utils.IsMainTwin(player_entity) and (Utils.IsForgotten(player_type) or Utils.IsKeeper(player_type) or Utils.IsIllusion(player_entity));
-end
-function Utils.IsTainted(player_entity)
-	local player_type = player_entity:GetPlayerType();
-	local player_config = EntityConfig.GetPlayer(player_type);
-	return player_config and player_config:IsTainted();
 end
 
 -- Player Types
@@ -491,6 +552,11 @@ function Utils.HasTwin(player_type)
 end
 function Utils.IsTwin(player_type)
 	return player_type == PlayerType.PLAYER_THESOUL or player_type == PlayerType.PLAYER_ESAU or player_type == PlayerType.PLAYER_THESOUL_B or player_type == PlayerType.PLAYER_LAZARUS2_B;
+end
+function Utils.IsTainted(player_type)
+	if not REPENTOGON then return player_type >= PlayerType.PLAYER_ISAAC_B and player_type <= PlayerType.PLAYER_THESOUL_B; end
+	local player_config = EntityConfig.GetPlayer(player_type);
+	return player_config ~= nil and player_config:IsTainted();
 end
 function Utils.IsLost(player_type)
 	return player_type == PlayerType.PLAYER_THELOST or player_type == PlayerType.PLAYER_THELOST_B;
@@ -503,12 +569,6 @@ function Utils.IsKeeper(player_type)
 end
 function Utils.HasInventory(player_type)
 	return player_type == PlayerType.PLAYER_ISAAC_B or player_type == PlayerType.PLAYER_CAIN_B or player_type == PlayerType.PLAYER_BLUEBABY_B;
-end
-function Utils.AnyoneIsNotPlayerType(player_type)
-	for i,ptype in pairs(mod.Players.Types) do
-		if player_type ~= ptype then return true; end
-	end
-	return false;
 end
 
 -- Font Utils
@@ -587,7 +647,7 @@ function Utils.GetSafeSpawnEntity(spawn_pos)
 	pathfinder_entity.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE;
 	pathfinder_entity.Visible = false;
 	pathfinder_entity.CanShutDoors = false;
-	pathfinder_entity:SetPauseTime(2000);
+	if REPENTOGON then pathfinder_entity:SetPauseTime(2000); else pathfinder_entity:AddMidasFreeze(EntityRef(Isaac.GetPlayer(0)), 2000); end
 	return pathfinder_entity; 
 end
 
@@ -596,7 +656,8 @@ function Utils.CheckSafeSpawnPosition(start_pos, target_pos) -- Vector, Vector
 	local safe_pos = false;
 	local index = room:GetGridIndex(target_pos);
 	local pathfinder_entity = Utils.GetSafeSpawnEntity(target_pos);
-	if pathfinder_entity:GetPathfinder():HasPathToPos(start_pos,true) and Utils.CheckGridIndex(room,index) then safe_pos = true; end -- Checks if it is behind Pits or unbreakable obstacles or is on top of an entity
+	local pathfinder = pathfinder_entity.Pathfinder;
+	if pathfinder:HasPathToPos(start_pos,true) and Utils.CheckGridIndex(room,index) then safe_pos = true; end -- Checks if it is behind Pits or unbreakable obstacles or is on top of an entity
 	pathfinder_entity:Remove();
 	return safe_pos;
 end
@@ -610,7 +671,7 @@ function Utils.GetSafeSpawnPosition(start_pos, target_pos, grid_steps) -- Vector
 	local max_attempts = 10;
 	local pathfinder_entity = Utils.GetSafeSpawnEntity(target_pos);
 	for i = 1, max_attempts, 1 do
-		if pathfinder_entity:GetPathfinder():HasPathToPos(start_pos,true) and Utils.CheckGridIndex(room,index) then break; end -- Checks if it is behind Pits or unbreakable obstacles or is on top of an entity
+		if pathfinder_entity.Pathfinder:HasPathToPos(start_pos,true) and Utils.CheckGridIndex(room,index) then break; end -- Checks if it is behind Pits or unbreakable obstacles or is on top of an entity
 		
 		local tile = Utils.GetGridTile(index);
 		tile = Vector(tile[1],tile[2]);
@@ -622,7 +683,7 @@ function Utils.GetSafeSpawnPosition(start_pos, target_pos, grid_steps) -- Vector
 		end
 		if tile.Y > room:GetGridHeight() then tile.X = tile.X + grid_steps[1]; tile.Y = 0; elseif tile.Y < 0 then tile.X = tile.X + grid_steps[1]; tile.Y = room:GetGridHeight(); end
 
-		index = room:GetGridIndexByTile(tile.X,tile.Y); -- IDK why REPENTAGON doesn't use Vector here, int[] is weird
+		index = room:GetGridIndexByTile(tile.X,tile.Y); -- IDK why REPENTOGON doesn't use Vector here, int[] is weird
 		pathfinder_entity.Position = room:GetGridPosition(index);
 	end
 	local safe_pos = Vector(pathfinder_entity.Position.X,pathfinder_entity.Position.Y);

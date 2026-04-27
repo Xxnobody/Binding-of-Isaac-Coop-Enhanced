@@ -83,6 +83,7 @@ local ModuleRegistry = {
 		mod.Registry.Commands.Auto[(mod.Config[module_name].CMD)] = "Co-op Labels commands and configuration settings";
 	end,
 	CoopMarks = function(module_name)
+		if not REPENTOGON then return; end
 		local dir = mod.Directory .. module_name .. ".";
 		CoopEnhanced[module_name] = {Directory = dir,DATA = {}};
 		CoopEnhanced.Registry:RegisterCallback("MARKS_POST_DATA");
@@ -125,6 +126,7 @@ local ModuleRegistry = {
 		mod.Registry.Commands.Auto[(mod.Config[module_name].CMD)] = "Co-op Treasure commands and configuration settings";
 	end,
 	CoopHUD = function(module_name)
+		if not REPENTOGON then return; end
 		local dir = mod.Directory .. module_name .. ".";
 		CoopEnhanced[module_name] = {Directory = dir,IsVisible = true,Refresh = false,DATA = {Players = {},Joining = {},Timer = {},Banner = {}},Player = {},Item = {Active = {},Trinket = {},Pocket = {},ChargeBar = {},Inventory = {}},Stats = {Deals = {}, Stat = {}},Misc = {Pickups = {}, Difficulty = {[0] = {},[1] = {}}, Wave = {[0] = {}}, Extra = {[0] = {}}}};
 		CoopEnhanced.Registry:RegisterCallback("HUD_PLAYER_INIT");
@@ -233,7 +235,7 @@ mod.Registry.Commands = {
 		local player_entity = Utils.GetMainPlayerByIndex(player_index);
 		if twin_index > 0 then player_entity = Utils.GetPlayerTwins(player_entity)[twin_index]; end
 		if not player_entity then print("Incorrect arguments for command. ('removeplayer <player_index> <twin_index>')"); end
-		PlayerManager.RemoveCoPlayer(player_entity);
+		if REPENTOGON then PlayerManager.RemoveCoPlayer(player_entity); else player_entity:Remove(); end
 	end,
 	["revive"] = function(args) -- Revive a dead player (Coop Ghost)
 		local player_index = tonumber(args[1]) or 1;
@@ -419,37 +421,44 @@ mod.Registry.Commands.Auto["print players"] = "Prints player data used by the mo
 mod.Registry.Commands.Auto["name"] = "Set a custom name of a player for a module. 'name <module> <player_index> <player_name>'";
 
  -- Special Commands. Create it this way to mimic vanilla commands.
-Console.RegisterCommand((mod.Config.commands.CMD .. "giveitem"),"Give an item to a player","giveitem <item_id> <player_index> <active_slot> <twin_index>",false,AutocompleteType.ITEM);
-Console.RegisterCommand((mod.Config.commands.CMD .. "removeitem"),"Remove an item from a player","removeitem <item_id> <player_index> <active_slot> <drop_item> <twin_index>",false,AutocompleteType.ITEM);
-Console.RegisterCommand("changeplayer","Change a player to another character","changeplayer <player_type> <player_index>",true,AutocompleteType.PLAYER);
-Console.RegisterCommand("removeplayer","Remove an existing player","removeplayer <player_index> <remove_twins>",true,AutocompleteType.NONE);
-Console.RegisterCommand("health","Modify the health of a player","health <player_index> <health_type> <health_amount> <twin_index>",true,AutocompleteType.NONE); 
-Console.RegisterCommand("revive","Revives a dead/ghost player","revive <player_index> <cost>",true,AutocompleteType.NONE); 
-Console.RegisterCommand("kill","Kill a player","kill <player_index> <twin_index>",true,AutocompleteType.NONE);
-Console.RegisterCommand("controller","Change the controller index of a player","controller <player_index> <controller_index>",true,AutocompleteType.NONE);
+if REPENTOGON then
+	Console.RegisterCommand((mod.Config.commands.CMD .. "giveitem"),"Give an item to a player","giveitem <item_id> <player_index> <active_slot> <twin_index>",false,AutocompleteType.ITEM);
+	Console.RegisterCommand((mod.Config.commands.CMD .. "removeitem"),"Remove an item from a player","removeitem <item_id> <player_index> <active_slot> <drop_item> <twin_index>",false,AutocompleteType.ITEM);
+	Console.RegisterCommand("changeplayer","Change a player to another character","changeplayer <player_type> <player_index>",true,AutocompleteType.PLAYER);
+	Console.RegisterCommand("removeplayer","Remove an existing player","removeplayer <player_index> <remove_twins>",true,AutocompleteType.NONE);
+	Console.RegisterCommand("health","Modify the health of a player","health <player_index> <health_type> <health_amount> <twin_index>",true,AutocompleteType.NONE); 
+	Console.RegisterCommand("revive","Revives a dead/ghost player","revive <player_index> <cost>",true,AutocompleteType.NONE); 
+	Console.RegisterCommand("kill","Kill a player","kill <player_index> <twin_index>",true,AutocompleteType.NONE);
+	Console.RegisterCommand("controller","Change the controller index of a player","controller <player_index> <controller_index>",true,AutocompleteType.NONE);
+	Console.RegisterCommand(mod.Config.commands.CMD,"Coop Enhanced Commands","",true,AutocompleteType.CUSTOM);
+end
 
 AutoConfig(mod.Config, ("config"));
 -- Register each module
 for key,registry_func in pairs(mod.Registry.Modules) do
 	registry_func(key);
-	CoopEnhanced[key].Name = key;
-	if mod.Config.commands.config then AutoConfig(mod.Config[key], (mod.Config[key].CMD .. " config")); end
+	if CoopEnhanced[key] then
+		CoopEnhanced[key].Name = key;
+		if mod.Config.commands.config then AutoConfig(mod.Config[key], (mod.Config[key].CMD .. " config")); end
+	end
 end
 
 -- Register Fonts
 CoopEnhanced.Utils.LoadFonts();
 
--- Register Commands (Repentagon Required)
-mod:AddCallback(ModCallbacks.MC_CONSOLE_AUTOCOMPLETE, function(_, cmd, params)
-	local auto_tbl = {};
-	for comA,comB in pairs(mod.Registry.Commands.Auto) do
-		if comA ~= "Config" then table.insert(auto_tbl,{comA,comB}); end
-	end
-	for comA,comB in pairs(mod.Registry.Commands.Auto.Config) do
-		table.insert(auto_tbl,{comA,comB});
-	end
-	return auto_tbl;
-end);
+-- Register Command Autocomplete (REPENTOGON Required)
+if REPENTOGON then
+	mod:AddCallback(ModCallbacks.MC_CONSOLE_AUTOCOMPLETE, function(_, cmd, params)
+		local auto_tbl = {};
+		for comA,comB in pairs(mod.Registry.Commands.Auto) do
+			if comA ~= "Config" then table.insert(auto_tbl,{comA,comB}); end
+		end
+		for comA,comB in pairs(mod.Registry.Commands.Auto.Config) do
+			table.insert(auto_tbl,{comA,comB});
+		end
+		return auto_tbl;
+	end);
+end
 
 mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, params)
 	local args = {};
@@ -499,7 +508,7 @@ mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, params)
 		end
 	else
 		local command = mod.Registry.Commands;
-		local variable_args = Utils.CloneObject(args);
+		local variable_args = Utils.Clone(args);
 		for i = 1, #args, 1 do
 			command = command[args[i]];
 			table.remove(variable_args,1); -- Remove non variable args for command functions
@@ -508,30 +517,35 @@ mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, params)
 		end
 	end
 end);
-Console.RegisterCommand(mod.Config.commands.CMD,"Coop Enhanced Commands","",true,AutocompleteType.CUSTOM);
 
+-- Execute Post Registry Callbacks
+CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.POST_REGISTRY_EXECUTE);
+
+if not REPENTOGON then return; end
 -- Mod Compat Registry
 local function modCompats()
 	local anim2 = "gfx/ui/coop_menu.anm2";
 	if Epiphany then
+		CoopEnhanced.AddCharacter("Tarnished Characters",Epiphany.technical_character,nil,{Anm2 = anim2,Animation = "Epiphany",Frame = 0}); -- Door Sprite
+		
 		local epiphany_anm2 = "gfx/ui/coop/tr_coop_menu.anm2";
-		CoopEnhanced.AddCharacter("Tarnished Isaac",Epiphany.PlayerType.ISAAC,(Epiphany:checkCharacter("ISAAC") and nil or -1),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 1});
-		CoopEnhanced.AddCharacter("Tarnished Magdelene",Epiphany.PlayerType.MAGDALENE,(Epiphany:checkCharacter("MAGDALENE") and nil or -2),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 2});
-		CoopEnhanced.AddCharacter("Tarnished Cain",Epiphany.PlayerType.CAIN,(Epiphany:checkCharacter("CAIN") and nil or -3),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 3});
-		CoopEnhanced.AddCharacter("Tarnished Judas",Epiphany.PlayerType.JUDAS,(Epiphany:checkCharacter("JUDAS") and nil or -4),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 4});
-		CoopEnhanced.AddCharacter("Tarnished ???",Epiphany.PlayerType.BLUEBABY,(Epiphany:checkCharacter("BLUEBABY") and nil or -5),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 5});
-		CoopEnhanced.AddCharacter("Tarnished Eve",Epiphany.PlayerType.EVE,(Epiphany:checkCharacter("EVE") and nil or -6),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 6});
-		CoopEnhanced.AddCharacter("Tarnished Samson",Epiphany.PlayerType.SAMSON,(Epiphany:checkCharacter("SAMSON") and nil or -7),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 7});
-		CoopEnhanced.AddCharacter("Tarnished Azazel",Epiphany.PlayerType.AZAZEL,(Epiphany:checkCharacter("AZAZEL") and nil or -8),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 8});
-		CoopEnhanced.AddCharacter("Tarnished Lazarus",Epiphany.PlayerType.LAZARUS,(Epiphany:checkCharacter("LAZARUS") and nil or -9),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 9});
-		CoopEnhanced.AddCharacter("Tarnished Eden",Epiphany.PlayerType.EDEN,(Epiphany:checkCharacter("EDEN") and nil or -10),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 10});
-		CoopEnhanced.AddCharacter("Tarnished Lost",Epiphany.PlayerType.LOST,(Epiphany:checkCharacter("LOST") and nil or -11),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 11});
-		CoopEnhanced.AddCharacter("Tarnished Lilith",Epiphany.PlayerType.LILITH,(Epiphany:checkCharacter("LILITH") and nil or -12),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 12});
-		CoopEnhanced.AddCharacter("Tarnished Keeper",Epiphany.PlayerType.KEEPER,(Epiphany:checkCharacter("KEEPER") and nil or -13),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 13});
-		CoopEnhanced.AddCharacter("Tarnished Apollyon",Epiphany.PlayerType.APOLLYON,(Epiphany:checkCharacter("APOLLYON") and nil or -14),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 14});
-		CoopEnhanced.AddCharacter("Tarnished Forgotten",Epiphany.PlayerType.FORGOTTEN,(Epiphany:checkCharacter("FORGOTTEN") and nil or -15),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 15});
-		CoopEnhanced.AddCharacter("Tarnished Bethany",Epiphany.PlayerType.BETHANY,(Epiphany:checkCharacter("BETHANY") and nil or -16),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 16});
-		CoopEnhanced.AddCharacter("Tarnished Jacob",Epiphany.PlayerType.JACOB,(Epiphany:checkCharacter("JACOB") and nil or -17),{Anm2 = epiphany_anm2,Animation = "Main",Frame = 17});
+		CoopEnhanced.AddCharacter("Tarnished Isaac",Epiphany.PlayerType.ISAAC,-1,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 1});
+		CoopEnhanced.AddCharacter("Tarnished Magdelene",Epiphany.PlayerType.MAGDALENE,-2,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 2});
+		CoopEnhanced.AddCharacter("Tarnished Cain",Epiphany.PlayerType.CAIN,-3,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 3});
+		CoopEnhanced.AddCharacter("Tarnished Judas",Epiphany.PlayerType.JUDAS,-4,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 4});
+		CoopEnhanced.AddCharacter("Tarnished ???",Epiphany.PlayerType.BLUEBABY,-5,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 5});
+		CoopEnhanced.AddCharacter("Tarnished Eve",Epiphany.PlayerType.EVE,-6,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 6});
+		CoopEnhanced.AddCharacter("Tarnished Samson",Epiphany.PlayerType.SAMSON,-7,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 7});
+		CoopEnhanced.AddCharacter("Tarnished Azazel",Epiphany.PlayerType.AZAZEL,-8,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 8});
+		CoopEnhanced.AddCharacter("Tarnished Lazarus",Epiphany.PlayerType.LAZARUS,-9,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 9});
+		CoopEnhanced.AddCharacter("Tarnished Eden",Epiphany.PlayerType.EDEN,-10,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 10});
+		CoopEnhanced.AddCharacter("Tarnished Lost",Epiphany.PlayerType.LOST,-11,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 11});
+		CoopEnhanced.AddCharacter("Tarnished Lilith",Epiphany.PlayerType.LILITH,-12,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 12});
+		CoopEnhanced.AddCharacter("Tarnished Keeper",Epiphany.PlayerType.KEEPER,-13,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 13});
+		CoopEnhanced.AddCharacter("Tarnished Apollyon",Epiphany.PlayerType.APOLLYON,-14,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 14});
+		CoopEnhanced.AddCharacter("Tarnished Forgotten",Epiphany.PlayerType.FORGOTTEN,-15,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 15});
+		CoopEnhanced.AddCharacter("Tarnished Bethany",Epiphany.PlayerType.BETHANY,-16,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 16});
+		CoopEnhanced.AddCharacter("Tarnished Jacob",Epiphany.PlayerType.JACOB,-17,{Anm2 = epiphany_anm2,Animation = "Main",Frame = 17});
 	end
 	if EdithRestored then
 		CoopEnhanced.AddCharacter("Edith",EdithRestored.Enums.PlayerType.EDITH,EdithRestored.Enums.Achievements.Characters.EDITH,{Anm2 = anim2,Animation = "Edith",Frame = 0});
@@ -539,14 +553,14 @@ local function modCompats()
 	end
 	if FiendFolio then
 		CoopEnhanced.AddCharacter("Fiend",FiendFolio.PLAYER.FIEND,nil,{Anm2 = anim2,Animation = "Fiend",Frame = 0});
-		CoopEnhanced.AddCharacter("The Bastard",FiendFolio.PLAYER.BIEND,(FiendFolio.GetAchievementsWithTag("BiendUnlock")[1]:IsUnlocked(true) and nil or 0),{Anm2 = anim2,Animation = "Fiend",Frame = 1});
-		CoopEnhanced.AddCharacter("Golem",mod.PLAYER.GOLEM,nil,{Anm2 = anim2,Animation = "Fiend",Frame = 2});
-		--CoopEnhanced.AddCharacter("The Cracked",mod.PLAYER.BOLEM,nil,{Anm2 = anim2,Animation = "Fiend",Frame = 2});
-		CoopEnhanced.AddCharacter("Slippy",mod.PLAYER.SLIPPY,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 3});
-		CoopEnhanced.AddCharacter("China",mod.PLAYER.CHINA,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 4});
-		--CoopEnhanced.AddCharacter("Fient",mod.PLAYER.FIENT,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 5});
-		--CoopEnhanced.AddCharacter("Fend",mod.PLAYER.FEND,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 6});
-		--CoopEnhanced.AddCharacter("Peat",mod.PLAYER.PEAT,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 7});
+		CoopEnhanced.AddCharacter("The Bastard",FiendFolio.PLAYER.BIEND,nil,{Anm2 = anim2,Animation = "Fiend",Frame = 1});
+		CoopEnhanced.AddCharacter("Golem",FiendFolio.PLAYER.GOLEM,nil,{Anm2 = anim2,Animation = "Fiend",Frame = 2});
+		CoopEnhanced.AddCharacter("The Cracked",FiendFolio.PLAYER.BOLEM,nil,{Anm2 = anim2,Animation = "Fiend",Frame = 2});
+		CoopEnhanced.AddCharacter("Slippy",FiendFolio.PLAYER.SLIPPY,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 3});
+		CoopEnhanced.AddCharacter("China",FiendFolio.PLAYER.CHINA,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 4});
+		--CoopEnhanced.AddCharacter("Fient",FiendFolio.PLAYER.FIENT,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 5});
+		--CoopEnhanced.AddCharacter("Fend",FiendFolio.PLAYER.FEND,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 6});
+		--CoopEnhanced.AddCharacter("Peat",FiendFolio.PLAYER.PEAT,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 7});
 	end
 	if _JERICHO_MOD then
 		CoopEnhanced.AddCharacter("Jericho",_JERICHO_MOD.Character.JERICHO,nil,{Anm2 = anim2,Animation = "Jericho",Frame = 0});
@@ -560,9 +574,18 @@ local function modCompats()
 		CoopEnhanced.AddCharacter("Mei",Isaac.GetPlayerTypeByName("Mei"),nil,{Anm2 = anim2,Animation = "Mei",Frame = 0});
 		CoopEnhanced.AddCharacter("The Asomatous",Isaac.GetPlayerTypeByName("Tainted Mei",true),nil,{Anm2 = anim2,Animation = "Mei",Frame = 1});
 	end
-	if XMLData.GetModById("Nemesis [for REP]") ~= nil then
+	if XMLData.GetModById("2501339433") and XMLData.GetModById("2501339433").enabled == "true" then
 		CoopEnhanced.AddCharacter("Nemesis",Isaac.GetPlayerTypeByName("Nemesis"),nil,{Anm2 = anim2,Animation = "Nemesis",Frame = 0});
 		CoopEnhanced.AddCharacter("The Ensorcelled",Isaac.GetPlayerTypeByName("Tainted Nemesis",true),nil,{Anm2 = anim2,Animation = "Nemesis",Frame = 1});
+	end
+	if Reverie then
+		for i,player in pairs(Reverie.Players) do
+			local player_config = EntityConfig.GetPlayer(player.Type);
+			local mod_sprite = player_config ~= nil and player_config:GetModdedCoopMenuSprite() or Sprite();
+			local achievment = player.Name:lower():find("hourai") and -1 or nil;
+			local sprite_data = {Anm2 = mod_sprite:GetFilename(), Animation = player.Name, Frame = 0};
+			CoopEnhanced.AddCharacter(player.Name,player.Type,achievment,sprite_data);
+		end
 	end
 	if SamaelMod then
 		CoopEnhanced.AddCharacter("Samael",SamaelMod.Lib.SamaelId,nil,{Anm2 = anim2,Animation = "Samael",Frame = 0});
@@ -571,6 +594,15 @@ local function modCompats()
 	if REVEL then
 		CoopEnhanced.AddCharacter("Sarah",REVEL.CHAR.SARAH.Type,nil,{Anm2 = anim2,Animation = "Revelations",Frame = 0});
 		CoopEnhanced.AddCharacter("Dante",REVEL.CHAR.DANTE.Type,nil,{Anm2 = anim2,Animation = "Revelations",Frame = 1});
+	end
+	if XMLData.GetModById("2785553778") and XMLData.GetModById("2785553778").enabled == "true" then
+		for i,player_name in pairs({"Zach","Tainted Zach"}) do
+			local player_type = Isaac.GetPlayerTypeByName(player_name,player_name:find("Tainted"));
+			local player_config = EntityConfig.GetPlayer(player_type);
+			local mod_sprite = player_config ~= nil and player_config:GetModdedCoopMenuSprite() or Sprite();
+			local sprite_data = {Anm2 = mod_sprite:GetFilename(), Animation = player_name, Frame = 0};
+			CoopEnhanced.AddCharacter(player_name,player_type,nil,sprite_data);
+		end
 	end
 end
 CoopEnhanced:AddCallback(ModCallbacks.MC_POST_MODS_LOADED, modCompats);
@@ -583,6 +615,3 @@ for i,character in pairs(mod.Characters) do
 	character.Sprite.Frame = character.Sprite.Frame or (character.Type + 1);
 	character.Sprite.Sheets = character.Sprite.Sheets or {[1] = mod.Images.Blank};
 end
-
--- Execute Post Registry Callbacks
-CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.POST_REGISTRY_EXECUTE);

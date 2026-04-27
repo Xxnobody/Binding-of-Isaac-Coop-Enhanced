@@ -58,7 +58,7 @@ function CoopTreasure.ClearGridSpace(position,radius) -- Clear Grid entities aro
 		local grid_type = grid_entity:GetType();
 		if Utils.IsGridTypeRemovable(grid_type) then
 			grid_entity:Destroy(true);
-			room:RemoveGridEntityImmediate(room:GetGridIndex(position),1,false);
+			if REPENTOGON then room:RemoveGridEntityImmediate(room:GetGridIndex(position),1,false); end
 		end
 	end
 end
@@ -248,9 +248,11 @@ function CoopTreasure:onRoom()
 	local room_data = {Assign = room_assign, Config = room_desc.Data, Positions = {}, Safe = {}, Spawn = {}, MoreOptions = {}, Treasure = {Assignments = {0,0,0,0}, Owned = {0,0,0,0}, Prices = {0,0,0,0}, Items = {[1] = {},[2] = {},[3] = {},[4] = {}}}, Render = {}};
 	local room_ID = Utils.GetRoomID();
 	local room_variant = room_desc.Data.Variant;
+	local room_seed = math.max(1,room:GetSpawnSeed());
 	local item_pool = game:GetItemPool();
+	local room_pool = REPENTOGON and room:GetItemPool(room_seed) or item_pool:GetPoolForRoom(room_type, room_seed);
 	
-	if PlayerManager.AnyoneHasCollectible(CollectibleType.COLLECTIBLE_CHAOS) then room:SetItemPool(item_pool:GetRandomPool(RNG(room:GetSpawnSeed()))); end
+	if REPENTOGON and Utils.AnyoneHasCollectible(CollectibleType.COLLECTIBLE_CHAOS) then room:SetItemPool(item_pool:GetRandomPool(RNG(room_seed))); end
 	
 	local orig_peds = Isaac.FindByType(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, -1);
 	if not orig_peds or #orig_peds == 0 then return; end
@@ -265,7 +267,7 @@ function CoopTreasure:onRoom()
 	room_data.Positions[3] = Vector(room_data.Positions[1].X,room_data.Positions[4].Y);
 	
 	room_data.Spawn = {Maximum = 2, Total = spawn_total, Vertical = (room:GetRoomShape() == RoomShape.ROOMSHAPE_IV or room:GetRoomShape() == RoomShape.ROOMSHAPE_IIV or room:GetRoomShape() == RoomShape.ROOMSHAPE_1x2), Radius = mod.Config.CoopTreasure.radius};
-	room_data.Safe = {Enable = Utils.CheckSafeSpawnPosition(game:GetPlayer().Position, orig_peds[1].Position), Mode = (not isSkinny and mod.Config.CoopTreasure.safe or 0)};
+	room_data.Safe = {Enable = Utils.CheckSafeSpawnPosition(game:GetPlayer(0).Position, orig_peds[1].Position), Mode = (not isSkinny and mod.Config.CoopTreasure.safe or 0)};
 	room_data.MoreOptions = {Enabled = (#orig_peds > 1), Offset = (room_data.Spawn.Vertical and Vector(0,2 * mod.GridSize) or Vector(2 * mod.GridSize,0))};
 	
 	-- Get Room Specific Data, Run Room Specific Methods
@@ -284,7 +286,7 @@ function CoopTreasure:onRoom()
 	end
 	
 	-- Move Restock boxes
-	local restock_boxes = Isaac.FindByType(EntityType.ENTITY_SLOT, SlotVariant.SHOP_RESTOCK_MACHINE, -1);
+	local restock_boxes = Isaac.FindByType(EntityType.ENTITY_SLOT, (SlotVariant and SlotVariant.SHOP_RESTOCK_MACHINE or 10), -1);
 	for _,entity in pairs(restock_boxes) do
 		entity.Position = room:GetCenterPos();
 	end
@@ -300,12 +302,12 @@ function CoopTreasure:onRoom()
 		if i > room_data.Spawn.Maximum then
 			pedestal_entity:Remove();
 		else
-			local isBlind = pedestal_entity:IsBlind();
+			local isBlind = REPENTOGON and pedestal_entity:IsBlind() or false;
 			item_pos = item_pos + (i > 1 and (room_data.MoreOptions.Offset / (math.min(room_data.Spawn.Maximum,#orig_peds) >= 3 and 2 or 1)) or Vector.Zero);
 			CoopTreasure.ClearGridSpace(item_pos, room_data.Spawn.Radius); -- Clear grid entities from around pedestals
-			if room_data.Safe.Enable and room_data.Safe.Mode > 0 then item_pos = Utils.GetSafeSpawnPosition(game:GetPlayer().Position, item_pos, safe_args); end -- Safe Pos Check
-			local new_pedestal_entity = game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, item_pos, Vector.Zero, nil, pedestal_entity.SubType, math.max(1,room:GetSpawnSeed())):ToPickup(); -- Spawn new one to remove extra items from coop (e.g. Boss Item Pedestals)
-			new_pedestal_entity:SetForceBlind(isBlind); -- Set blind (usually alt floor treasure)
+			if room_data.Safe.Enable and room_data.Safe.Mode > 0 then item_pos = Utils.GetSafeSpawnPosition(game:GetPlayer(0).Position, item_pos, safe_args); end -- Safe Pos Check
+			local new_pedestal_entity = game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, item_pos, Vector.Zero, nil, pedestal_entity.SubType, room_seed):ToPickup(); -- Spawn new one to remove extra items from coop (e.g. Boss Item Pedestals)
+			if REPENTOGON then new_pedestal_entity:SetForceBlind(isBlind); end -- Set blind (usually alt floor treasure)
 			if room_data.MoreOptions.Enabled then new_pedestal_entity.OptionsPickupIndex = 1; end
 			if room_data.Assign > 1 and players[1]:GetPlayerType() == PlayerType.PLAYER_KEEPER_B then new_pedestal_entity.Price = 15; new_pedestal_entity.ShopItemId = -1; elseif isDevilDeal then new_pedestal_entity.Price = Utils.GetDevilPrice(players[1],nil,new_pedestal_entity.SubType); else new_pedestal_entity.Price = room_data.Treasure.Prices[1] or 0; end
 			pedestal_entity:Remove();
@@ -322,16 +324,16 @@ function CoopTreasure:onRoom()
 		for ii = 1, #room_data.Treasure.Items[1], 1 do
 			if ii > 1 then item_pos = item_pos + ((room_data.MoreOptions.Offset / (#room_data.Treasure.Items[1] >= 3 and 2 or 1)) * edge_multipliers); end
 			CoopTreasure.ClearGridSpace(item_pos, room_data.Spawn.Radius); -- Clear grid entities from around pedestals
-			if room_data.Safe.Enable and room_data.Safe.Mode > 0 then item_pos = Utils.GetSafeSpawnPosition(game:GetPlayer().Position, item_pos, {safe_args[1] * edge_multipliers.X,safe_args[2] * edge_multipliers.Y,2}); end -- Safe Pos Check
-			local item_id = item_pool:GetCollectible(room:GetItemPool(math.max(1,room:GetSpawnSeed())), true, math.max(1,room:GetSpawnSeed())); -- Gets seed accurate Collectible Type
-			local pedestal_entity = game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, item_pos, Vector.Zero, nil, item_id, math.max(1,room:GetSpawnSeed())):ToPickup();
-			pedestal_entity:SetForceBlind(room_data.Treasure.Items[1][ii].IsBlind);
+			if room_data.Safe.Enable and room_data.Safe.Mode > 0 then item_pos = Utils.GetSafeSpawnPosition(game:GetPlayer(0).Position, item_pos, {safe_args[1] * edge_multipliers.X,safe_args[2] * edge_multipliers.Y,2}); end -- Safe Pos Check
+			local item_id = item_pool:GetCollectible(room_pool, true, room_seed); -- Gets seed accurate Collectible Type
+			local pedestal_entity = game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, item_pos, Vector.Zero, nil, item_id, room_seed):ToPickup();
+			if REPENTOGON then pedestal_entity:SetForceBlind(room_data.Treasure.Items[1][ii].IsBlind); end
 			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_PEDESTAL, i, pedestal_entity); -- Execute Pre Pedestal updates for player 1 Callbacks (player_index, pedestal_entity(EntityPickup))
 			
 			if room_data.Assign > 1 and players[i]:GetPlayerType() == PlayerType.PLAYER_KEEPER_B then pedestal_entity.Price = 15; pedestal_entity.ShopItemId = -1; -- Set Miser costs
 			elseif isDevilDeal then pedestal_entity.Price = Utils.GetDevilPrice(players[i],nil,item_id); else pedestal_entity.Price = room_data.Treasure.Prices[i] or 0; end -- Set Health price
 			if room_data.MoreOptions.Enabled then pedestal_entity.OptionsPickupIndex = i; end -- Set OptionsPickupIndex
-			local pedestal_data = {Pointer = EntityPtr(pedestal_entity), Position = item_pos, SubType = pedestal_entity.SubType, IsBlind = pedestal_entity:IsBlind()};
+			local pedestal_data = {Pointer = EntityPtr(pedestal_entity), Position = item_pos, SubType = pedestal_entity.SubType, IsBlind = (REPENTOGON and pedestal_entity:IsBlind() or false)};
 			--Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, item_pos, Vector.Zero, nil);
 			table.insert(room_data.Treasure.Items[i],pedestal_data);
 			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_POST_PEDESTAL, i, pedestal_entity, pedestal_data); -- Execute Post Pedestal updates for player 1 Callbacks (player_index, pedestal_entity(EntityPickup), pedestal_data(table))

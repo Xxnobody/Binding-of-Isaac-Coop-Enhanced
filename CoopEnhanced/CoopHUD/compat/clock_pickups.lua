@@ -16,7 +16,7 @@ function CoopHUD.ClockPickups()
 		["RedHeart"] = 6
 	};
 	local function AnimatePickups(misc_data)
-		if not misc_data or not misc_data["Pickups"].Visible or not mod.Config.CoopHUD.mods.ANIMATEDPICKUPS.enabled then return; end
+		if not misc_data or not misc_data["Pickups"].Visible or not mod.Config.CoopHUD.compat.ANIMATEDPICKUPS.enabled then return; end
 		local animated_sprites = ClockPickupCounter.PoryadokPokaza.SamPoryadok;
 		if not animated_sprites then return; end
 		

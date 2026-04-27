@@ -13,15 +13,18 @@ function CoopHUD.Reflourished()
 		if not mod.Config.CoopHUD.misc.wave.background or not misc_data["Wave"] then return; end
 		local sprite = misc_data["Wave"][1].Sprite or nil;
 		local data = misc_data["Wave"][1].Data or nil;
-		if data.Wave.Current == 0 then data.Text = nil; misc_data["Wave"].Visible = false; return; end
 		if sprite and data and data.Type == CoopHUD.WaveType.BOSSRUSH then
-			if not mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.enabled then
-				if sprite:GetFilename() ~= mod.Animations.Waves then sprite:Load(mod.Animations.Waves, true); end
+			if not mod.Config.CoopHUD.compat.REFLOURISHED.boss_counter.enabled then
+				if sprite:GetFilename() ~= mod.Animations.Waves then
+					sprite:Load(mod.Animations.Waves, true);
+					sprite:SetFrame("Main",data.Type);
+				end
 				return;
 			end
+			if data.Wave.Current == 0 then CoopHUD.Misc.Wave.Visible = false; return; end
 			data.Animated = true;
-			data.Pos = data.Pos + ((mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.offset + Vector(7,7)) * mod.Config.CoopHUD.misc.wave.scale); --Needs extra offset due to how the anim2 file sets positions
-			if data.Text then data.Text.Pos = data.Text.Pos + ((mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.text_offset) * mod.Config.CoopHUD.misc.wave.text_scale); end
+			data.Pos = data.Pos + ((mod.Config.CoopHUD.compat.REFLOURISHED.boss_counter.offset + Vector(7,7)) * mod.Config.CoopHUD.misc.wave.scale); --Needs extra offset due to how the anim2 file sets positions
+			if data.Text then data.Text.Pos = data.Text.Pos + ((mod.Config.CoopHUD.compat.REFLOURISHED.boss_counter.text_offset) * mod.Config.CoopHUD.misc.wave.text_scale); end
 			if sprite:GetFilename() ~= wavebar_animation then sprite:Load(wavebar_animation, true); end
 			if data.Wave.Current ~= last_wave then
 				last_wave = data.Wave.Current;
@@ -52,12 +55,12 @@ function CoopHUD.Reflourished()
 		
 		local function RenderTimer(player_entity)
 			local player_data = CoopHUD.getDataFromEntity(player_entity);
-			if not mod.Config.CoopHUD.mods.REFLOURISHED.excited_timer.enabled or not player_data then return; end
+			if not mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.enabled or not player_data then return; end
 			local controller_index = player_entity.ControllerIndex;
 			local cooldown = playerTimers[controller_index];
 			local seconds = math.ceil((cooldown / 30 % 30));
 			
-			local config = mod.Config.CoopHUD.mods.REFLOURISHED.excited_timer;
+			local config = mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer;
 			
 			local isMapDown = CoopHUD.IsPlayerMapDown[controller_index];
 			
@@ -100,7 +103,7 @@ function CoopHUD.Reflourished()
 
 		mod.Registry:AddCallback(mod.Callbacks.HUD_POST_PLAYER_RENDER, function()
 			if not anyPlayerHasExcited or RoomTransition.GetTransitionMode() ~= 0 then return; end
-			for _, player_entity in pairs(PlayerManager.GetPlayers()) do
+			for _, player_entity in pairs(Utils.GetPlayers()) do
 				if playerTimers[player_entity.ControllerIndex] then
 					RenderTimer(player_entity);
 				end
@@ -128,7 +131,7 @@ function CoopHUD.Reflourished()
 			if cooldown <= 0 then
 				playerTimers[player_entity.ControllerIndex] = nil;
 				local playersHaveExcited = false;
-				for _, player_entity in pairs(PlayerManager.GetPlayers()) do
+				for _, player_entity in pairs(Utils.GetPlayers()) do
 					if playerTimers[player_entity.ControllerIndex] and playerTimers[player_entity.ControllerIndex] > 0 then
 						playersHaveExcited = true;
 					end
@@ -152,7 +155,7 @@ function CoopHUD.Reflourished()
 	mod:AddCallback(IsaacReflourished.SaveManager.SaveCallbacks.POST_DATA_LOAD, function()
 		local save_data = IsaacReflourished.SaveManager.GetDeadSeaScrollsSave();
 		if save_data and save_data.Toggles and save_data.Toggles["ExcitedTimerEnabled"] then ExcitedTimer(); end
-		if mod.Config.CoopHUD.mods.REFLOURISHED.boss_counter.enabled then
+		if mod.Config.CoopHUD.compat.REFLOURISHED.boss_counter.enabled then
 			if save_data and save_data.Toggles then save_data.Toggles["bossRushWaveCounterEnabled"] = false; end
 			mod.Registry:AddCallback(mod.Callbacks.HUD_POST_MISC_UPDATE, BossCounter);
 		end

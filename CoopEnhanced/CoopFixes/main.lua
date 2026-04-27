@@ -53,6 +53,18 @@ function CoopFixes.JoinFix(_)
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CoopFixes.JoinFix);
 
+--[[
+-- Rewind Fix (Not Needed ?)
+-- Fixes players 2+ losing control of their characters after a rewind command
+function CoopFixes.RewindFix(_, cmd, params)
+	if cmd:lower() == "rewind" then
+		for i,player_entity in pairs(Utils.GetPlayers()) do
+			print(player_entity.ControllerIndex)
+		end
+	end
+end
+mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, CoopFixes.RewindFix);
+]]--
 
 --Rejoin Fix
 -- Fixes Characters changing type on rejoin when controller order changes
@@ -159,7 +171,7 @@ function CoopFixes.LoadBackup(player_index, level_stage)
 	end
 	if level_stage > 0 then
 		if player_data.Backups and #player_data.Backups > 0 and player_data.Backups[level_stage] ~= nil then
-			player_data.Data = Utils.CloneObject(player_data.Backup[level_stage]);
+			player_data.Data = Utils.Clone(player_data.Backup[level_stage]);
 		else
 			print("There is no backup at the specified depth. Possible level stage backups include: ");
 			print("Initial: 0");
@@ -189,21 +201,22 @@ function CoopFixes.BackupPlayer(player_index,player_entity,save_floor)
 		
 	local actives = {};
 	for slot = ActiveSlot.SLOT_PRIMARY, ActiveSlot.SLOT_SECONDARY, 1 do
-		local item_desc = player_entity:GetActiveItemDesc(slot);
-		actives[slot] = {Item = item_desc.Item or 0, Charge = item_desc.Charge or 0, VarData = item_desc.VarData or 0};
+		actives[slot] = {Item = player_entity:GetActiveItem(slot), Charge = player_entity:GetActiveCharge(slot) or 0, VarData = 0};
 		if not actives[slot] or actives[slot].Item == CollectibleType.COLLECTIBLE_NULL then break; end
 	end
 	
 	local pockets = {}
-	for slot = PillCardSlot.PRIMARY, PillCardSlot.QUATERNARY, 1 do
-		local pocket_item = player_entity:GetPocketItem(slot);
+	if REPENTOGON then 
+		for slot = PillCardSlot.PRIMARY, PillCardSlot.QUATERNARY, 1 do
+			local pocket_item = player_entity:GetPocketItem(slot);
 
-		pockets[slot] = {Type = (pocket_item:GetSlot() == 0 and -1 or pocket_item:GetType())};
-		if pocket_item:GetType() == PocketItemType.ACTIVE_ITEM then
-			local item_desc = player_entity:GetActiveItemDesc(pocket_item:GetSlot() - 1);
-			pockets[slot].Slot = {Item = item_desc.Item or 0, Charge = item_desc.Charge or 0, VarData = item_desc.VarData or 0};
-		else
-			pockets[slot].Slot = pocket_item:GetSlot();
+			pockets[slot] = {Type = (pocket_item:GetSlot() == 0 and -1 or pocket_item:GetType())};
+			if pocket_item:GetType() == PocketItemType.ACTIVE_ITEM then
+				local item_desc = player_entity:GetActiveItemDesc(pocket_item:GetSlot() - 1);
+				pockets[slot].Slot = {Item = item_desc.Item or 0, Charge = item_desc.Charge or 0, VarData = item_desc.VarData or 0};
+			else
+				pockets[slot].Slot = pocket_item:GetSlot();
+			end
 		end
 	end
 	
@@ -227,6 +240,6 @@ local function onNewFloor(_) -- Backup every Floor start
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, onNewFloor);
 local function onNewPlayer(_) -- Backup New Players
-	if Isaac:CanStartTrueCoop() then CoopFixes.BackupPlayer(0,player_entity); else mod:RemoveCallback(ModCallbacks.MC_POST_PLAYER_INIT, onNewPlayer); end
+	if Utils.CanStartCoop() then CoopFixes.BackupPlayer(0,player_entity); else mod:RemoveCallback(ModCallbacks.MC_POST_PLAYER_INIT, onNewPlayer); end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, onNewPlayer);

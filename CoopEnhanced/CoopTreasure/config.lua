@@ -71,7 +71,7 @@ mod.CoopTreasure.DefaultConfig = {
 };
 
 function CoopEnhanced.CoopTreasure.ResetConfig()
-	mod.Config.CoopTreasure = Utils.CloneObject(mod.CoopTreasure.DefaultConfig);
+	mod.Config.CoopTreasure = Utils.Clone(mod.CoopTreasure.DefaultConfig);
 end
 if mod.Config.CoopTreasure == nil then mod.CoopTreasure.ResetConfig(); end
 

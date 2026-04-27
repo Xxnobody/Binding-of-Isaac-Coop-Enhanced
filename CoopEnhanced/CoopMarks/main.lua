@@ -20,7 +20,7 @@ function CoopMarks.getMarks(player_entity, player_index, position)
 	local player_config = player_sync == "Global" and mod.Config.players[player_index] or (mod.Config[player_sync] and mod.Config[player_sync].players[player_index] or mod.Config.CoopMarks.players[player_index]);
 	if not player_config then return nil; end
 		
-	local isTainted = Utils.IsTainted(player_entity);
+	local isTainted = Utils.IsTainted(player_type);
 	local player_color = Colors[player_config.color].Value;
 			
 	local player_data = {};
@@ -30,7 +30,7 @@ function CoopMarks.getMarks(player_entity, player_index, position)
 	
 	player_data.Pos = position or (player_index == 1 and (screen_dimensions.Center + Vector(-72, -85)) or ((screen_dimensions.Center + ((Vector(60, -50) + mod.Config.CoopMarks.offset) * Vector(1 / player_data.Scale.X, 1 / player_data.Scale.Y))) + (Vector(0,(player_index - 1) * 80) + mod.Config.CoopMarks.rel_offset) * player_data.Scale.Y));
 	
-	-- Text
+	-- Label
 	if mod.Config.CoopMarks.display > 1 then 
 		local text_scale = (player_index == 1 and Vector(1.5,1.5) or mod.Config.CoopMarks.text_scale * player_data.Scale);
 		player_data.Text = {Value = (Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, false)), Pos = (player_data.Pos + (mod.Config.CoopMarks.text_offset + Vector(24, -16)) * text_scale), Scale = text_scale, Color = Utils.ConvertColorToFont(player_color, mod.Config.CoopMarks.opacity)};
@@ -47,37 +47,85 @@ function CoopMarks.getMarks(player_entity, player_index, position)
 		sprite:Load("gfx/ui/completion_widget.anm2",true);
 		sprite:Play("Idle");
 		sprite:SetFrame(0);
-		for x = 0, 11, 1 do sprite:ReplaceSpritesheet(x,"gfx/ui/completion_widget_pause.png"); end
+		if PauseMenu.GetState() == PauseMenuStates.OPEN then for x = 0, 11, 1 do sprite:ReplaceSpritesheet(x,"gfx/ui/completion_widget_pause.png"); end end
 		sprite:LoadGraphics();
 		player_data.Sprite = sprite;
 	end
 	
+	-- Marks
+	local total_hardmode = 0;
+	local delirium = 0;
 	for mark,value in pairs(completion_marks) do
-		if value == 3 then value = isTainted and 4 or 2; end -- Values get returned as 3 which results in aqua color pallette instead of red/purple for hard mode
-		if mark == "Delirium" then player_data.Sprite:SetLayerFrame(0,value + (isTainted and 3 or 0)); end
-		if CoopMarks.Layers[mark] then
+		if mark == "Delirium" then delirium = value;
+		elseif CoopMarks.Layers[mark] then
+			if value > 0 then
+				player_data.Total = player_data.Total + 1;
+				if value > 1 and isTainted and mod.Config.CoopMarks.tainted_colors then value = value + 2; end -- Do Online colors for tainted instead
+				if value > 2 and not isTainted and not mod.Config.CoopMarks.online_colors then value = value - 1; end -- Fix REPENTOGON rendering aqua color 
+				if value == 2 or value == 4 then total_hardmode = total_hardmode + 1; end
+			end
 			player_data.Sprite:SetLayerFrame(CoopMarks.Layers[mark],value);
-			if value > 0 then player_data.Total = player_data.Total + 1; end
 		end
 	end
+	local all_hard = total_hardmode == CoopMarks.Layers.Total;
+	
+	-- Paper Background
+	local paper_back = CoopMarks.Papers.Normal;
+	if isTainted then
+		paper_back = CoopMarks.Papers.TaintedNormal;
+		if delirium > 1 then paper_back = mod.Config.CoopMarks.tainted_colors and CoopMarks.Papers.TaintedOnlineHardmode or CoopMarks.Papers.TaintedHardmode;
+		elseif delirium > 0 then paper_back = mod.Config.CoopMarks.tainted_colors and CoopMarks.Papers.TaintedOnlineDelirium or CoopMarks.Papers.TaintedDelirium; end
+	else
+		if delirium > 1 then paper_back = CoopMarks.Papers.Hardmode;
+		elseif delirium > 0 then paper_back = CoopMarks.Papers.Delirium; end
+	end
+	player_data.Sprite:SetLayerFrame(0,paper_back);
+	
 	return player_data;
 end
 
 function CoopMarks.onPause(_)
-	if not mod.Config.modules.CoopMarks or (Isaac:GetFrameCount() % 30) ~= 0 or mod.Challenge.ID ~= Challenge.CHALLENGE_NULL then return; end
-	local players = Utils.GetMainPlayers();
-	for i,player_entity in ipairs(players) do
-		CoopMarks.DATA[i] = CoopMarks.getMarks(player_entity, i);
-		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.MARKS_POST_DATA, i, CoopMarks.DATA[i]); -- Execute Post Player Marks Data update Callbacks (player_index, player_data(table))
+	if mod.Challenge.ID ~= Challenge.CHALLENGE_NULL or PauseMenu.GetState() ~= PauseMenuStates.OPEN or not pause:IsFinished() then return; end
+	if mod.Config.modules.CoopMarks or (Isaac:GetFrameCount() % 30) == 0 then
+		local players = Utils.GetMainPlayers();
+		for i,player_entity in ipairs(players) do
+			CoopMarks.DATA[i] = CoopMarks.getMarks(player_entity, i);
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.MARKS_POST_DATA, i, CoopMarks.DATA[i]); -- Execute Post Player Marks Data update Callbacks (player_index, player_data(table))
+		end
+	end
+	for i = 1, mod.Players.Total, 1 do
+		local player_data = CoopMarks.DATA[i];
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.MARKS_PRE_RENDER, i, player_data, false); -- Execute Pre Marks Render Callbacks (player_index, player_data(table), isCoopSelectMenu(Boolean))
+		if player_data and player_data.Total > 0 and (i > 1 or mod.Players.Total > 1 or not mod.Config.CoopMarks.coop_only) then -- Dont render if nothing has been completed, same as vanilla
+			if i > 1 then
+				player_data.Sprite.Scale = player_data.Scale;
+				player_data.Sprite.Color = mod.Config.CoopMarks.colors and player_data.Color or Color.Default;
+				player_data.Sprite:Render(player_data.Pos);
+			end
+			if player_data.Head and player_data.Head.Sprite then
+				player_data.Head.Sprite.Scale = player_data.Head.Scale;
+				player_data.Head.Sprite.Color = mod.Config.CoopMarks.head_colors and player_data.Color or Color.Default;
+				player_data.Head.Sprite:Render(player_data.Head.Pos);
+			end
+			if player_data.Text and player_data.Text.Value then
+				mod.Fonts.CoopMarks.mark:DrawStringScaled(
+					player_data.Text.Value,
+					player_data.Text.Pos.X, player_data.Text.Pos.Y,
+					player_data.Text.Scale.X, player_data.Text.Scale.Y,
+					player_data.Text.Color, player_data.Text.Width or 0, player_data.Text.Center or true
+				);
+			end
+		end
 	end
 end
-mod:AddCallback(ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER, CoopMarks.onPause);
+mod:AddCallback(ModCallbacks.MC_POST_PAUSE_SCREEN_RENDER, CoopMarks.onPause);
 
-function CoopMarks.onRender()
-	if mod.Config.CoopMarks.coop_menu and not Utils.IsPauseMenuOpen() then -- Render Marks w/ Co-op Character Select
+-- Render Marks w/ Co-op Character Select
+function CoopMarks.onRender(_)
+	if mod.Config.CoopMarks.coop_menu and mod.IsPlayerJoining() and not Utils.IsPauseMenuOpen() then
 		for i,joining in pairs(mod.Players.Joining) do
 			local character_data = mod.Players.Unlocked[joining.Selected];
-			if character_data.Type < 0 then goto continue; end
+			if character_data.Type < 0 or CoopMarks.IgnoredCharacters[character_data.Type] then goto continue; end
 			
 			local extra_offset = mod.CoopHUD.IsVisible() and Vector(((joining.Index % 2) == 0 and -160 or 80),(joining.Index > 2 and -40 or 10)) or Vector((joining.Index % 2) == 0 and 25 or 0,(joining.Index > 2 and -50 or 10));
 			local joining_pos = joining.Pos + mod.Config.CoopMarks.menu_offset + (extra_offset * mod.Config.CoopMarks.scale);
@@ -105,30 +153,5 @@ function CoopMarks.onRender()
 			::continue::
 		end
 	end
-	if mod.Challenge.ID ~= Challenge.CHALLENGE_NULL or not game:IsPauseMenuOpen() or PauseMenu.GetState() ~= PauseMenuStates.OPEN or not pause:IsFinished() then return; end
-	for i = 1, mod.Players.Total, 1 do
-		local player_data = CoopMarks.DATA[i];
-		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.MARKS_PRE_RENDER, i, player_data, false); -- Execute Pre Marks Render Callbacks (player_index, player_data(table), isCoopSelectMenu(Boolean))
-		if player_data and player_data.Total > 0 and (i > 1 or mod.Players.Total > 1 or not mod.Config.CoopMarks.coop_only) then -- Dont render if nothing has been completed, same as vanilla
-			if i > 1 then
-				player_data.Sprite.Scale = player_data.Scale;
-				player_data.Sprite.Color = mod.Config.CoopMarks.colors and player_data.Color or Color.Default;
-				player_data.Sprite:Render(player_data.Pos);
-			end
-			if player_data.Head and player_data.Head.Sprite then
-				player_data.Head.Sprite.Scale = player_data.Head.Scale;
-				player_data.Head.Sprite.Color = mod.Config.CoopMarks.head_colors and player_data.Color or Color.Default;
-				player_data.Head.Sprite:Render(player_data.Head.Pos);
-			end
-			if player_data.Text and player_data.Text.Value then
-				mod.Fonts.CoopMarks.mark:DrawStringScaled(
-					player_data.Text.Value,
-					player_data.Text.Pos.X, player_data.Text.Pos.Y,
-					player_data.Text.Scale.X, player_data.Text.Scale.Y,
-					player_data.Text.Color, player_data.Text.Width or 0, player_data.Text.Center or true
-				);
-			end
-		end
-	end
 end
-mod:AddCallback(ModCallbacks.MC_POST_PAUSE_SCREEN_RENDER, CoopMarks.onRender);
+mod:AddCallback(ModCallbacks.MC_POST_RENDER, CoopMarks.onRender);

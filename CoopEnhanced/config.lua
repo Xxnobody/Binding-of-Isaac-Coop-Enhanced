@@ -39,7 +39,7 @@ mod.DefaultConfig = {
 		}
 	}
 };
-mod.Config = Utils.CloneObject(mod.DefaultConfig);
+mod.Config = Utils.Clone(mod.DefaultConfig);
 
 if ModConfigMenu == nil then return; end
 

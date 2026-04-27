@@ -20,7 +20,7 @@ function Misc.GetPickups(screen_dimensions)
 	if not mod.CoopHUD.Misc.Pickups then mod.CoopHUD.Misc.Pickups = {}; end
 	
 	local pickups = {};
-	local player_entity = game:GetPlayer();
+	local player_entity = game:GetPlayer(0);
 	
 	pickups[1] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[1] and mod.CoopHUD.Misc.Pickups[1].Sprite or nil, CoopHUD.MiscType.COIN), Type = "Coin", Value = player_entity:GetNumCoins() or 0};
 
@@ -30,18 +30,18 @@ function Misc.GetPickups(screen_dimensions)
 	local key_sprite = player_entity:HasGoldenKey() and CoopHUD.MiscType.GOLDEN_KEY or CoopHUD.MiscType.KEY;
 	pickups[3] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[3] and mod.CoopHUD.Misc.Pickups[3].Sprite or nil, key_sprite), Type = "Key", Value = player_entity:GetNumKeys() or 0};
 	
-	if PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BLUEBABY_B) then
+	if Utils.AnyoneIsPlayerType(PlayerType.PLAYER_BLUEBABY_B) then
 		local poop = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[4] and mod.CoopHUD.Misc.Pickups[4].Sprite or nil, CoopHUD.MiscType.POOP), Type = "Poop", Value = player_entity:GetPoopMana() or 0};
 		if Utils.AnyoneIsNotPlayerType(PlayerType.PLAYER_BLUEBABY_B) then pickups[4] = poop; else pickups[2] = poop; end
 	else 
 		pickups[4] = {};
 	end
-	if PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BETHANY) then
+	if Utils.AnyoneIsPlayerType(PlayerType.PLAYER_BETHANY) then
 		pickups[5] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[5] and mod.CoopHUD.Misc.Pickups[5].Sprite or nil, CoopHUD.MiscType.SOUL_HEART), Type = "Soul", Value = player_entity:GetSoulCharge() or 0};
 	else 
 		pickups[5] = {};
 	end
-	if PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BETHANY_B) then
+	if Utils.AnyoneIsPlayerType(PlayerType.PLAYER_BETHANY_B) then
 		pickups[6] = {Sprite = Misc.GetSprite(mod.CoopHUD.Misc.Pickups[6] and mod.CoopHUD.Misc.Pickups[6].Sprite or nil, CoopHUD.MiscType.RED_HEART), Type = "Blood", Value = player_entity:GetBloodCharge() or 0};
 	else 
 		pickups[6] = {};
@@ -51,7 +51,7 @@ function Misc.GetPickups(screen_dimensions)
 	mod.CoopHUD.Misc.Pickups.Visible = (mod.Config.CoopHUD.misc.pickups.display == 0 or (mod.Config.CoopHUD.misc.pickups.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.pickups.display == 2 and not CoopHUD.IsMapDown or false)));
 	if not mod.CoopHUD.Misc.Pickups.Visible then return; end
 	
-	local pos = Utils.CloneObject(CoopHUD.Positions.Pickups);
+	local pos = Utils.Clone(CoopHUD.Positions.Pickups);
 	local offset = mod.Config.CoopHUD.offset;
 	local anchor = mod.Config.CoopHUD.misc.pickups.anchor;
 	local edge_multipliers = Vector(anchor < 3 and -1 or 1,anchor == 1 and -1 or 1);
@@ -87,7 +87,7 @@ function Misc.GetPickups(screen_dimensions)
 			local text_value = string.format('%02d', pickup.Value);
 			local text_pos = (pos + ((Vector((size + 2) - (anchor == 2 and (mod.Fonts.CoopHUD.pickups:GetStringWidth(string.rep("0",text_value:len())) * 2) or 0),1) * scale) + mod.Config.CoopHUD.misc.pickups.text_offset));
 			pickup_data.Sprite = pickup.Sprite;
-			pickup_data.Data = {Pos = Utils.CloneObject(pos), Text = {Pos = text_pos, Value = text_value, Scale = scale, Font = mod.Fonts.CoopHUD.pickups}, Scale = scale, Type = pickup.Type};
+			pickup_data.Data = {Pos = Utils.Clone(pos), Text = {Pos = text_pos, Value = text_value, Scale = scale, Font = mod.Fonts.CoopHUD.pickups}, Scale = scale, Type = pickup.Type};
 			seperation = (mod.Fonts.CoopHUD.pickups:GetStringWidth(text_value) + 2) * scale.X;
 		end
 		mod.CoopHUD.Misc.Pickups[i] = pickup_data;
@@ -163,7 +163,7 @@ function Misc.GetWave(screen_dimensions)
 	pos = pos + ((mod.Config.CoopHUD.misc.wave.offset) * edge_multipliers);
 	
 	local sprite = mod.Config.CoopHUD.misc.wave.background and (mod.CoopHUD.Misc.Wave[1].Sprite or Sprite(mod.Animations.Waves,true)) or nil;
-	if sprite then sprite:SetFrame(wave_type, 0); end
+	if sprite then sprite:SetFrame("Main",wave_type); end
 	mod.CoopHUD.Misc.Wave[1] = {Sprite = sprite, Data = {Pos = pos, Text = text, Scale = scale, Type = wave_type, Wave = {Current = wave, Max = max_waves}}};
 end
 
@@ -187,7 +187,7 @@ function Misc.GetDifficulty(screen_dimensions)
 	mod.CoopHUD.Misc.Difficulty.Visible = (mod.Config.CoopHUD.misc.difficulty.display == 0 or (mod.Config.CoopHUD.misc.difficulty.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.difficulty.display == 2 and not CoopHUD.IsMapDown or false)));
 	if not mod.CoopHUD.Misc.Difficulty.Visible then return; end
 	
-	local pos = Utils.CloneObject(CoopHUD.Positions.Difficulty);
+	local pos = Utils.Clone(CoopHUD.Positions.Difficulty);
 	local offset = mod.Config.CoopHUD.offset;
 	local anchor = mod.Config.CoopHUD.misc.difficulty.anchor;
 	local scale = mod.Config.CoopHUD.misc.difficulty.scale;
@@ -223,7 +223,7 @@ function Misc.GetExtra(screen_dimensions)
 	mod.CoopHUD.Misc.Extra.Visible = (mod.Config.CoopHUD.misc.extra.display == 0 or (mod.Config.CoopHUD.misc.extra.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.extra.display == 2 and not CoopHUD.IsMapDown or false)));
 	if not mod.CoopHUD.Misc.Extra.Visible then return; end
 	
-	local pos = Utils.CloneObject(CoopHUD.Positions.Difficulty);
+	local pos = Utils.Clone(CoopHUD.Positions.Difficulty);
 	local anchor = mod.Config.CoopHUD.misc.extra.anchor;
 	local scale = mod.Config.CoopHUD.misc.extra.scale;
 	local size = 16 * scale.X;
@@ -249,7 +249,7 @@ function Misc.GetExtra(screen_dimensions)
 		
 	if not mod.UnlocksAllowed then
 		local sprite = Misc.GetSprite(mod.CoopHUD.Misc.Extra[1].Sprite, CoopHUD.MiscType.NO_ACHIEVEMENTS);
-		mod.CoopHUD.Misc.Extra[1] = {Sprite = sprite, Data = {Pos = Utils.CloneObject(pos), Scale = scale}};
+		mod.CoopHUD.Misc.Extra[1] = {Sprite = sprite, Data = {Pos = Utils.Clone(pos), Scale = scale}};
 	end
 	if game:GetVictoryLap() > 0 then
 		if not mod.UnlocksAllowed then pos.X = pos.X + size; end
@@ -302,13 +302,16 @@ function Misc.Render(screen_dimensions)
 		Misc.GetDifficulty(screen_dimensions);
 		Misc.GetExtra(screen_dimensions);
 		
+		local temp_data = {Pickups = mod.CoopHUD.Misc.Pickups,Difficulty = mod.CoopHUD.Misc.Difficulty,Wave = mod.CoopHUD.Misc.Wave,Extra = mod.CoopHUD.Misc.Extra};
+		
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_MISC_UPDATE,temp_data);
+		
 		mod.CoopHUD.Misc.Data = {};
 		if mod.CoopHUD.Misc.Pickups.Visible then mod.CoopHUD.Misc.Data["Pickups"] = mod.CoopHUD.Misc.Pickups; end
 		if mod.CoopHUD.Misc.Difficulty.Visible then mod.CoopHUD.Misc.Data["Difficulty"] = mod.CoopHUD.Misc.Difficulty; end
 		if mod.CoopHUD.Misc.Wave.Visible then mod.CoopHUD.Misc.Data["Wave"] = mod.CoopHUD.Misc.Wave; end
 		if mod.CoopHUD.Misc.Extra.Visible then mod.CoopHUD.Misc.Data["Extra"] = mod.CoopHUD.Misc.Extra; end
 		
-		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_MISC_UPDATE,mod.CoopHUD.Misc.Data);
 	end
 	
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_MISC_RENDER,mod.CoopHUD.Misc.Data);

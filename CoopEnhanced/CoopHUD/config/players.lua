@@ -194,7 +194,7 @@ ModConfigMenu.AddSetting(
 );
 
 ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.players);
-ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.players, 'Player Names');
+ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.players, 'Player Labels');
 ModConfigMenu.AddSetting(
 	CoopHUD.MCM.title,
 	CoopHUD.MCM.categories.players,

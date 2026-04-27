@@ -34,6 +34,8 @@ mod.CoopMarks.DefaultConfig = {
 	colors = false,
 	text_colors = true,
 	head_colors = false,
+	online_colors = false,
+	tainted_colors = false,
 	tint_amount = 0.5,
 	player_sync = "Global",
 	opacity = 1,
@@ -49,7 +51,7 @@ mod.CoopMarks.DefaultConfig = {
 };
 	
 function mod.CoopMarks.ResetConfig()
-	mod.Config.CoopMarks = Utils.CloneObject(mod.CoopMarks.DefaultConfig);
+	mod.Config.CoopMarks = Utils.Clone(mod.CoopMarks.DefaultConfig);
 end
 if mod.Config.CoopMarks == nil then CoopMarks.ResetConfig(); end
 
@@ -75,7 +77,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopMarks.head_colors; end,
-		Display = function() return 'Text Colors: ' .. (mod.Config.CoopMarks.head_colors and 'on' or 'off'); end,
+		Display = function() return 'Head Colors: ' .. (mod.Config.CoopMarks.head_colors and 'on' or 'off'); end,
 		OnChange = function(b) mod.Config.CoopMarks.head_colors = b; end,
 	}
 );
@@ -86,6 +88,26 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopMarks.text_colors; end,
 		Display = function() return 'Text Colors: ' .. (mod.Config.CoopMarks.text_colors and 'on' or 'off'); end,
 		OnChange = function(b) mod.Config.CoopMarks.text_colors = b; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopMarks.online_colors; end,
+		Display = function() return 'Online Colors: ' .. (mod.Config.CoopMarks.online_colors and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopMarks.online_colors = b; end,
+		Info = {'Enable to show online mark colors (may render incorrectly).'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopMarks.tainted_colors; end,
+		Display = function() return 'Tainted Colors: ' .. (mod.Config.CoopMarks.tainted_colors and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopMarks.tainted_colors = b; end,
+		Info = {'Enable to use online colors for tainted character marks instead.'},
 	}
 );
 ModConfigMenu.AddSetting(

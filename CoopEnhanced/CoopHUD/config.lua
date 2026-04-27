@@ -332,23 +332,12 @@ mod.CoopHUD.DefaultConfig = {
 			centered = true,
 		}
 	},
-	fonts = {
-		banners = 'upheaval',
-		curse = 'teammeatfont10',
-		description = 'pftempestasevencondensed',
-		lives = 'pftempestasevencondensed',
-		misc = 'pftempestasevencondensed',
-		pickups = 'pftempestasevencondensed',
-		players = 'terminus',
-		pocket = 'pftempestasevencondensed',
-		stats = 'luaminioutlined',
-		timer = 'pftempestasevencondensed',
-	},
-	mods = {
+	compat = {
 		ANIMATEDPICKUPS = {
 			enabled = false,
 		},
 		DIVOID = {
+			enabled = true,
 			display = 0,
 			opacity = 1,
 			colorize = 1,
@@ -356,10 +345,24 @@ mod.CoopHUD.DefaultConfig = {
 			color_extra = 2,
 			max_charge = 3,
 			offset = Vector(0, 0),
-			enabled = true,
 		},
 		EBB = {
-			auto_pad = true,
+			offset = Vector(0,0),
+			auto_pad = {
+				enabled = true,
+				pickups = 18,
+				stats = 18,
+				wave = 20,
+			}
+		},
+		FBB = {
+			offset = Vector(0,0),
+			auto_pad = {
+				enabled = true,
+				pickups = 18,
+				stats = 18,
+				wave = 20,
+			}
 		},
 		EID = {
 			display = 0,
@@ -371,9 +374,9 @@ mod.CoopHUD.DefaultConfig = {
 			offset = Vector(15, -35),
 		},
 		mAPI = {
+			enabled = true,
 			pos = Vector(30, 10),
 			frame = Vector(30, 40),
-			override = true,
 		},
 		REFLOURISHED = {
 			excited_timer = {
@@ -391,11 +394,36 @@ mod.CoopHUD.DefaultConfig = {
 				text_offset = Vector(3, -1),
 			}
 		},
+		REVERIE = {
+			enabled = true,
+			quality = {
+				offset = Vector(0,0),
+				scale = Vector(1,1),
+				opacity = 1.0,
+			},
+			addictbar = {
+				offset = Vector(0,0),
+				scale = Vector(1,1),
+				opacity = 1.0,
+			},
+		},
+	},
+	fonts = {
+		banners = 'upheaval',
+		curse = 'teammeatfont10',
+		description = 'pftempestasevencondensed',
+		lives = 'pftempestasevencondensed',
+		misc = 'pftempestasevencondensed',
+		pickups = 'pftempestasevencondensed',
+		players = 'terminus',
+		pocket = 'pftempestasevencondensed',
+		stats = 'luaminioutlined',
+		timer = 'pftempestasevencondensed',
 	}
 };
 
 function mod.CoopHUD.ResetConfig()
-	mod.Config.CoopHUD = Utils.CloneObject(mod.CoopHUD.DefaultConfig);
+	mod.Config.CoopHUD = Utils.Clone(mod.CoopHUD.DefaultConfig);
 end
 if mod.Config.CoopHUD == nil then mod.CoopHUD.ResetConfig(); end
 

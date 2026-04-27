@@ -190,7 +190,7 @@ function CoopHUD.RenderCoopMenuSprite(joining)
 end
 
 local function minimapConfig(setting, value)
-	if not mod.Config.CoopHUD.mods.mAPI.override then
+	if not mod.Config.CoopHUD.compat.mAPI.enabled or not CoopHUD.isVisible then
 		MinimapAPI.OverrideConfig[setting] = MinimapAPI.Config[setting];
 	elseif MinimapAPI.OverrideConfig[setting] ~= value then
 		MinimapAPI.OverrideConfig[setting] = value;
@@ -239,11 +239,11 @@ mod:AddCallback(ModCallbacks.MC_PRE_ITEM_TEXT_DISPLAY, displayBanner);
 local hotkey_timer = 0;
 local function onRender()
 	-- Renderer Checks
-	if not mod.Config.modules.CoopHUD or game:GetSeeds():HasSeedEffect(SeedEffect.SEED_NO_HUD) or (not Isaac:CanStartTrueCoop() and mod.Config.CoopHUD.toggle_hud.coop_only and not PlayerManager.IsCoopPlay()) then -- Check if HUD can be rendered at all
+	if not mod.Config.modules.CoopHUD or game:GetSeeds():HasSeedEffect(SeedEffect.SEED_NO_HUD) or (not Utils.CanStartCoop() and mod.Config.CoopHUD.toggle_hud.coop_only and not Utils.IsCoopPlay()) then -- Check if HUD can be rendered at all
 		CoopHUD.isVisible = false;
 		CoopHUD.Refresh = false;
 		return;
-	elseif (mod.Config.CoopHUD.toggle_hud.coop_only and not PlayerManager.IsCoopPlay()) or (not mod.Config.CoopHUD.toggle_hud.pause_display and Utils.IsPauseMenuOpen()) then -- Check for Coop play and pause screens
+	elseif (mod.Config.CoopHUD.toggle_hud.coop_only and not Utils.IsCoopPlay()) or (not mod.Config.CoopHUD.toggle_hud.pause_display and Utils.IsPauseMenuOpen()) then -- Check for Coop play and pause screens
 		return;
 	elseif mod.Fonts.CoopHUD == nil then
 		mod.Debug("Fonts not loaded properly due to an unknown error. HUD must abort!",CoopHUD.Name);
@@ -260,7 +260,7 @@ local function onRender()
 			hud:SetVisible(true);
 			return;
 		end
-	elseif Isaac:CanStartTrueCoop() and not game:IsPaused() and CoopHUD.isVisible then 
+	elseif Utils.CanStartCoop() and not game:IsPaused() and CoopHUD.isVisible then 
 		CoopHUD.InitNewPlayers(screen_dimensions);
 		if mod.Config.CoopHUD.players.menu.display == 0 and CoopHUD.IsPlayerJoining() then hud:SetVisible(true); return; end
 	elseif game:GetRoom():GetType() == RoomType.ROOM_BOSS and game:GetRoom():IsFirstVisit() and game:GetRoom():GetFrameCount() < 5 then -- Hide all HUDs when entering a boss cutscene
@@ -271,16 +271,29 @@ local function onRender()
 	-- Toggle HUD Keybinds
 	local controller_index = game:GetPlayer(0).ControllerIndex;
 	local hotkeys = mod.Controls[mod.Config.CoopHUD.toggle_hud.button];
+	local hud_key = (ModConfigMenu and ModConfigMenu.Config[CoopHUD.MCM.title]["ToggleHUDKeyboard"]) or mod.Config.CoopHUD.toggle_hud.key;
 	if hotkeys.Held and (Input.IsActionPressed(hotkeys.Buttons.X, controller_index) and hotkey_timer < hotkeys.Buttons.Y) then
 		hotkey_timer = hotkey_timer + 1;
 		if hotkey_timer == hotkeys.Buttons.Y then
 			hotkeys.isHeld = true;
 		end
-	elseif (Input.IsButtonTriggered(ModConfigMenu and ModConfigMenu.Config[CoopHUD.MCM.title]["ToggleHUDKeyboard"] or mod.Config.CoopHUD.toggle_hud.key, 0) and not game:IsPaused()) or (hotkeys.isHeld or (not hotkeys.Held and (Input.IsActionPressed(hotkeys.Buttons.X, controller_index) and Input.IsActionTriggered(hotkeys.Buttons.Y, controller_index)))) then
+	elseif (Input.IsButtonTriggered(hud_key,0) and not game:IsPaused()) or (hotkeys.isHeld or (not hotkeys.Held and (Input.IsActionPressed(hotkeys.Buttons.X, controller_index) and Input.IsActionTriggered(hotkeys.Buttons.Y, controller_index)))) then
 		hotkeys.isHeld = nil;
 		CoopHUD.SetVisible();
 	else
 		hotkey_timer = 0;
+	end
+	
+	-- mAPI
+	if MinimapAPI then
+		minimapConfig('DisplayOnNoHUD', true);
+		minimapConfig('DisplayMode', 2);
+		minimapConfig('PositionX', mod.Config.CoopHUD.compat.mAPI.pos.X);
+		minimapConfig('PositionY', mod.Config.CoopHUD.compat.mAPI.pos.Y);
+		minimapConfig('MapFrameWidth', mod.Config.CoopHUD.compat.mAPI.frame.X);
+		minimapConfig('MapFrameHeight', mod.Config.CoopHUD.compat.mAPI.frame.Y);
+		minimapConfig('DisplayLevelFlags', 2);
+		minimapConfig('BorderColorA', 0.5);
 	end
 	
 	if not CoopHUD.isVisible then return; end
@@ -289,19 +302,7 @@ local function onRender()
 	CoopHUD.IsMapDown = false;
 	CoopHUD.IsPlayerMapDown = {};
 	
-	if CoopHUD.Refresh then
-		-- mAPI
-		if MinimapAPI then
-			minimapConfig('DisplayOnNoHUD', true);
-			minimapConfig('DisplayMode', 2);
-			minimapConfig('PositionX', mod.Config.CoopHUD.mods.mAPI.pos.X);
-			minimapConfig('PositionY', mod.Config.CoopHUD.mods.mAPI.pos.Y);
-			minimapConfig('MapFrameWidth', mod.Config.CoopHUD.mods.mAPI.frame.X);
-			minimapConfig('MapFrameHeight', mod.Config.CoopHUD.mods.mAPI.frame.Y);
-			minimapConfig('DisplayLevelFlags', 2);
-			minimapConfig('BorderColorA', 0.5);
-		end
-		
+	if CoopHUD.Refresh then		
 		-- CustomHealthAPI
 		if CustomHealthAPI then
 			CustomHealthAPI.Constants.HEART_PIXEL_WIDTH_DEFAULT = mod.Config.CoopHUD.health.space.X;
@@ -312,7 +313,7 @@ local function onRender()
 	end
 	
 	-- EID 
-	if EID then EID.isHidden = mod.Config.CoopHUD.mods.EID.display == 3 or (mod.Config.CoopHUD.mods.EID.display == 2 and not CoopHUD.IsMapDown or (mod.Config.CoopHUD.mods.EID.display == 1 and CoopHUD.IsMapDown or false)); end
+	if EID then EID.isHidden = mod.Config.CoopHUD.compat.EID.display == 3 or (mod.Config.CoopHUD.compat.EID.display == 2 and not CoopHUD.IsMapDown or (mod.Config.CoopHUD.compat.EID.display == 1 and CoopHUD.IsMapDown or false)); end
 	
 	-- Render the various HUD elements
 	CoopHUD.RenderPlayers(screen_dimensions);

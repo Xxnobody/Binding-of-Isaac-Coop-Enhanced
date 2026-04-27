@@ -12,7 +12,7 @@ function CoopHUD.Epiphany()
 	local function EpiphanyHudHelper(player_entity, _, edges, edge_multipliers)
 		for _, v in pairs(HudHelper.HUD_ELEMENTS) do
 			if v.Condition(player_entity) and v.Name ~= 'TR Isaac Inventory' then
-				v.OnRender(player_entity, edges + (mod.Config.CoopHUD.mods.EPIPHANY.hud_element_pos * edge_multipliers))
+				v.OnRender(player_entity, edges + (mod.Config.CoopHUD.compat.EPIPHANY.hud_element_pos * edge_multipliers))
 			end
 		end
 	end

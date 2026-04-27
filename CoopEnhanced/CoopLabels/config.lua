@@ -46,7 +46,7 @@ mod.CoopLabels.DefaultConfig = {
 };
 	
 function mod.CoopLabels.ResetConfig()
-	mod.Config.CoopLabels = Utils.CloneObject(mod.CoopLabels.DefaultConfig);
+	mod.Config.CoopLabels = Utils.Clone(mod.CoopLabels.DefaultConfig);
 end
 if mod.Config.CoopLabels == nil then CoopLabels.ResetConfig(); end
 

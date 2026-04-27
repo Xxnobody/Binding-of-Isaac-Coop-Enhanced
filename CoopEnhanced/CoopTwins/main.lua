@@ -41,17 +41,18 @@ function CoopTwins.BirthrightJacobEsau(birth_twin)
 end
 
 function CoopTwins.onRender(_)
-	if Isaac:CanStartTrueCoop() then
+	if not CoopTwins.DATA.Joining or type(CoopTwins.DATA.Joining) ~= "table" then CoopTwins.DATA.Joining = {}; end
+	if not CoopTwins.DATA.Twins or type(CoopTwins.DATA.Twins) ~= "table" then CoopTwins.DATA.Twins = {}; end
+	if Utils.CanStartCoop() then
 		local joinable_twins = {};
 		local joinable_twin = nil;
-		for i,player_entity in pairs(PlayerManager.GetPlayers()) do
+		for i = 1, Game():GetNumPlayers(), 1 do
+			local player_entity = Isaac.GetPlayer(i - 1);
 			if mod.TwinTypes[player_entity:GetPlayerType()] and player_entity:GetOtherTwin() ~= nil and CoopTwins.SetTwin[player_entity:GetPlayerType()] ~= nil then
 				table.insert(joinable_twins,player_entity);
 				if not joinable_twin and Input.IsActionPressed(ButtonAction.ACTION_DROP, player_entity.ControllerIndex) then joinable_twin = player_entity; end
 			end
 		end
-		if not CoopTwins.DATA.Joining or type(CoopTwins.DATA.Twins) ~= "table" then CoopTwins.DATA.Joining = {}; end
-		if not CoopTwins.DATA.Twins then CoopTwins.DATA.Twins = {}; end
 		for i = 1, CoopEnhanced.MaxControllers, 1 do
 			local controller_index = (i - 1);
 			local player_entity = Utils.GetPlayerByController(controller_index);
@@ -98,6 +99,7 @@ function CoopTwins.onRender(_)
 end
 mod:AddPriorityCallback(ModCallbacks.MC_POST_RENDER, CallbackPriority.IMPORTANT, CoopTwins.onRender);
 
+if not REPENTOGON then return; end
 -- Add item functions
 local function addCollectible(_, collectible_type, _, _, _, _, player_entity)
 	local item_functions = CoopTwins.ItemFunctions[collectible_type];
