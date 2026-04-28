@@ -51,39 +51,7 @@ Here are each modules features. Each module can be totally disabled by the main 
 	See the Wiki for every command and its various options.
 
 ## Built-in Mod Support
-Several mods have been given built in support for most features:
-- [Angel Beggars](https://steamcommunity.com/sharedfiles/filedetails/?id=1832381849): Support for Angel Deal Coop Treasure generation.
-- [Divided-Void](https://steamcommunity.com/sharedfiles/filedetails/?id=2900644381): Full HUD support with extra features and customization options.
-- [Enhanced Boss Bars](https://steamcommunity.com/sharedfiles/filedetails/?id=2635267643): HUD support with auto-padding for HUD elements.
-- [Edith (Restored)](https://steamcommunity.com/sharedfiles/filedetails/?id=3552120418): Some HUD support.
-- [Epiphany](https://steamcommunity.com/sharedfiles/filedetails/?id=3012430463): Some HUD support (Needs Testing).
-- [Fiend Folio](https://steamcommunity.com/sharedfiles/filedetails/?id=3012430463): Some HUD support (Needs Testing).
-- [Jericho](https://steamcommunity.com/sharedfiles/filedetails/?id=3207962098): HUD support (Needs Testing).
-- [Library Chance](https://steamcommunity.com/sharedfiles/filedetails/?id=3534359537): HUD support, with Custom calculations.
-- [Library Expanded](https://steamcommunity.com/sharedfiles/filedetails/?id=2917917616): HUD support, Coop Treasure also has support for all of its various Library layouts.
-- [Live Planetarium Chance](https://steamcommunity.com/sharedfiles/filedetails/?id=3702842339): HUD Support.
-- [Low Firerate Bar](https://steamcommunity.com/sharedfiles/filedetails/?id=3387673993): HUD support.
-- [Isaac Reflourished](https://steamcommunity.com/sharedfiles/filedetails/?id=3655824749): HUD support for I'm Excited timer and Boss Rush Wave Bar (Disable the boss Rush Bar in Reflourished config or you'll see double). Also supports Reflourished Book Library chance increase from Library Chance HUD.
-- [Martha of Bethany](https://steamcommunity.com/sharedfiles/filedetails/?id=2987653166): Some HUD support.
-- [Mei](https://steamcommunity.com/sharedfiles/filedetails/?id=842051906): Some HUD support.
-- [Nemesis](https://steamcommunity.com/sharedfiles/filedetails/?id=2501339433): Some HUD support.
-- [Revelations](https://steamcommunity.com/sharedfiles/filedetails/?id=2880387531): Some HUD support.
-- [Reverie](https://steamcommunity.com/sharedfiles/filedetails/?id=2538556220): Some HUD support.
-- [Samael](https://steamcommunity.com/sharedfiles/filedetails/?id=3897795840): Some HUD support.
-- [Zodiac Planetariums](https://steamcommunity.com/sharedfiles/filedetails/?id=2516129211): Support for Planetarium Coop Treasure generation.
-
-## Known Incompatibilites
-Most mods that don't add HUD elements, change Coop Ghosts, or alter Treasure Rooms are compatible. Otherwise compatability is dubious. Here's a list of known Incompatible mods (that won't get compatibility or already contain all the features found within).
-- Coop Commands: (https://steamcommunity.com/sharedfiles/filedetails/?id=2657359273): Most are in this mod.
-- Coop Completion Marks(https://steamcommunity.com/sharedfiles/filedetails/?id=3346134460): Already in this mod.
-- Coop Found HUD or similar (https://steamcommunity.com/sharedfiles/filedetails/?id=3162170417): Already in this mod.
-- Co-op Fixes (https://steamcommunity.com/sharedfiles/filedetails/?id=2787563175): All features in this mod.
-- Coop Label Mods or similar (https://steamcommunity.com/sharedfiles/filedetails/?id=2519553756): Already in this mod.
-- Co-op Ghosts can fly now! (https://steamcommunity.com/sharedfiles/filedetails/?id=2526550159): Already in this mod.
-- Coop HUD Mods: Co-op HUD+ (https://steamcommunity.com/sharedfiles/filedetails/?id=3229942849), coopHUD 'WIP' (https://steamcommunity.com/sharedfiles/filedetails/?id=2731267631).
-- Coop Treasure Mods like True Co-op Treasure Rooms (https://steamcommunity.com/sharedfiles/filedetails/?id=1686448496), True Co-Op Boss Items (https://steamcommunity.com/sharedfiles/filedetails/?id=1688922073), Fair Co-Op Items (https://steamcommunity.com/sharedfiles/filedetails/?id=2678027825), Better Coop Item Pedestals (https://steamcommunity.com/sharedfiles/filedetails/?id=2491785532): ALl of their features are added in some way by this mod.
-- Extended Coop (https://steamcommunity.com/sharedfiles/filedetails/?id=3656165860): All features already in this mod.
-- Visible Lost Health (https://steamcommunity.com/sharedfiles/filedetails/?id=2497320263) and Visible Holy Mantles (https://steamcommunity.com/sharedfiles/filedetails/?id=2673481744): IDK what IS compatible with these, but they don't support CustomHealthAPI so no deal.
+https://steamcommunity.com/workshop/filedetails/discussion/3711103859/805723742332314153/
 
 ## Mod Support
 I've attempted to make the mod as future proof and compatible as possible, adding various API implementations and avoiding hard-coded values where I could. Many mods have built-in support but many more do not. A lot of other mods won't need support added for this mod, but many large mods most likely will. Isaac modding is a headache at the best of times and the API lacks a lot of features, so compatibility will usually have to added by this mod or the other. I'm open to adding compatibility to many mods where possible, but it's easier to accomplish this when other mods use global variables. Some mods cannot be made compatible just due to the way they're written unfortunately.
