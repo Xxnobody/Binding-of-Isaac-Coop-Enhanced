@@ -155,3 +155,5 @@ function CoopMarks.onRender(_)
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, CoopMarks.onRender);
+
+require(mod.Directory .. 'CoopMarks.compat');

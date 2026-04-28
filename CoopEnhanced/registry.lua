@@ -576,7 +576,6 @@ local function modCompats()
 		--CoopEnhanced.AddCharacter("Peat",FiendFolio.PLAYER.PEAT,-1,{Anm2 = anim2,Animation = "Fiend",Frame = 7});
 	end
 	if JosephMod then
-		
 		local mod_sprite = Utils.GetHeadSprite(nil,nil,JosephMod.enums.PlayerType.PLAYER_JOSEPH);
 		CoopEnhanced.AddCharacter("Joseph",JosephMod.enums.PlayerType.PLAYER_JOSEPH,nil,{Anm2 = mod_sprite:GetFilename(),Animation = mod_sprite:GetAnimation(),Frame = 0});
 	end
@@ -614,6 +613,12 @@ local function modCompats()
 		CoopEnhanced.AddCharacter("Sarah",REVEL.CHAR.SARAH.Type,nil,{Anm2 = anim2,Animation = "Revelations",Frame = 0});
 		CoopEnhanced.AddCharacter("Dante",REVEL.CHAR.DANTE.Type,nil,{Anm2 = anim2,Animation = "Revelations",Frame = 1});
 	end
+	if SacredDreams then
+		local mod_sprite = Utils.GetHeadSprite(nil,nil,SDMod.PlayerType.PLAYER_GUARD);
+		CoopEnhanced.AddCharacter("The Dream Guard",SDMod.PlayerType.PLAYER_GUARD,nil,{Anm2 = mod_sprite:GetFilename(),Animation = mod_sprite:GetAnimation(),Frame = 0});
+		mod_sprite = Utils.GetHeadSprite(nil,nil,SDMod.PlayerType.PLAYER_GUARD_B);
+		CoopEnhanced.AddCharacter("The Nightmare",SDMod.PlayerType.PLAYER_GUARD_B,nil,{Anm2 = mod_sprite:GetFilename(),Animation = mod_sprite:GetAnimation(),Frame = 0});
+	end
 	if SamaelMod then
 		CoopEnhanced.AddCharacter("Samael",SamaelMod.Lib.SamaelId,nil,{Anm2 = anim2,Animation = "Samael",Frame = 0});
 		CoopEnhanced.AddCharacter("The Inevitable",SamaelMod.Lib.TaintedSamaelId,nil,{Anm2 = anim2,Animation = "Samael",Frame = 1});
@@ -623,6 +628,9 @@ local function modCompats()
 		CoopEnhanced.AddCharacter("The Serpent",TheSerpent.Player.Serpent.ID,TheSerpent.Player.Serpent.ACHIEVEMENT,{Anm2 = mod_sprite:GetFilename(),Animation = "The Serpent",Frame = 0});
 		mod_sprite = Utils.GetHeadSprite(nil,nil,TheSerpent.Player.SerpentB.ID);
 		CoopEnhanced.AddCharacter("The Banished",TheSerpent.Player.SerpentB.ID,TheSerpent.Player.SerpentB.ACHIEVEMENT,{Anm2 = mod_sprite:GetFilename(),Animation = "The Serpent",Frame = 0});
+	end
+	if VTRemaster then
+		CoopEnhanced.AddCharacter("Vitiated Characters",Isaac.GetPlayerTypeByName("Selector"),nil,{Anm2 = anim2,Animation = "Epiphany",Frame = 0});
 	end
 	if XMLData.GetModById("2785553778") and XMLData.GetModById("2785553778").enabled == "true" then
 		for i,player_name in pairs({"Zach","Tainted Zach"}) do

@@ -438,14 +438,16 @@ function Utils.GetHeadSprite(sprite, player_entity, player_type) -- Taken from c
 			character_data.Sprite = {};
 			Utils.CloneSprite(mod_sprite,character_data.Sprite);
 		end
-		sprite:Load(character_data.Sprite.Anm2, true);
-		if character_data.Sprite.Sheets then 
-			for id,sheet in pairs(character_data.Sprite.Sheets) do
-				mod_sprite:ReplaceSpritesheet(id,sheet);
+		if character_data.Sprite and character_data.Sprite.Anm2 then 
+			sprite:Load(character_data.Sprite.Anm2, true);
+			if character_data.Sprite.Sheets then 
+				for id,sheet in pairs(character_data.Sprite.Sheets) do
+					mod_sprite:ReplaceSpritesheet(id,sheet);
+				end
 			end
+			sprite:LoadGraphics();
+			sprite:SetFrame(character_data.Sprite.Animation, character_data.Sprite.Frame);
 		end
-		sprite:LoadGraphics();
-		sprite:SetFrame(character_data.Sprite.Animation, character_data.Sprite.Frame);
 	elseif player_type >= 0 then
 		if sprite == nil then
 			sprite = Sprite();

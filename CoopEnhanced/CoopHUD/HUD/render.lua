@@ -61,6 +61,7 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 			local index = i;
 			local player_index = 0;
 			local player_entity = Isaac.GetPlayer(i - 1);
+			if not player_entity then return; end -- Something went horribly wrong (or horribly right)
 			local edge = {Pos = Utils.Clone(screen_dimensions.Min), Offset = Utils.Clone(mod.Config.CoopHUD.offset), Multipliers = Vector.One};
 			
 			if mod.Players.Twins[i] then
