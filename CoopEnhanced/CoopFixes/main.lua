@@ -8,7 +8,7 @@ local json = require("json");
 
 -- Saving and Loading
 function CoopEnhanced.CoopFixes.gameStart(isCont, data)
-	CoopFixes.DATA = {PLAYERS = {}};
+	CoopFixes.DATA = {Players = {},Controllers = {}};
 	CoopFixes.RefreshFullscreen();
 	
 	if isCont and data and data.CoopFixes then
@@ -53,18 +53,27 @@ function CoopFixes.JoinFix(_)
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CoopFixes.JoinFix);
 
---[[
--- Rewind Fix (Not Needed ?)
--- Fixes players 2+ losing control of their characters after a rewind command
-function CoopFixes.RewindFix(_, cmd, params)
-	if cmd:lower() == "rewind" then
+
+-- Rewind Fix
+-- Fixes players 2+ losing control of their characters after a rewind command or similar
+if REPENTOGON then
+	function CoopFixes.RewindFix()
+		if not mod.Config.CoopFixes.rewind then CoopFixes.DATA.Controllers = {}; return; end
+		if CoopFixes.DATA.Controllers then
+			for player_id,controller_index in pairs(CoopFixes.DATA.Controllers) do
+				local player_entity = Utils.GetPlayerByID(player_id);
+				if player_entity then player_entity:SetControllerIndex(controller_index); end
+			end
+		else
+			CoopFixes.DATA.Controllers = {};
+		end
 		for i,player_entity in pairs(Utils.GetPlayers()) do
-			print(player_entity.ControllerIndex)
+			local player_id = Utils.GetPlayerID(player_entity);
+			CoopFixes.DATA.Controllers[player_id] = player_entity.ControllerIndex;
 		end
 	end
+	mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CoopFixes.RewindFix);
 end
-mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, CoopFixes.RewindFix);
-]]--
 
 --Rejoin Fix
 -- Fixes Characters changing type on rejoin when controller order changes
@@ -240,6 +249,6 @@ local function onNewFloor(_) -- Backup every Floor start
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, onNewFloor);
 local function onNewPlayer(_) -- Backup New Players
-	if Utils.CanStartCoop() then CoopFixes.BackupPlayer(0,player_entity); else mod:RemoveCallback(ModCallbacks.MC_POST_PLAYER_INIT, onNewPlayer); end
+	if Utils.CanStartTrueCoop() then CoopFixes.BackupPlayer(0,player_entity); else mod:RemoveCallback(ModCallbacks.MC_POST_PLAYER_INIT, onNewPlayer); end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, onNewPlayer);

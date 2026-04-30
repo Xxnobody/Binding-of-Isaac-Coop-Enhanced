@@ -20,7 +20,6 @@ function Player.Render(player_number, screen_dimensions)
 	local isKeeper = Utils.IsKeeper(player.Type);
 	local isBaby = Utils.IsBaby(player_entity);
 	local isTemporary = Utils.IsTemporary(player_entity);
-	local extra_scale = isTwin and mod.Config.CoopHUD.players.twins.scale or (player.Scale or Vector.One);
 	
 	if CoopHUD.Refresh then
 		if not isTemporary and not isBaby then -- Don't render anything except Health for strawmen or similar player types		
@@ -127,12 +126,12 @@ function Player.Render(player_number, screen_dimensions)
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].Data = {};
 				local item_id = player_entity:GetActiveItem(slot);
 				if item_id ~= CollectibleType.COLLECTIBLE_NULL then 
-					local item_scale = mod.Config.CoopHUD.active[slot].scale * extra_scale;
+					local item_scale = mod.Config.CoopHUD.active[slot].scale * player.Scale;
 					local item_size = 15 * item_scale.X;
-					local bar_scale = mod.Config.CoopHUD.active[slot].chargebar.scale * extra_scale;
+					local bar_scale = mod.Config.CoopHUD.active[slot].chargebar.scale * player.Scale;
 					local bar_size = 2 * bar_scale.X;
 					
-					local item_pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Active[slot] + mod.Config.CoopHUD.active[slot].offset) * extra_scale) * player_data.Edge.Multipliers);
+					local item_pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Active[slot] + mod.Config.CoopHUD.active[slot].offset) * player.Scale) * player_data.Edge.Multipliers);
 					
 					local bar_flip = 1;
 					if mod.Config.CoopHUD.active[slot].chargebar.mirror then bar_flip = bar_flip * player_data.Edge.Multipliers.X; end
@@ -171,13 +170,13 @@ function Player.Render(player_number, screen_dimensions)
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Data = {};
 				local item = pocket_items[slot];
 				if mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Visible and item and item.ID ~= CollectibleType.COLLECTIBLE_NULL and item.Type > -1 then
-					local item_scale = mod.Config.CoopHUD.pocket[slot].scale * extra_scale;
-					local bar_scale = mod.Config.CoopHUD.pocket.chargebar.scale * extra_scale;
+					local item_scale = mod.Config.CoopHUD.pocket[slot].scale * player.Scale;
+					local bar_scale = mod.Config.CoopHUD.pocket.chargebar.scale * player.Scale;
 					local item_size = 14 * item_scale.X;
 					local bar_size = 2 * bar_scale.X;
 					
-					item.Pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Pocket[slot] + mod.Config.CoopHUD.pocket[slot].offset) * extra_scale) * player_data.Edge.Multipliers);
-					if isTwin then item.Pos.Y = item.Pos.Y - (25 * extra_scale.Y); end
+					item.Pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Pocket[slot] + mod.Config.CoopHUD.pocket[slot].offset) * player.Scale) * player_data.Edge.Multipliers);
+					if isTwin then item.Pos.Y = item.Pos.Y - (25 * player.Scale.Y); end
 					
 					local bar_flip = 1;
 					if mod.Config.CoopHUD.pocket.chargebar.mirror then bar_flip = bar_flip * player_data.Edge.Multipliers.X; end
@@ -201,7 +200,7 @@ function Player.Render(player_number, screen_dimensions)
 						
 					local isTextVisible = mod.Config.CoopHUD.pocket[slot].text.display == 0 or (mod.Config.CoopHUD.pocket[slot].text.display == 1 and isPlayerMapDown or (mod.Config.CoopHUD.pocket[slot].text.display == 2 and not isPlayerMapDown or false));
 					if isTextVisible then
-						local text_scale = mod.Config.CoopHUD.pocket[slot].text.scale * extra_scale;
+						local text_scale = mod.Config.CoopHUD.pocket[slot].text.scale * player.Scale;
 						local text_pos = item.Pos + ((mod.Config.CoopHUD.pocket[slot].text.offset + Vector(item_size + (6 * text_scale.X) + (bar_flip > 0 and bar_size * player_data.Edge.Multipliers.X or 0), -(mod.Fonts.CoopHUD.pocket:GetBaselineHeight(item.Name) / 1.5) * text_scale.Y)) * player_data.Edge.Multipliers);
 						if player_data.Edge.Multipliers.X < 0 then text_pos.X = text_pos.X - (mod.Fonts.CoopHUD.pocket:GetStringWidth(item.Name) * text_scale.X); end
 						if player_data.Edge.Multipliers.Y < 0 then text_pos.Y = text_pos.Y - mod.Fonts.CoopHUD.pocket:GetBaselineHeight(item.Name); end
@@ -219,10 +218,10 @@ function Player.Render(player_number, screen_dimensions)
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket[slot].Data = {};
 				local item_id = player_entity:GetTrinket(slot);
 				if item_id ~= TrinketType.TRINKET_NULL then
-					local scale = mod.Config.CoopHUD.trinket[slot].scale * extra_scale;
+					local scale = mod.Config.CoopHUD.trinket[slot].scale * player.Scale;
 					local extra_offset = pocket_total ~= nil and pocket_total > 0 and (mod.Config.CoopHUD.trinket[slot].offset_w_pockets and Vector(0,pocket_total * (20 * mod.Config.CoopHUD.pocket[(pocket_total - 1)].scale.Y))) or Vector.Zero;
-					local pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Trinket[slot] + mod.Config.CoopHUD.trinket[slot].offset + extra_offset) * extra_scale) * player_data.Edge.Multipliers);
-					if isTwin then pos.Y = pos.Y - (25 * extra_scale.Y); end
+					local pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Trinket[slot] + mod.Config.CoopHUD.trinket[slot].offset + extra_offset) * player.Scale) * player_data.Edge.Multipliers);
+					if isTwin then pos.Y = pos.Y - (25 * player.Scale.Y); end
 					if player_data.Edge.Multipliers.Y < 0 then pos.Y = pos.Y + 20; end
 					local color = Utils.ColorOpacity((mod.Config.CoopHUD.trinket.colors and player.Color or Color.Default),mod.Config.CoopHUD.trinket[slot].opacity);
 					local data = {Item = {ID = item_id, Pos = pos}, Scale = scale, Color = color};
@@ -238,8 +237,8 @@ function Player.Render(player_number, screen_dimensions)
 			mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Data = {};
 			if mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Visible then
 				local max_slots, row_size, inventory = GetInfo(player_data);
-				local scale = mod.Config.CoopHUD.inventory.special.scale * extra_scale;
-				local screen_edge = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Special + mod.Config.CoopHUD.inventory.special.offset) * extra_scale) * player_data.Edge.Multipliers);
+				local scale = mod.Config.CoopHUD.inventory.special.scale * player.Scale;
+				local screen_edge = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Special + mod.Config.CoopHUD.inventory.special.offset) * player.Scale) * player_data.Edge.Multipliers);
 				local offset = Vector(0,mod.Config.CoopHUD.inventory.special.offset_w_pockets and player_data.Inventory.Pocket.Total > 0 and player_data.Inventory.Pocket.Total * ((32 + (player_entity:GetTrinket(mod.TrinketSlot.PRIMARY) ~= TrinketType.TRINKET_NULL and (18 * mod.Config.CoopHUD.trinket[mod.TrinketSlot.PRIMARY].scale.X) or 2)) * (mod.Config.CoopHUD.pocket[(player_data.Inventory.Pocket.Total - 1)].scale.Y * scale.Y)) or 0);
 				
 				local data = {};
@@ -270,7 +269,7 @@ function Player.Render(player_number, screen_dimensions)
 			if mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible and (mod.Config.CoopHUD.inventory.items.anchor == 0 or not isTwin) then
 				local anchor = mod.Config.CoopHUD.inventory.items.anchor;
 				local offset = mod.Config.CoopHUD.inventory.items.offset;
-				local scale = mod.Config.CoopHUD.inventory.items.scale * extra_scale;
+				local scale = mod.Config.CoopHUD.inventory.items.scale * player.Scale;
 				local space = mod.Config.CoopHUD.inventory.items.space;
 				local pos = Vector.Zero;
 					
@@ -335,7 +334,7 @@ function Player.Render(player_number, screen_dimensions)
 			if not isTwin then
 				-- Player Heads
 				if mod.Config.CoopHUD.players.heads.display then
-					local scale = (mod.Config.CoopHUD.players.heads.sync.scale and player_entity.SpriteScale or mod.Config.CoopHUD.players.heads.scale) * extra_scale;
+					local scale = (mod.Config.CoopHUD.players.heads.sync.scale and player_entity.SpriteScale or mod.Config.CoopHUD.players.heads.scale) * player.Scale;
 					local head_pos = player_data.Edge.Pos + player_data.Edge.Offset + ((CoopHUD.Positions.Active[ActiveSlot.SLOT_PRIMARY] + (Vector((player_data.Edge.Multipliers.X > 0 and -0.5 or 1),8)) + mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].offset + mod.Config.CoopHUD.players.heads.offset + (player_entity:GetActiveItem(ActiveSlot.SLOT_PRIMARY) ~= 0 and not player_entity:IsCoopGhost() and (mod.Config.CoopHUD.players.heads.item_offset * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale) or Vector(0,-4))) * player_data.Edge.Multipliers) * scale;
 					local head_opacity = mod.Config.CoopHUD.players.heads.opacity;
 					local head_sprite = Utils.GetHeadSprite(mod.CoopHUD.DATA.Players[player_number].Label.Sprite, player_entity);
@@ -347,13 +346,13 @@ function Player.Render(player_number, screen_dimensions)
 				
 				-- Player Names
 				if mod.Config.CoopHUD.players.names.display then
-					local player_name = player.Config.type == 1 and (mainTwin ~= nil and (player.Name .. " & " .. Utils.GetPlayerName(mainTwin, player.Index, player.Config.type, "", mod.Config.CoopHUD.tainted))) or player.Name;
+					local player_name = player.Config.type == 1 and (mainTwin ~= nil and (player.Name .. " & " .. Utils.GetPlayerName(mainTwin, player.Index, player.Config.type, "", mod.Config.players.tainted_names))) or player.Name;
 					local name_size = Vector(mod.Fonts.CoopHUD.players:GetStringWidth(player_name),mod.Fonts.CoopHUD.players:GetBaselineHeight(player_name));
 					local max_scale = math.min(1,(50 / name_size.X));
-					local scale = ((mod.Config.CoopHUD.players.names.scale * extra_scale) * max_scale);
+					local scale = ((mod.Config.CoopHUD.players.names.scale * player.Scale) * max_scale);
 					local head_offset = mod.Config.CoopHUD.players.heads.display and mod.Config.CoopHUD.players.names.head_offset and player_entity:GetActiveItem(ActiveSlot.SLOT_PRIMARY) ~= 0 and not player_entity:IsCoopGhost() and ((mod.Config.CoopHUD.players.heads.item_offset.Y * (player_data.Edge.Multipliers.X > 0 and -1.5 or 1.5)) * mod.CoopHUD.DATA.Players[player_number].Label.Scale.X) or 0;
 					local item_pos = player_data.Edge.Pos + player_data.Edge.Offset + ((CoopHUD.Positions.Active[ActiveSlot.SLOT_PRIMARY] + mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].offset) * player_data.Edge.Multipliers)
-					local name_pos = Vector(item_pos.X - ((head_offset * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale.X) + (8 - mod.Config.CoopHUD.players.names.offset.X) * player_data.Edge.Multipliers.X), item_pos.Y + (((mod.Config.CoopHUD.players.names.offset.Y + 2) * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale.Y) * player_data.Edge.Multipliers.Y)) * extra_scale;
+					local name_pos = Vector(item_pos.X - ((head_offset * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale.X) + (8 - mod.Config.CoopHUD.players.names.offset.X) * player_data.Edge.Multipliers.X), item_pos.Y + (((mod.Config.CoopHUD.players.names.offset.Y + 2) * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale.Y) * player_data.Edge.Multipliers.Y)) * player.Scale;
 					if player_data.Edge.Multipliers.X < 0 then name_pos.X = name_pos.X - (name_size.X * max_scale); end
 					if player_data.Edge.Multipliers.Y < 0 then name_pos.Y = name_pos.Y - (name_size.Y * max_scale); end
 					name_pos.X = math.min((screen_dimensions.Max.X - name_size.X),math.max(screen_dimensions.Min.X,name_pos.X)); -- Prevent it from leaving the screen
@@ -367,7 +366,7 @@ function Player.Render(player_number, screen_dimensions)
 		if not isTemporary then
 			local bar_pos,_ = CustomHealthAPI and CustomHealthAPI.Helper.GetHealthBarPos(player_entity, (player.Index - 1)) or Vector.Zero;
 			local flip = false;
-			local scale = mod.Config.CoopHUD.health.scale * extra_scale;
+			local scale = mod.Config.CoopHUD.health.scale * player.Scale;
 			local health_pos = (player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Health + mod.Config.CoopHUD.health.offset + (isTwin and mod.Config.CoopHUD.health.twin.offset or Vector.Zero))) * scale) * player_data.Edge.Multipliers) - bar_pos;
 			if (player.Index % 2) == 0 then
 				flip = mod.Config.CoopHUD.health.invert;

@@ -43,7 +43,7 @@ end
 function CoopTwins.onRender(_)
 	if not CoopTwins.DATA.Joining or type(CoopTwins.DATA.Joining) ~= "table" then CoopTwins.DATA.Joining = {}; end
 	if not CoopTwins.DATA.Twins or type(CoopTwins.DATA.Twins) ~= "table" then CoopTwins.DATA.Twins = {}; end
-	if Utils.CanStartCoop() then
+	if Utils.CanStartTrueCoop() then
 		local joinable_twins = {};
 		local joinable_twin = nil;
 		for i = 1, Game():GetNumPlayers(), 1 do

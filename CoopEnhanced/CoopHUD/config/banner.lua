@@ -5,6 +5,16 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.title,
 	CoopHUD.MCM.categories.banner,
 	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopHUD.banner.display; end,
+		Display = function() return 'Display Banners: ' .. (mod.Config.CoopHUD.banner.display and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.banner.display = b; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.banner,
+	{
 		Type = ModConfigMenu.OptionType.NUMBER,
 		Minimum = 0,
 		Maximum = 2,
@@ -56,6 +66,17 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopHUD.banner.duration; end,
 		Display = function() return 'Display Duration: ' .. mod.Config.CoopHUD.banner.duration .. "s"; end,
 		OnChange = function(n) mod.Config.CoopHUD.banner.duration = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.banner,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopHUD.banner.temp_fortune_fix; end,
+		Display = function() return 'Temp Fortune Fix: ' .. (mod.Config.CoopHUD.banner.temp_fortune_fix and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopHUD.banner.temp_fortune_fix = b; end,
+		Info = {'Enable to hide the HUD when Fortune banners appear (until API is available to get fortune text this is the fix).'},
 	}
 );
 

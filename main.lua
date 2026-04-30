@@ -75,7 +75,7 @@ local function onUpdate()
 		CoopEnhanced.Players.Unlocked = CoopEnhanced.Utils.GetUnlockedCharacters();
 	end
 	CoopEnhanced.FrameCount = CoopEnhanced.FrameCount > 60 and 1 or CoopEnhanced.FrameCount + 1;
-	if not Game():IsPaused() and CoopEnhanced.Utils.CanStartCoop() and CoopEnhanced.Challenge.ID == Challenge.CHALLENGE_NULL then
+	if not Game():IsPaused() and CoopEnhanced.Utils.CanStartTrueCoop() and CoopEnhanced.Challenge.ID == Challenge.CHALLENGE_NULL then
 		local joining_total = CoopEnhanced.GetJoiningTotal();
 		for i = 1, CoopEnhanced.MaxControllers, 1 do
 			local controller_index = (i - 1);

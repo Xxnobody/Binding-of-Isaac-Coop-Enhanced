@@ -15,6 +15,7 @@ mod.CoopFixes.DefaultConfig = {
 		max = 2
 	},
 	rejoin = true,
+	rewind = false,
 };
 	
 function mod.CoopFixes.ResetConfig()
@@ -92,6 +93,19 @@ ModConfigMenu.AddSetting(
 		Display = function() return 'Character Rejoin Fix: ' .. (CoopEnhanced.Config.CoopFixes.rejoin and 'on' or 'off'); end,
 		OnChange = function(b) CoopEnhanced.Config.CoopFixes.rejoin = b; end,
 		Info = {'Enable to fix a bug that can happen when rejoining that causes all character types to become the same as player 1. RESTART REQUIRED'},
+	}
+);
+
+ModConfigMenu.AddSpace(CoopFixes.MCM.category)
+ModConfigMenu.AddTitle(CoopFixes.MCM.category, 'Rewind Fix');
+ModConfigMenu.AddSetting(
+	CoopFixes.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return CoopEnhanced.Config.CoopFixes.rewind; end,
+		Display = function() return 'Rewind Fix: ' .. (CoopEnhanced.Config.CoopFixes.rewind and 'on' or 'off'); end,
+		OnChange = function(b) CoopEnhanced.Config.CoopFixes.rewind = b; end,
+		Info = {'Enable to fix a bug that causes player controller indexes to shuffle when the Rewind command or similar is used.'},
 	}
 );
 

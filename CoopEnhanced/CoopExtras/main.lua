@@ -7,7 +7,7 @@ local Utils = mod.Utils;
 
 -- Saving and Loading
 function CoopEnhanced.CoopExtras.gameStart(isCont, data)
-	CoopExtras.DATA = {Pickups = {}};
+	CoopExtras.DATA = {Pickups = {},Perfect = {Players = {}, Floors = {}}};
 	if isCont and data and data.CoopExtras then
 		CoopExtras.DATA = data.CoopExtras;
 	end
@@ -19,7 +19,13 @@ function CoopEnhanced.CoopExtras.gameEnd(data)
 end
 
 function CoopExtras:onFloor()
-	CoopExtras.DATA.Pickups = {}; -- Clear FLoor data since we dont need it anymore and it can cause issues
+	if game:GetLevel():GetStage() == LevelStage.STAGE1_1 then return; end
+	CoopExtras.DATA.Pickups = {}; -- Clear pickup Floor data since we dont need it anymore and it can cause issues
+	if mod.Config.CoopExtras.perfection.enabled then
+		for i,perfect_count in pairs(CoopExtras.DATA.Perfect.Players) do
+			if perfect_count < 0 then perfect_count = 0; end -- Reset perfection count
+		end
+	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, CoopExtras.onFloor);
 
@@ -27,7 +33,87 @@ function CoopExtras.GetPickupID(pickup)
 	return tostring(pickup.SubType) .. "|" .. tostring(pickup.Position.X) .. "|" .. tostring(pickup.Position.Y); -- Unique enough ID to help find collectibles and be able to save/load it for later
 end
 
---Greed Revive Machine
+
+-- Tainted Blue Baby Bombs
+if REPENTOGON and not TBBCoopFix then
+	function CoopExtras:ClearBlueBabyFlies(amount, pos)
+		local flies = Isaac.FindByType(EntityType.ENTITY_FAMILIAR, FamiliarVariant.ATTACK_FLY);
+		if #flies == 0 then return; end
+		
+		for i,fly in pairs(flies) do
+			if fly.Position:Distance(pos) <= 10 and fly.FrameCount <= 5 and Utils.IsPlayerType(fly.SpawnerEntity,PlayerType.PLAYER_BLUEBABY_B) then
+				fly.Visible = false;
+				fly:Remove();
+				amount = amount - 1;
+				if amount <= 0 then return; end
+			end
+		end
+	end
+
+	function CoopExtras:onBlueBabyBomb(pickup_entity, entity)
+		local player_entity = entity:ToPlayer();
+		local other_player = Utils.FirstPlayerNotType(PlayerType.PLAYER_BLUEBABY_B);
+		if not mod.Config.CoopExtras.tainted_bombs or not other_player or not player_entity or player_entity:GetPlayerType() ~= PlayerType.PLAYER_BLUEBABY_B or pickup_entity.SubType > BombSubType.BOMB_DOUBLEPACK then return; end
+		
+		local bomb_amount = pickup_entity.SubType;
+		other_player:AddBombs(bomb_amount);
+		
+		CoopExtras:ClearBlueBabyFlies(bomb_amount, player_entity.Position);
+	end
+	mod:AddCallback(ModCallbacks.MC_POST_PICKUP_COLLISION, CoopExtras.onBlueBabyBomb, PickupVariant.PICKUP_BOMB);
+
+	function CoopExtras:onBlueBabyBombItem(collectible_type, _, _, _, _, player_entity)
+		local item_config = Isaac.GetItemConfig():GetCollectible(collectible_type);
+		local other_player = Utils.FirstPlayerNotType(PlayerType.PLAYER_BLUEBABY_B);
+		if not mod.Config.CoopExtras.tainted_bombs or not player_entity or not other_player or player_entity:GetPlayerType() ~= PlayerType.PLAYER_BLUEBABY_B or item_config.AddBombs <= 0 then return; end
+		
+		local bomb_amount = item_config.AddBombs;
+		
+		other_player:AddBombs(bomb_amount);
+		CoopExtras:ClearBlueBabyFlies(bomb_amount, player_entity.Position);
+	end
+	mod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, CoopExtras.onBlueBabyBombItem);
+end
+
+
+-- Perfection per Player
+function CoopExtras.PerPlayerFection(_,entity,damage_flags,source)
+	if not mod.Config.CoopExtras.perfection.enabled then return; end
+	if (damage_flags & DamageFlag.DAMAGE_NO_PENALTIES == 0) then
+		local player_index = Utils.GetMainPlayerIndex(entity:ToPlayer());
+		CoopExtras.DATA.Perfect.Players[player_index] = CoopExtras.DATA.Perfect.Players[player_index] or 0;
+		local stop_hit = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_PERFECTION_HIT, CoopExtras.DATA.Perfect.Players[player_index]); -- Execute Pre Perfection loss (perfection_count(Number))
+		if not stop_hit and (not mod.Config.CoopExtras.perfection.once or CoopExtras.DATA.Perfect.Players[player_index] < mod.Config.CoopExtras.perfection.required) then CoopExtras.DATA.Perfect.Players[player_index] = -1; end
+	end
+end
+mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, CoopExtras.PerPlayerFection, EntityType.ENTITY_PLAYER);
+
+function CoopExtras.PerBossFection(_,rng,spawn_pos)
+	if not mod.Config.CoopExtras.perfection.enabled then return; end
+	if game:GetRoom():GetType() == RoomType.ROOM_BOSS then
+		local perfection_spawned = #Isaac.FindByType(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_TRINKET, TrinketType.TRINKET_PERFECTION) > 0 and 0 or 1; -- in case the vanilla perfection is spawned skip one
+		for i,player_entity in pairs(Utils.GetMainPlayers()) do
+			local player_index = Utils.GetMainPlayerIndex(player_entity);
+			local perfect_count = (CoopExtras.DATA.Perfect.Players[player_index] or 0) + 1;
+			if perfect_count > 0 then
+				if perfection_spawned == 0 then
+					perfection_spawned = 1;
+				elseif perfect_count == mod.Config.CoopExtras.perfection.required then
+					local stop_spawn = CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_PERFECTION_SPAWN, player_index, perfect_count); -- Execute Pre Perfection loss (player_index(Nuumber), perfection_count(Number))
+					if not stop_spawn then
+						game:SetStateFlag(GameStateFlag.STATE_PERFECTION_SPAWNED,true);
+						game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_TRINKET, spawn_pos, Vector(rng:RandomInt(5),rng:RandomInt(5)), nil, TrinketType.TRINKET_PERFECTION, 1):ToPickup();
+					end
+				end
+				CoopExtras.DATA.Perfect.Players[player_index] = perfect_count;
+			end
+		end
+	end
+end
+mod:AddCallback(ModCallbacks.MC_PRE_SPAWN_CLEAN_AWARD, CoopExtras.PerBossFection);
+
+
+-- Greed mode Revive Machine
 function CoopExtras.GreedRevive(_)
 	local room = game:GetRoom();
 	if mod.Config.CoopExtras.greed_revive and game:IsGreedMode() and room:GetType() == RoomType.ROOM_SHOP and game:GetLevel():GetCurrentRoomDesc().VisitedCount <= 1 and Game():GetLevel():GetStage() ~= LevelStage.STAGE1_GREED and Game():GetLevel():GetStage() ~= LevelStage.STAGE7_GREED then

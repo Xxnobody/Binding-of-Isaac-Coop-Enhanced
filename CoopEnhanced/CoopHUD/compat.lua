@@ -6,10 +6,10 @@ local function configSetup()
 	if ModConfigMenu == nil then return; end
 	
 	if ClockPickupCounterXX then -- Doesnt Work Yet
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Animated Pickups');
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Animated Pickups');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.BOOLEAN,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.ANIMATEDPICKUPS.enabled; end,
@@ -18,17 +18,17 @@ local function configSetup()
 				Info = {'Animates the HUD pickups using Animated Pickups.'},
 			}
 		);
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
 	
 	if DIVIDED_VOID then
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Divided Void');
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Divided Void');
 		local valid_charges = {};
 		for i,_ in pairs(CoopHUD.Item.ChargeBar.Charge) do table.insert(valid_charges,i); end
 		table.sort(valid_charges);
 		--[[ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				Minimum = 1,
@@ -40,7 +40,7 @@ local function configSetup()
 		);]]-- Doesn't Work because the mod loads the value once at runtime, change it in the mod directly
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.DIVOID.display; end,
@@ -52,7 +52,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.DIVOID.colorize; end,
@@ -64,7 +64,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.DIVOID.offset.X; end,
@@ -74,7 +74,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.DIVOID.offset.Y; end,
@@ -84,7 +84,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				Minimum = 0.0,
@@ -96,7 +96,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.DIVOID.color; end,
@@ -109,7 +109,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.DIVOID.color_extra; end,
@@ -120,14 +120,14 @@ local function configSetup()
 				Info = "Set the extra charge color.",
 			}
 		);
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
 	
 	if EID then
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'External Item Descriptions');
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'External Item Descriptions');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.EID.display; end,
@@ -137,14 +137,14 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.compat.EID.display = n; end,
 			}
 		);
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
 
 	if Epiphany then
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Epiphany');
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Epiphany');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.EPIPHANY.hud_element_pos.X; end,
@@ -155,7 +155,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.EPIPHANY.hud_element_pos.Y; end,
@@ -164,14 +164,14 @@ local function configSetup()
 				Info = {'Used for rendering any additional HUD elements for Epiphany Tarnished characters'},
 			}
 		);
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
 	
 	if HPBars then
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Enhanced Boss Bars');
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Enhanced Boss Bars');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.BOOLEAN,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.EBB.auto_pad.enabled; end,
@@ -182,7 +182,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.EBB.auto_pad.pickups; end,
@@ -192,7 +192,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.EBB.auto_pad.stats; end,
@@ -202,7 +202,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.EBB.auto_pad.wave; end,
@@ -212,7 +212,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.EBB.offset.X; end,
@@ -222,7 +222,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.EBB.offset.Y; end,
@@ -230,14 +230,14 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.compat.EBB.offset.Y = n; end,
 			}
 		);
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
 	
 	if FancyBossBar then
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Enhanced Boss Bars');
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Enhanced Boss Bars');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.BOOLEAN,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.FBB.auto_pad.enabled; end,
@@ -248,7 +248,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.FBB.auto_pad.pickups; end,
@@ -258,7 +258,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.FBB.auto_pad.stats; end,
@@ -268,7 +268,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.FBB.auto_pad.wave; end,
@@ -278,7 +278,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.FBB.offset.X; end,
@@ -288,7 +288,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.FBB.offset.Y; end,
@@ -296,16 +296,16 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.compat.FBB.offset.Y = n; end,
 			}
 		);
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
 	
 	
 	if IsaacReflourished then
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Isaac Reflourished');
-		ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, '--Excited Timer--');
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Isaac Reflourished');
+		ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, '--Excited Timer--');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display; end,
@@ -317,7 +317,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.anchor; end,
@@ -330,7 +330,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.offset.X; end,
@@ -340,7 +340,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.offset.Y; end,
@@ -350,7 +350,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				Minimum = 0.0,
@@ -362,7 +362,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				Minimum = 0.0,
@@ -373,7 +373,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				Minimum = 0.0,
@@ -383,10 +383,10 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.opacity = n / 100; end,
 			}
 		);
-		ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, '--Boss Wave Counter--');
+		ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, '--Boss Wave Counter--');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.BOOLEAN,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REFLOURISHED.boss_counter.enabled; end,
@@ -396,7 +396,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REFLOURISHED.boss_counter.offset.X; end,
@@ -406,7 +406,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REFLOURISHED.boss_counter.offset.Y; end,
@@ -416,7 +416,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REFLOURISHED.boss_counter.text_offset.X; end,
@@ -426,7 +426,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REFLOURISHED.boss_counter.text_offset.Y; end,
@@ -434,14 +434,14 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.compat.REFLOURISHED.boss_counter.text_offset.Y = n; end,
 			}
 		);
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end	
 	
 	if LowFirerateChargeBar then
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Low Firerate Chargebar');
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Low Firerate Chargebar');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.LOWFIRERATEBAR.offset.X; end,
@@ -452,7 +452,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.LOWFIRERATEBAR.offset.Y; end,
@@ -461,14 +461,14 @@ local function configSetup()
 				Info = {'Used for moving Jukebox title not in the way of the HUD'},
 			}
 		);
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
 	
 	if MinimapAPI then
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'MinimapAPI');
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'MinimapAPI');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.BOOLEAN,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.mAPI.enabled; end,
@@ -479,7 +479,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.mAPI.pos.X; end,
@@ -489,7 +489,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.mAPI.pos.Y; end,
@@ -499,7 +499,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.mAPI.frame.X; end,
@@ -509,7 +509,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.mAPI.frame.Y; end,
@@ -517,14 +517,14 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.compat.mAPI.frame.Y = n; end,
 			}
 		);
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
 	
 	if Reverie then
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, 'Reverie - Touhou Combinations');
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Reverie - Touhou Combinations');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.BOOLEAN,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REVERIE.enabled; end,
@@ -533,10 +533,10 @@ local function configSetup()
 				Info = {'Enable compat for Reverie.'},
 			}
 		);
-		ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, '--Addiction Bar--');
+		ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, '--Addiction Bar--');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REVERIE.addictbar.offset.X; end,
@@ -546,7 +546,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REVERIE.addictbar.offset.Y; end,
@@ -556,7 +556,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				Minimum = 0.0,
@@ -567,7 +567,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				Minimum = 0.0,
@@ -577,10 +577,10 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.compat.REVERIE.addictbar.opacity = n / 100; end,
 			}
 		);
-		ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods, '--Quality Meter--');
+		ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, '--Quality Meter--');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REVERIE.quality.offset.X; end,
@@ -590,7 +590,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REVERIE.quality.offset.Y; end,
@@ -600,7 +600,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				Minimum = 0.0,
@@ -611,7 +611,7 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
-			CoopHUD.MCM.categories.mods,
+			CoopHUD.MCM.categories.compat,
 			{
 				Type = ModConfigMenu.OptionType.NUMBER,
 				Minimum = 0.0,
@@ -621,7 +621,167 @@ local function configSetup()
 				OnChange = function(n) mod.Config.CoopHUD.compat.REVERIE.quality.opacity = n / 100; end,
 			}
 		);
-		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.mods);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
+	end
+	if VoidedItems then
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Voided Items');
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.display; end,
+				Minimum = 0,
+				Maximum = 3,
+				Display = function() return 'Display: ' .. (mod.Config.CoopHUD.compat.VOIDED.display == 0 and 'Always' or (mod.Config.CoopHUD.compat.VOIDED.display == 1 and 'Map' or (mod.Config.CoopHUD.compat.VOIDED.display == 2 and 'No Map' or 'Never'))); end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.display = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				Minimum = 0,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.max; end,
+				Display = function() return 'Max Displayed: ' .. mod.Config.CoopHUD.compat.VOIDED.max; end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.max = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.BOOLEAN,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.colors; end,
+				Display = function() return 'Item Colors: ' .. (mod.Config.CoopHUD.compat.VOIDED.colors and 'on' or 'off'); end,
+				OnChange = function(b) mod.Config.CoopHUD.compat.VOIDED.colors = b; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.offset.X; end,
+				Display = function() return 'Offset (X): ' .. mod.Config.CoopHUD.compat.VOIDED.offset.X; end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.offset.X = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.offset.Y; end,
+				Display = function() return 'Offset (Y): ' .. mod.Config.CoopHUD.compat.VOIDED.offset.Y; end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.offset.Y = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				Minimum = 0.0,
+				CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopHUD.compat.VOIDED.scale.X * 100)); end,
+				Display = function() return 'Scale: ' .. string.format('%.0f', mod.Config.CoopHUD.compat.VOIDED.scale.X * 100) .. '%'; end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.scale = Vector(n/100, n/100); end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				Minimum = 0.0,
+				Maximum = 100.0,
+				CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopHUD.compat.VOIDED.opacity * 100)); end,
+				Display = function() return 'Opacity: ' .. string.format('%.0f', mod.Config.CoopHUD.compat.VOIDED.opacity * 100) .. '%'; end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.opacity = n / 100; end,
+			}
+		);
+
+		ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Grid');
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				Minimum = 0,
+				Maximum = 3,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.direction; end,
+				Display = function() return 'Direction: ' .. (mod.Config.CoopHUD.compat.VOIDED.direction == 0 and 'Left' or (mod.Config.CoopHUD.compat.VOIDED.direction == 1 and 'Up' or (mod.Config.CoopHUD.compat.VOIDED.direction == 2 and 'Right' or 'Down'))); end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.direction = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.invert_direction.X; end,
+				Minimum = 0,
+				Maximum = 1,
+				Display = function() return 'Invert Direction (X): ' .. (mod.Config.CoopHUD.compat.VOIDED.invert_direction.X == 1 and 'on' or 'off'); end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.invert_direction.X = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.invert_direction.Y; end,
+				Minimum = 0,
+				Maximum = 1,
+				Display = function() return 'Invert Direction (Y): ' .. (mod.Config.CoopHUD.compat.VOIDED.invert_direction.Y == 1 and 'on' or 'off'); end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.invert_direction.Y = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				Minimum = 1,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.max_grid.X; end,
+				Display = function() return 'Max Columns: ' .. math.floor(mod.Config.CoopHUD.compat.VOIDED.max_grid.X); end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.max_grid.X = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				Minimum = 1,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.max_grid.Y; end,
+				Display = function() return 'Max Rows: ' .. math.floor(mod.Config.CoopHUD.compat.VOIDED.max_grid.Y); end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.max_grid.Y = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.space.X; end,
+				Display = function() return 'Space Between Columns: ' .. mod.Config.CoopHUD.compat.VOIDED.space.X; end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.space.X = n; end,
+			}
+		);
+		ModConfigMenu.AddSetting(
+			CoopHUD.MCM.title,
+			CoopHUD.MCM.categories.compat,
+			{
+				Type = ModConfigMenu.OptionType.NUMBER,
+				CurrentSetting = function() return mod.Config.CoopHUD.compat.VOIDED.space.Y; end,
+				Display = function() return 'Space Between Rows: ' .. mod.Config.CoopHUD.compat.VOIDED.space.Y; end,
+				OnChange = function(n) mod.Config.CoopHUD.compat.VOIDED.space.Y = n; end,
+			}
+		);
+		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
 end
 
@@ -635,6 +795,7 @@ require(CoopHUD.Directory .. 'compat.library_expanded');
 require(CoopHUD.Directory .. 'compat.low_firerate_bar');
 require(CoopHUD.Directory .. 'compat.reflourished');
 require(CoopHUD.Directory .. 'compat.reverie');
+require(CoopHUD.Directory .. 'compat.voided_items');
 
 local mods = {
 	{
@@ -686,6 +847,11 @@ local mods = {
 		name = "Reverie - Touhou Combinations",
 		file = function() CoopHUD.Reverie() end,
 		condition = function() return Reverie ~= nil end,
+	},
+	{
+		name = "Voided Items",
+		file = function() CoopHUD.VoidedItems() end,
+		condition = function() return VoidedItems ~= nil end,
 	}
 };
 

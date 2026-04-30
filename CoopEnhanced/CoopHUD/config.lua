@@ -278,7 +278,7 @@ mod.CoopHUD.DefaultConfig = {
 			anchor = 0,
 			opacity = 1,
 			offset = Vector(0, 0),
-			scale = Vector(0.75,0.5),
+			scale = Vector(0.75,0.75),
 			space = Vector(12, 12),
 			offset_w_pockets = false,
 			ignore_curse = false,
@@ -308,6 +308,7 @@ mod.CoopHUD.DefaultConfig = {
 	},
 	banner = {
 		display = true,
+		temp_fortune_fix = true,
 		anchor = 1,
 		speed = 0.5,
 		duration = 2,
@@ -407,6 +408,18 @@ mod.CoopHUD.DefaultConfig = {
 				opacity = 1.0,
 			},
 		},
+		VOIDED = {
+			display = 0,
+			direction = 2,
+			invert_direction = Vector(0,0),
+			colors = false,
+			offset = Vector(0,0),
+			space = Vector(10,10),
+			scale = Vector(0.5,0.5),
+			opacity = 0.8,
+			max_grid = Vector(6,3),
+			max = 24,
+		},
 	},
 	fonts = {
 		banners = 'upheaval',
@@ -443,7 +456,7 @@ CoopHUD.MCM.categories = {
 	misc = 'Misc.',
 	banner = 'Banners',
 	fonts = 'Fonts',
-	mods = 'Mods',
+	compat = 'Mods',
 };
 
 local dir = CoopHUD.Directory .. 'config.';

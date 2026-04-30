@@ -57,7 +57,7 @@ function CoopLabels.RenderLabels(_)
 			
 			-- Name
 			if mod.Config.CoopLabels.display > 1 then
-				local player_name = Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.CoopLabels.tainted);
+				local player_name = Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.players.tainted_names);
 				if player_name and player_name:len() > 0 then player_data.Text = {Value = player_name, Scale = mod.Config.CoopLabels.text_scale * scale} end
 			end
 			

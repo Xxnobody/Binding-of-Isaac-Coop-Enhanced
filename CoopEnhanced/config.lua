@@ -17,6 +17,7 @@ mod.DefaultConfig = {
 		CoopTwins = true,
 	},
 	players = {
+		tainted_names = false,
 		[1] = {
 			color = Utils.GetColorIndexByName("Red"),
 			name = "",
@@ -121,7 +122,20 @@ ModConfigMenu.AddSetting(
 );
 
 ModConfigMenu.AddSpace(mod.MCM.category)
-ModConfigMenu.AddTitle(mod.MCM.category, 'Global Player Names');
+ModConfigMenu.AddTitle(mod.MCM.category, 'Global Player Settings');
+ModConfigMenu.AddSetting(
+	mod.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.players.tainted_names; end,
+		Display = function() return 'Full Tainted Names: ' .. (mod.Config.players.tainted_names and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.players.tainted_names = b; end,
+		Info = {'Enable to use full tainted names (i.e. The Baleful, The Miser, etc).'},
+	}
+);
+
+ModConfigMenu.AddSpace(mod.MCM.category)
+ModConfigMenu.AddTitle(mod.MCM.category, 'Player Names');
 for i = 1, 4 do
 	ModConfigMenu.AddSetting(
 		mod.MCM.category,
@@ -138,7 +152,7 @@ for i = 1, 4 do
 end
 
 ModConfigMenu.AddSpace(mod.MCM.category)
-ModConfigMenu.AddTitle(mod.MCM.category, 'Global Player Colors');
+ModConfigMenu.AddTitle(mod.MCM.category, 'Player Colors');
 for i = 1, 4 do
 	ModConfigMenu.AddSetting(
 		mod.MCM.category,

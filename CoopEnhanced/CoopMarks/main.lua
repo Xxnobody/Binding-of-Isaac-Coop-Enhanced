@@ -33,13 +33,13 @@ function CoopMarks.getMarks(player_entity, player_index, position)
 	-- Label
 	if mod.Config.CoopMarks.display > 1 then 
 		local text_scale = (player_index == 1 and Vector(1.5,1.5) or mod.Config.CoopMarks.text_scale * player_data.Scale);
-		player_data.Text = {Value = (Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, false)), Pos = (player_data.Pos + (mod.Config.CoopMarks.text_offset + Vector(24, -16)) * text_scale), Scale = text_scale, Color = Utils.ConvertColorToFont(player_color, mod.Config.CoopMarks.opacity)};
+		player_data.Text = {Value = (Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.players.tainted_names)), Pos = (player_data.Pos + (mod.Config.CoopMarks.text_offset + Vector(24, -16)) * text_scale), Scale = text_scale, Color = Utils.ConvertColorToFont(player_color, mod.Config.CoopMarks.opacity)};
 		player_data.Text.Pos.X = player_data.Text.Pos.X - ((mod.Fonts.CoopMarks.mark:GetStringWidth(player_data.Text.Value) / 2) * text_scale.X);
 	end
 	-- Head
 	if mod.Config.CoopMarks.display == 1 or mod.Config.CoopMarks.display == 3 then
 		local head_scale = (player_index == 1 and Vector(1,1) or mod.Config.CoopMarks.head_scale * player_data.Scale);
-		player_data.Head = {Sprite = Utils.GetHeadSprite(nil, player_entity), Pos = (player_data.Pos + (mod.Config.CoopMarks.head_offset + Vector(2,-10)) * head_scale), Scale = head_scale};
+		player_data.Head = {Sprite = Utils.GetHeadSprite(nil,nil,player_type), Pos = (player_data.Pos + (mod.Config.CoopMarks.head_offset + Vector(2,-10)) * head_scale), Scale = head_scale};
 	end
 	
 	if not player_data.Sprite then

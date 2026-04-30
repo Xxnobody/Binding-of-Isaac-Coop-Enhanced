@@ -194,7 +194,7 @@ function CoopTreasure:onRender()
 			if player_entity and player_index > 0 and room_data.Treasure.Items[i][1] and #Isaac.FindInRadius(room_data.Treasure.Items[i][1].Position, (mod.GridSize / 2), EntityPartition.PICKUP) > 0 then
 				if game:GetFrameCount() % 15 == 0 then -- Update Data twice each second	
 					local player_config = player_sync == "Global" and mod.Config.players[player_index] or (mod.Config[player_sync] and mod.Config[player_sync].players[player_index] or mod.Config.CoopTreasure.players[player_index]);
-					local player_name = display > 1 and Utils.GetPlayerName(player_entity, Utils.GetMainPlayerIndex(player_entity), player_config.type, player_config.name, mod.Config.CoopLabels.tainted) or nil;
+					local player_name = display > 1 and Utils.GetPlayerName(player_entity, Utils.GetMainPlayerIndex(player_entity), player_config.type, player_config.name, mod.Config.players.tainted_names) or nil;
 					local player_color = Colors[player_config.color].Value;
 					
 					local edge_multipliers = Vector((i % 2 == 0) and -1 or 1, i > 2 and -1 or 1);

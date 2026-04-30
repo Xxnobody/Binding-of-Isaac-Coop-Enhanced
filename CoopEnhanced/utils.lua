@@ -197,10 +197,6 @@ function Utils.IsDSSMenuOpen()
 	return DeadSeaScrollsMenu ~= nil and DeadSeaScrollsMenu.IsOpen();
 end
 
-function Utils.CanStartCoop()
-	return REPENTOGON ~= nil and Isaac.CanStartTrueCoop() or Game():GetStateFlag(GameStateFlag.STATE_BOSSPOOL_SWITCHED);
-end
-
 function Utils.GetHealthTypes()
 	if not CustomHealthAPI then return mod.HealthTypes; end
 	local health_types = {};
@@ -292,6 +288,19 @@ function Utils.AnyoneHasTrinket(trinket_type)
 	end
 	return false;
 end
+function Utils.FirstPlayerByType(player_type)
+	if REPENTOGON then return PlayerManager.FirstPlayerByType(player_type); end
+	for i,ptype in pairs(mod.Players.Types) do
+		if player_type == ptype then return Isaac.GetPlayer(i - 1); end
+	end
+	return nil;
+end
+function Utils.FirstPlayerNotType(player_type)
+	for i,ptype in pairs(mod.Players.Types) do
+		if player_type ~= ptype then return Isaac.GetPlayer(i - 1); end
+	end
+	return nil;
+end
 function Utils.GetNumCollectibles(collectible_type)
 	if REPENTOGON then return PlayerManager.GetNumCollectibles(collectible_type); end
 	local total = 0;
@@ -300,11 +309,15 @@ function Utils.GetNumCollectibles(collectible_type)
 	end
 	return total;
 end
+
+function Utils.CanStartTrueCoop()
+	return REPENTOGON ~= nil and Isaac.CanStartTrueCoop() or Game():GetStateFlag(GameStateFlag.STATE_BOSSPOOL_SWITCHED);
+end
 function Utils.IsCoopPlay()
 	if REPENTOGON then return PlayerManager.IsCoopPlay(); end
 	if mod.Players.Total > 1 then
 		for i = 2, game:GetNumPlayers(), 1 do
-			if not mod.Players.Twins[i] then return true; end
+			if mod.Players.Twins[i] then return true; end
 		end
 	end
 	return false;
@@ -319,7 +332,7 @@ function Utils.GetCharacterByType(player_type)
 			if character.Type == player_type then return character, #mod.Characters + i; end
 		end
 	end
-	return {},-1;
+	return nil,-1;
 end
 function Utils.GetCharacterByName(player_name)
 	if REPENTOGON then
@@ -330,7 +343,7 @@ function Utils.GetCharacterByName(player_name)
 			if character.Name == player_name then return character, #mod.Characters + i; end
 		end
 	end
-	return {},-1;
+	return nil,-1;
 end
 function Utils.GetPlayerID(player_entity) -- Taken from CustomHealthAPI
 	if not player_entity then return "nil"; end
@@ -535,6 +548,13 @@ end
 function Utils.IsPlayerDying(player_entity) -- Taken from LibraryExpanded
 	return player_entity:GetSprite():GetAnimation():sub(-#"Death") == "Death";
 end
+
+-- Player Types
+function Utils.IsPlayerType(entity,player_type) -- Useful for checking if is player and player_type all at once
+	if not entity then return false; end
+	local player_entity = entity.Type == EntityType.ENTITY_PLAYER and (entity.BabySkin ~= nil and entity or entity:ToPlayer()) or nil;
+	return player_entity ~= nil and player_entity:GetPlayerType() == player_type;
+end
 function Utils.IsBaby(player_entity)
 	if not REPENTOGON or not player_entity then return false; end
 	return player_entity.BabySkin ~= BabySubType.BABY_UNASSIGNED;
@@ -546,8 +566,6 @@ function Utils.IsTemporary(player_entity)
 	local player_type = player_entity:GetPlayerType()
 	return Utils.IsMainTwin(player_entity) and (Utils.IsForgotten(player_type) or Utils.IsKeeper(player_type) or Utils.IsIllusion(player_entity));
 end
-
--- Player Types
 function Utils.HasTwin(player_type)
 	return player_type == PlayerType.PLAYER_THEFORGOTTEN or player_type == PlayerType.PLAYER_THESOUL or player_type == PlayerType.PLAYER_THEFORGOTTEN_B or player_type == PlayerType.PLAYER_THESOUL_B or player_type == PlayerType.PLAYER_ESAU or player_type == PlayerType.PLAYER_JACOB or player_type == PlayerType.PLAYER_JACOB_B or player_type == PlayerType.PLAYER_LAZARUS2_B;
 end

@@ -52,7 +52,7 @@ function CoopHUD.createBanner(name, desc, banner_type, display_bottom_paper)
 	sprite:LoadGraphics();
 	sprite:Play('Text', false);
 	sprite.PlaybackSpeed = mod.Config.CoopHUD.banner.speed;
-	CoopHUD.DATA.Banner = {Sprite = sprite, Name = name, Desc = desc, Curse = display_bottom_paper, Type = banner_type, Timer = banner_timer};
+	CoopHUD.DATA.Banner = {Sprite = sprite, Name = (name or ""), Desc = (desc or ""), Curse = display_bottom_paper, Type = banner_type, Timer = banner_timer};
 end
 
 function CoopHUD.getDataFromController(controller_index)
@@ -222,13 +222,13 @@ local function removeCollectible(_, player_entity, collectible_type)
 end
 mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, removeCollectible);
 
-local function fortuneDisplay(_)
+local function fortuneDisplay(_, name, description)
 	local fortunesprite = game:GetHUD():GetFortuneSprite();
+	CoopEnhanced.CoopHUD.createBanner(name, description, CoopHUD.BannerType.FORTUNE, IsCurse);
 	CoopHUD.DATA.Banner.Sprite = fortunesprite;
-	CoopHUD.DATA.Banner.Type = CoopHUD.BannerType.FORTUNE;
 end
 mod:AddCallback(ModCallbacks.MC_PRE_FORTUNE_DISPLAY, fortuneDisplay);
-local function displayBanner(_ , name, description, isSticky, IsCurse)
+local function displayBanner(_, name, description, isSticky, IsCurse)
 	if name == CoopHUD.DATA.Banner.Name then return; end
 	local banner_type = isSticky and CoopHUD.BannerType.FLOOR or CoopHUD.BannerType.ITEM;
 	CoopEnhanced.CoopHUD.createBanner(name, description, banner_type, IsCurse);
@@ -239,7 +239,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_ITEM_TEXT_DISPLAY, displayBanner);
 local hotkey_timer = 0;
 local function onRender()
 	-- Renderer Checks
-	if not mod.Config.modules.CoopHUD or game:GetSeeds():HasSeedEffect(SeedEffect.SEED_NO_HUD) or (not Utils.CanStartCoop() and mod.Config.CoopHUD.toggle_hud.coop_only and not Utils.IsCoopPlay()) then -- Check if HUD can be rendered at all
+	if not mod.Config.modules.CoopHUD or game:GetSeeds():HasSeedEffect(SeedEffect.SEED_NO_HUD) or (not Utils.CanStartTrueCoop() and mod.Config.CoopHUD.toggle_hud.coop_only and not Utils.IsCoopPlay()) then -- Check if HUD can be rendered at all
 		CoopHUD.isVisible = false;
 		CoopHUD.Refresh = false;
 		return;
@@ -253,14 +253,14 @@ local function onRender()
 	local screen_dimensions = Utils.GetScreenDimensions();
 	mod.CoopHUD.Refresh = (mod.Config.CoopHUD.renderer.refresh == 1 or (CoopEnhanced.FrameCount % mod.Config.CoopHUD.renderer.refresh) == 0);
 	
-	if CoopHUD.DATA.Banner.Type == CoopHUD.BannerType.FORTUNE then -- Temperary fix until an API to get Fortune text is available
+	if CoopHUD.DATA.Banner.Type == CoopHUD.BannerType.FORTUNE and mod.Config.CoopHUD.banner.temp_fortune_fix then -- Temperary fix until an API to get Fortune text is available
 		if CoopHUD.DATA.Banner.Sprite:IsFinished() then
 			CoopHUD.DATA.Banner = {};
 		else
 			hud:SetVisible(true);
 			return;
 		end
-	elseif Utils.CanStartCoop() and not game:IsPaused() and CoopHUD.isVisible then 
+	elseif Utils.CanStartTrueCoop() and not game:IsPaused() and CoopHUD.isVisible then 
 		CoopHUD.InitNewPlayers(screen_dimensions);
 		if mod.Config.CoopHUD.players.menu.display == 0 and CoopHUD.IsPlayerJoining() then hud:SetVisible(true); return; end
 	elseif game:GetRoom():GetType() == RoomType.ROOM_BOSS and game:GetRoom():IsFirstVisit() and game:GetRoom():GetFrameCount() < 5 then -- Hide all HUDs when entering a boss cutscene

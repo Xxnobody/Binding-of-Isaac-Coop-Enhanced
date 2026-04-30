@@ -85,7 +85,8 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 			local player_config = player_sync == "Global" and mod.Config.players[player_index] or (mod.Config[player_sync] and mod.Config[player_sync].players[player_index] or mod.Config.CoopHUD.players[player_index]);
 			
 			if player_index == 0 or player_config == nil then break; end --Should never be Zero or above 4
-			local player_name = Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.CoopHUD.tainted);
+			local player_name = Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.players.tainted_names);
+			local player_scale = (index > 0 and mod.Config.CoopHUD.players[player_index].scale or mod.Config.CoopHUD.players.twins.scale);
 			
 			-- Edge Stuff
 			if (player_index % 2) == 0 then
@@ -111,7 +112,7 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 				CoopHUD.Item.Inventory.Reload(mod.CoopHUD.DATA.Players[index],player_entity);
 				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PLAYER_INIT, index, mod.CoopHUD.DATA.Players[index]); -- Execute Post Player Register Callbacks (index(number),player_data(table))
 			end
-			mod.CoopHUD.DATA.Players[index].Player = {Index = player_index,Config = player_config,Entity = EntityPtr(player_entity),Name = player_name,Type = player_entity:GetPlayerType(),Color = Colors[player_config.color].Value,Scale = mod.Config.CoopHUD.players[player_index].scale};
+			mod.CoopHUD.DATA.Players[index].Player = {Index = player_index,Config = player_config,Entity = EntityPtr(player_entity),Name = player_name,Type = player_entity:GetPlayerType(),Color = Colors[player_config.color].Value,Scale = (player_scale or Vector.One)};
 			mod.CoopHUD.DATA.Players[index].Edge = edge;
 			mod.CoopHUD.DATA.Players[index].Index = i;
 			mod.CoopHUD.DATA.Players[index].Controller = player_entity.ControllerIndex;
@@ -133,7 +134,6 @@ end
 
 function CoopHUD.RenderBanners(screen_dimensions)
 	if not mod.Config.CoopHUD.banner.display or not CoopHUD.DATA.Banner.Type or not CoopHUD.DATA.Banner.Sprite then return; end
-	if CoopHUD.DATA.Banner.Type == CoopHUD.BannerType.FORTUNE then return; end -- Temperary fix until an API to get Fortune text is available
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_BANNER_RENDER, mod.CoopHUD.DATA.Banner);
 	
 	local frame = CoopHUD.DATA.Banner.Sprite:GetFrame();
