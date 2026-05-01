@@ -39,7 +39,7 @@ local function leadingZero(val)
 end
 
 local function refreshTimer(timeString)
-	if game:IsPaused() then	return timeString; end
+	if game:IsPaused() then	return timeString or "00:00:00"; end
 
 	local time = game.TimeCounter;
 	local secs = math.floor(time/30)%60;
@@ -50,6 +50,7 @@ local function refreshTimer(timeString)
 	return timeString;
 end
 
+local map_frames = 0;
 function CoopHUD.RenderPlayers(screen_dimensions)
 	if game:GetNumPlayers() > 0 then
 		local players = {};
@@ -74,8 +75,15 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 				end
 			else
 				player_index = i - num_twins;
-				CoopHUD.IsMapDown = CoopHUD.IsMapDown or Input.IsActionPressed(ButtonAction.ACTION_MAP, player_entity.ControllerIndex);
-				CoopHUD.IsPlayerMapDown[player_entity.ControllerIndex] = Input.IsActionPressed(ButtonAction.ACTION_MAP, player_entity.ControllerIndex);
+				local map_down = Input.IsActionPressed(ButtonAction.ACTION_MAP, player_entity.ControllerIndex);
+				CoopHUD.IsMapDown = CoopHUD.IsMapDown or map_down;
+				CoopHUD.IsPlayerMapDown[player_entity.ControllerIndex] = map_down;
+				if map_down then
+					map_frames = map_frames + 1;
+				else
+					if map_frames > 1 and map_frames <= mod.Config.CoopHUD.toggle_hud.frames then CoopHUD.IsMapToggled = not CoopHUD.IsMapToggled; end
+					map_frames = 0;
+				end
 				if not game:IsPaused() and Input.IsActionTriggered(ButtonAction.ACTION_DROP, player_entity.ControllerIndex) then
 					local player_data = mod.CoopHUD.DATA.Players[index];
 					if player_data then CoopHUD.Item.Inventory.Shift(player_data); end
@@ -134,7 +142,6 @@ end
 
 function CoopHUD.RenderBanners(screen_dimensions)
 	if not mod.Config.CoopHUD.banner.display or not CoopHUD.DATA.Banner.Type or not CoopHUD.DATA.Banner.Sprite then return; end
-	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_BANNER_RENDER, mod.CoopHUD.DATA.Banner);
 	
 	local frame = CoopHUD.DATA.Banner.Sprite:GetFrame();
 	if frame < CoopHUD.DATA.Banner.Sprite:GetCurrentAnimationData():GetLength() / 2 or (CoopHUD.DATA.Banner.Type == CoopHUD.BannerType.FLOOR and not CoopHUD.IsMapDown) or game:GetFrameCount() > CoopHUD.DATA.Banner.Timer then
@@ -154,6 +161,7 @@ function CoopHUD.RenderBanners(screen_dimensions)
 		CoopHUD.DATA.Banner.Pos = CoopHUD.DATA.Banner.Pos + Vector(mod.Config.CoopHUD.banner.offset.X,mod.Config.CoopHUD.banner.offset.Y * edge_multiplier);
 	end
 	
+	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_BANNER_RENDER, mod.CoopHUD.DATA.Banner);
 	CoopHUD.DATA.Banner.Sprite:Render(CoopHUD.DATA.Banner.Pos, Vector.Zero, Vector.Zero);
 	if frame > 5 and frame < 60 and CoopHUD.DATA.Banner.Name then
 		mod.Fonts.CoopHUD.banners:DrawStringScaled(
@@ -186,28 +194,56 @@ function CoopHUD.RenderBanners(screen_dimensions)
 	end
 end
 
+function CoopHUD.RenderScore(screen_dimensions)
+	mod.CoopHUD.DATA.Score.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.misc.score.display);
+	
+	if mod.CoopHUD.DATA.Score.Visible then
+		if CoopHUD.Refresh then
+			ScoreSheet.Calculate();
+			CoopHUD.DATA.Score.Value = ((mod.Config.CoopHUD.misc.score.show_text and "Score:   " or "") .. ScoreSheet.GetTotalScore());
+			if not CoopHUD.DATA.Score.Value then return; end
+			local anchor = mod.Config.CoopHUD.misc.score.anchor;
+			local edge_multi = Vector(1,anchor == 2 and -1 or 1);
+			CoopHUD.DATA.Score.Pos = screen_dimensions.Center - Vector(((mod.Fonts.CoopHUD.score:GetStringWidth(CoopHUD.DATA.Score.Value) * mod.Config.CoopHUD.misc.score.scale.X) / 2),0);
+			if anchor > 0 then CoopHUD.DATA.Score.Pos.Y = anchor == 1 and mod.Config.CoopHUD.offset.Y or screen_dimensions.Max.Y - (mod.Config.CoopHUD.offset.Y + (mod.Fonts.CoopHUD.score:GetBaselineHeight() * mod.Config.CoopHUD.misc.score.scale.Y)); end
+			CoopHUD.DATA.Score.Pos = CoopHUD.DATA.Score.Pos + (((mod.Config.CoopHUD.misc.timer.anchor == anchor and Vector(0,mod.Fonts.CoopHUD.timer:GetBaselineHeight()) or Vector.Zero) + mod.Config.CoopHUD.misc.score.offset) * edge_multi);
+		end
+		
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_SCORE_RENDER, mod.CoopHUD.DATA.Score);
+		if CoopHUD.DATA.Score.Value then
+			mod.Fonts.CoopHUD.score:DrawStringScaled(
+				CoopHUD.DATA.Score.Value,
+				CoopHUD.DATA.Score.Pos.X, CoopHUD.DATA.Score.Pos.Y,
+				mod.Config.CoopHUD.misc.score.scale.X, mod.Config.CoopHUD.misc.score.scale.Y,
+				KColor(1, 1, 1, mod.Config.CoopHUD.misc.score.opacity),
+				mod.Fonts.CoopHUD.score:GetStringWidth(CoopHUD.DATA.Score.Value), true
+			);
+		end
+	end
+end
+
 function CoopHUD.RenderTimer(screen_dimensions)
-	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_TIMER_RENDER, mod.CoopHUD.DATA.Timer);
-	mod.CoopHUD.DATA.Timer.Visible = mod.Config.CoopHUD.misc.timer.display == 0 or (mod.Config.CoopHUD.misc.timer.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.timer.display == 2 and not CoopHUD.IsMapDown)) or false;
+	mod.CoopHUD.DATA.Timer.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.misc.timer.display);
 	
 	if mod.CoopHUD.DATA.Timer.Visible then
 		if CoopHUD.Refresh then
-			CoopHUD.DATA.Timer.Value = refreshTimer(CoopHUD.DATA.Timer.Value);
+			CoopHUD.DATA.Timer.Value = ((mod.Config.CoopHUD.misc.timer.show_text and "Time: " or "") .. refreshTimer(CoopHUD.DATA.Timer.Value));
 			if not CoopHUD.DATA.Timer.Value then return; end
 			local anchor = mod.Config.CoopHUD.misc.timer.anchor;
-			CoopHUD.DATA.Timer.Pos = screen_dimensions.Center;
-			CoopHUD.DATA.Timer.Pos.X = screen_dimensions.Center.X - (mod.Fonts.CoopHUD.timer:GetStringWidth(CoopHUD.DATA.Timer.Value) / 2);
-			if anchor > 0 then CoopHUD.DATA.Timer.Pos.Y = anchor == 1 and mod.Config.CoopHUD.offset.Y or screen_dimensions.Max.Y - (mod.Config.CoopHUD.offset.Y + (16 * mod.Config.CoopHUD.misc.timer.scale.Y)); end
-			CoopHUD.DATA.Timer.Pos = CoopHUD.DATA.Timer.Pos + mod.Config.CoopHUD.misc.timer.offset;
+			local edge_multi = Vector(1,anchor == 2 and -1 or 1);
+			CoopHUD.DATA.Timer.Pos = screen_dimensions.Center - Vector(((mod.Fonts.CoopHUD.timer:GetStringWidth(CoopHUD.DATA.Timer.Value) * mod.Config.CoopHUD.misc.timer.scale.X) / 2),0);
+			if anchor > 0 then CoopHUD.DATA.Timer.Pos.Y = anchor == 1 and mod.Config.CoopHUD.offset.Y or screen_dimensions.Max.Y - (mod.Config.CoopHUD.offset.Y + (mod.Fonts.CoopHUD.timer:GetBaselineHeight() * mod.Config.CoopHUD.misc.timer.scale.Y)); end
+			CoopHUD.DATA.Timer.Pos = CoopHUD.DATA.Timer.Pos + (mod.Config.CoopHUD.misc.timer.offset * edge_multi);
 		end
 		
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_TIMER_RENDER, mod.CoopHUD.DATA.Timer);
 		if CoopHUD.DATA.Timer.Value then
 			mod.Fonts.CoopHUD.timer:DrawStringScaled(
 				CoopHUD.DATA.Timer.Value,
 				CoopHUD.DATA.Timer.Pos.X, CoopHUD.DATA.Timer.Pos.Y,
 				mod.Config.CoopHUD.misc.timer.scale.X, mod.Config.CoopHUD.misc.timer.scale.Y,
 				KColor(1, 1, 1, mod.Config.CoopHUD.misc.timer.opacity),
-				mod.Fonts.CoopHUD.timer:GetStringWidth(CoopHUD.DATA.Timer.Value), CoopHUD.DATA.Timer.Center or true
+				mod.Fonts.CoopHUD.timer:GetStringWidth(CoopHUD.DATA.Timer.Value), true
 			);
 		end
 	end

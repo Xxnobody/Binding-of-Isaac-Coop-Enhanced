@@ -48,7 +48,7 @@ function Misc.GetPickups(screen_dimensions)
 	end
 	
 	
-	mod.CoopHUD.Misc.Pickups.Visible = (mod.Config.CoopHUD.misc.pickups.display == 0 or (mod.Config.CoopHUD.misc.pickups.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.pickups.display == 2 and not CoopHUD.IsMapDown or false)));
+	mod.CoopHUD.Misc.Pickups.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.misc.pickups.display);
 	if not mod.CoopHUD.Misc.Pickups.Visible then return; end
 	
 	local pos = Utils.Clone(CoopHUD.Positions.Pickups);
@@ -102,7 +102,7 @@ function Misc.GetWave(screen_dimensions)
 	local wave_type = game:GetRoom():GetType() == RoomType.ROOM_BOSSRUSH and CoopHUD.WaveType.BOSSRUSH or ((game:IsGreedMode() and stage ~= LevelStage.STAGE7_GREED and game:GetLevel():GetCurrentRoomIndex() == game:GetLevel():GetStartingRoomIndex() and (game.Difficulty == Difficulty.DIFFICULTY_GREEDIER and CoopHUD.WaveType.GREEDIER or CoopHUD.WaveType.GREED)) or (game:GetRoom():GetBossID() == BossType.GREAT_GIDEON and CoopHUD.WaveType.GIDEON or nil));
 	if not wave_type then mod.CoopHUD.Misc.Wave.Visible = false; return; end
 	
-	mod.CoopHUD.Misc.Wave.Visible = (mod.Config.CoopHUD.misc.wave.display == 0 or (mod.Config.CoopHUD.misc.wave.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.wave.display == 2 and not CoopHUD.IsMapDown or false)));
+	mod.CoopHUD.Misc.Wave.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.misc.wave.display);
 	if not mod.CoopHUD.Misc.Wave.Visible then return; end
 	
 	local max_waves = wave_type == CoopHUD.WaveType.BOSSRUSH and Ambush.GetMaxBossrushWaves() or ((wave_type == CoopHUD.WaveType.GREED or wave_type == CoopHUD.WaveType.GREEDIER) and (game:GetGreedWavesNum() - 1) or 6);
@@ -184,7 +184,7 @@ function Misc.GetDifficulty(screen_dimensions)
 		return;
 	end
 	
-	mod.CoopHUD.Misc.Difficulty.Visible = (mod.Config.CoopHUD.misc.difficulty.display == 0 or (mod.Config.CoopHUD.misc.difficulty.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.difficulty.display == 2 and not CoopHUD.IsMapDown or false)));
+	mod.CoopHUD.Misc.Difficulty.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.misc.difficulty.display);
 	if not mod.CoopHUD.Misc.Difficulty.Visible then return; end
 	
 	local pos = Utils.Clone(CoopHUD.Positions.Difficulty);
@@ -220,7 +220,7 @@ function Misc.GetExtra(screen_dimensions)
 		return;
 	end
 	
-	mod.CoopHUD.Misc.Extra.Visible = (mod.Config.CoopHUD.misc.extra.display == 0 or (mod.Config.CoopHUD.misc.extra.display == 1 and CoopHUD.IsMapDown or (mod.Config.CoopHUD.misc.extra.display == 2 and not CoopHUD.IsMapDown or false)));
+	mod.CoopHUD.Misc.Extra.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.misc.extra.display);
 	if not mod.CoopHUD.Misc.Extra.Visible then return; end
 	
 	local pos = Utils.Clone(CoopHUD.Positions.Difficulty);

@@ -64,15 +64,15 @@ function CoopHUD.Reflourished()
 			
 			local isMapDown = CoopHUD.IsPlayerMapDown[controller_index];
 			
-			local isVisible = config.display == 3 and (seconds <= 9 or seconds > 26) or (config.display == 0 or (config.display == 1 and isMapDown) or (config.display == 2 and not isMapDown));
+			local isVisible = config.display == 4 and (seconds <= 9 or seconds > 26) or CoopHUD.IsElementVisible(config.display);
 			if not isVisible then return; end
 			
 			local showSeconds = IsaacReflourished:GetSettingsValue("ExcitedTimerShowSeconds") == 2;
 			local displayPos = IsaacReflourished:GetSettingsValue("ExcitedTimerDisplayPos");
 			fadeAlpha[controller_index] = fadeAlpha[controller_index] or 0;
 
-			if config.display == 3 then
-				fadeAlpha[controller_index] =  CoopHUD.IsPlayerMapDown[controller_index] and math.min(config.opacity, fadeAlpha[controller_index] + config.fade_speed) or math.max(0, fadeAlpha[controller_index] - config.fade_speed);
+			if config.display == 4 then
+				fadeAlpha[controller_index] = CoopHUD.IsPlayerMapDown[controller_index] and math.min(config.opacity, fadeAlpha[controller_index] + config.fade_speed) or math.max(0, fadeAlpha[controller_index] - config.fade_speed);
 			else
 				fadeAlpha[controller_index] = config.opacity;
 			end

@@ -189,12 +189,8 @@ function CoopHUD.RenderCoopMenuSprite(joining)
 	arrow_sprite.FlipX = false;
 end
 
-local function minimapConfig(setting, value)
-	if not mod.Config.CoopHUD.compat.mAPI.enabled or not CoopHUD.isVisible then
-		MinimapAPI.OverrideConfig[setting] = MinimapAPI.Config[setting];
-	elseif MinimapAPI.OverrideConfig[setting] ~= value then
-		MinimapAPI.OverrideConfig[setting] = value;
-	end
+function CoopHUD.IsElementVisible(display)
+	return display == 0 or (display == 1 and CoopHUD.IsMapDown or (display == 2 and not CoopHUD.IsMapDown or (display == 3 and CoopHUD.IsMapToggled or false))) or false;
 end
 
 -- Ititialize the rest of the HUD
@@ -285,15 +281,19 @@ local function onRender()
 	end
 	
 	-- mAPI
-	if MinimapAPI then
-		minimapConfig('DisplayOnNoHUD', true);
-		minimapConfig('DisplayMode', 2);
-		minimapConfig('PositionX', mod.Config.CoopHUD.compat.mAPI.pos.X);
-		minimapConfig('PositionY', mod.Config.CoopHUD.compat.mAPI.pos.Y);
-		minimapConfig('MapFrameWidth', mod.Config.CoopHUD.compat.mAPI.frame.X);
-		minimapConfig('MapFrameHeight', mod.Config.CoopHUD.compat.mAPI.frame.Y);
-		minimapConfig('DisplayLevelFlags', 2);
-		minimapConfig('BorderColorA', 0.5);
+	if CoopHUD.Refresh and MinimapAPI then
+		local minimapAPIConfig = {
+			['DisplayOnNoHUD'] = true,
+			['PositionX'] = mod.Config.CoopHUD.compat.mAPI.pos.X,
+			['PositionY'] = mod.Config.CoopHUD.compat.mAPI.pos.Y,
+			['MapFrameWidth'] = mod.Config.CoopHUD.compat.mAPI.frame.X,
+			['MapFrameHeight'] = mod.Config.CoopHUD.compat.mAPI.frame.Y
+		};
+		if not mod.Config.CoopHUD.compat.mAPI.enabled or not CoopHUD.isVisible then
+			for setting,value in pairs(minimapAPIConfig) do MinimapAPI.OverrideConfig[setting] = MinimapAPI.Config[setting]; end
+		else
+			for setting,value in pairs(minimapAPIConfig) do MinimapAPI.OverrideConfig[setting] = value; end
+		end
 	end
 	
 	if not CoopHUD.isVisible then return; end
@@ -313,13 +313,14 @@ local function onRender()
 	end
 	
 	-- EID 
-	if EID then EID.isHidden = mod.Config.CoopHUD.compat.EID.display == 3 or (mod.Config.CoopHUD.compat.EID.display == 2 and not CoopHUD.IsMapDown or (mod.Config.CoopHUD.compat.EID.display == 1 and CoopHUD.IsMapDown or false)); end
+	if EID then EID.isHidden = mod.Config.CoopHUD.compat.EID.display == 4 or not CoopHUD.IsElementVisible(mod.Config.CoopHUD.compat.EID.display); end
 	
 	-- Render the various HUD elements
 	CoopHUD.RenderPlayers(screen_dimensions);
 	CoopHUD.Misc.Render(screen_dimensions);
 	CoopHUD.RenderBanners(screen_dimensions);
 	CoopHUD.RenderTimer(screen_dimensions);
+	CoopHUD.RenderScore(screen_dimensions);
 end
 
 local callbacks = {

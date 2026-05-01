@@ -8,8 +8,8 @@ ModConfigMenu.AddSetting(
 		Type = ModConfigMenu.OptionType.NUMBER,
 		CurrentSetting = function() return mod.Config.CoopHUD.stats.display; end,
 		Minimum = 0,
-		Maximum = 3,
-		Display = function() return 'Stats Display: ' .. (mod.Config.CoopHUD.stats.display == 0 and 'Always' or (mod.Config.CoopHUD.stats.display == 1 and 'Map' or (mod.Config.CoopHUD.stats.display == 2 and 'No Map' or 'Never'))); end,
+		Maximum = 4,
+		Display = function() return 'Stats Display: ' .. (mod.Config.CoopHUD.stats.display == 0 and 'Always' or (mod.Config.CoopHUD.stats.display == 1 and 'Map' or (mod.Config.CoopHUD.stats.display == 2 and 'No Map' or (mod.Config.CoopHUD.stats.display == 3 and 'Toggle' or 'Never')))); end,
 		OnChange = function(n) mod.Config.CoopHUD.stats.display = n; end,
 	}
 );
@@ -157,8 +157,8 @@ ModConfigMenu.AddSetting(
 		Type = ModConfigMenu.OptionType.NUMBER,
 		CurrentSetting = function() return mod.Config.CoopHUD.stats.deals.display; end,
 		Minimum = 0,
-		Maximum = 3,
-		Display = function() return 'Deals Display: ' .. (mod.Config.CoopHUD.stats.deals.display == 0 and 'Synced' or (mod.Config.CoopHUD.stats.deals.display == 1 and 'Always' or (mod.Config.CoopHUD.stats.deals.display == 2 and 'Map' or 'Never'))); end,
+		Maximum = 4,
+		Display = function() return 'Deals Display: ' .. (mod.Config.CoopHUD.stats.deals.display == 0 and 'Synced' or (mod.Config.CoopHUD.stats.deals.display == 1 and 'Always' or (mod.Config.CoopHUD.stats.deals.display == 2 and 'Map' or (mod.Config.CoopHUD.stats.deals.display == 3 and 'Toggle' or 'Never')))); end,
 		OnChange = function(b) mod.Config.CoopHUD.stats.deals.display = b; end,
 		Info = {'Choose how Deal chances display. Synced means it follows Stats Display.'},
 	}

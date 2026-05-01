@@ -29,7 +29,7 @@ mod.CoopLabels.DefaultConfig = {
 		}
 	},
 	display = 2,
-	player_sync = "Global",
+	coop_only = true,
 	opacity = 1,
 	tint_amount = 1,
 	tear_tint_amount = 1,
@@ -42,6 +42,7 @@ mod.CoopLabels.DefaultConfig = {
 	scale_sync = false,
 	tear_colors = false,
 	player_colors = false,
+	player_sync = "Global",
 	fonts = {labels = 'terminus',}
 };
 	
@@ -65,6 +66,15 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopLabels.display; end,
 		Display = function() return 'Display: ' .. (mod.Config.CoopLabels.display == 0 and "None" or (mod.Config.CoopLabels.display == 1 and "Head" or (mod.Config.CoopLabels.display == 2 and "Name" or "Head & Name"))); end,
 		OnChange = function(n) mod.Config.CoopLabels.display = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopLabels.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopLabels.coop_only; end,
+		Display = function() return 'Coop Only: ' .. (mod.Config.CoopLabels.coop_only and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopLabels.coop_only = b; end,
 	}
 );
 ModConfigMenu.AddSetting(

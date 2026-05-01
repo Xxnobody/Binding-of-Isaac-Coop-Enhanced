@@ -130,7 +130,7 @@ local ModuleRegistry = {
 	CoopHUD = function(module_name)
 		if not REPENTOGON then return; end
 		local dir = mod.Directory .. module_name .. ".";
-		CoopEnhanced[module_name] = {Directory = dir,IsVisible = true,Refresh = false,DATA = {Players = {},Joining = {},Timer = {},Banner = {}},Player = {},Item = {Active = {},Trinket = {},Pocket = {},ChargeBar = {},Inventory = {}},Stats = {Deals = {}, Stat = {}},Misc = {Pickups = {}, Difficulty = {[0] = {},[1] = {}}, Wave = {[0] = {}}, Extra = {[0] = {}}}};
+		CoopEnhanced[module_name] = {Directory = dir,IsVisible = true,IsMapDown = false,IsMapToggled = false,IsPlayerMapDown = {},Refresh = false,DATA = {Players = {},Joining = {},Score = {},Timer = {},Banner = {}},Player = {},Item = {Active = {},Trinket = {},Pocket = {},ChargeBar = {},Inventory = {}},Stats = {Deals = {}, Stat = {}},Misc = {Pickups = {}, Difficulty = {[0] = {},[1] = {}}, Wave = {[0] = {}}, Extra = {[0] = {}}}};
 		CoopEnhanced.Registry:RegisterCallback("HUD_PLAYER_INIT");
 		CoopEnhanced.Registry:RegisterCallback("HUD_PRE_COOP_MENU_RENDER");
 		CoopEnhanced.Registry:RegisterCallback("HUD_PRE_PLAYER_RENDER");
@@ -146,6 +146,7 @@ local ModuleRegistry = {
 		CoopEnhanced.Registry:RegisterCallback("HUD_PRE_MISC_RENDER");
 		CoopEnhanced.Registry:RegisterCallback("HUD_PRE_BANNER_RENDER");
 		CoopEnhanced.Registry:RegisterCallback("HUD_PRE_TIMER_RENDER");
+		CoopEnhanced.Registry:RegisterCallback("HUD_PRE_SCORE_RENDER");
 		CoopEnhanced.Registry:RegisterCallback("HUD_POST_STATS_UPDATE");
 		CoopEnhanced.Registry:RegisterCallback("HUD_POST_ACTIVE_UPDATE");
 		CoopEnhanced.Registry:RegisterCallback("HUD_POST_POCKET_UPDATE");

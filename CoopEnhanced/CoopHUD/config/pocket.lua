@@ -8,8 +8,8 @@ ModConfigMenu.AddSetting(
 		Type = ModConfigMenu.OptionType.NUMBER,
 		CurrentSetting = function() return mod.Config.CoopHUD.pocket.display; end,
 		Minimum = 0,
-		Maximum = 3,
-		Display = function() return 'Display: ' .. (mod.Config.CoopHUD.pocket.display == 0 and 'Always' or (mod.Config.CoopHUD.pocket.display == 1 and 'Map' or (mod.Config.CoopHUD.pocket.display == 2 and 'No Map' or 'Never'))); end,
+		Maximum = 4,
+		Display = function() return 'Display: ' .. (mod.Config.CoopHUD.pocket.display == 0 and 'Always' or (mod.Config.CoopHUD.pocket.display == 1 and 'Map' or (mod.Config.CoopHUD.pocket.display == 2 and 'No Map' or (mod.Config.CoopHUD.pocket.display == 3 and 'Toggle' or 'Never')))); end,
 		OnChange = function(n) mod.Config.CoopHUD.pocket.display = n; end,
 	}
 );
@@ -163,8 +163,8 @@ for i = 0, 3, 1 do
 			Type = ModConfigMenu.OptionType.NUMBER,
 			CurrentSetting = function() return mod.Config.CoopHUD.pocket[i].text.display; end,
 			Minimum = 0,
-			Maximum = 3,
-			Display = function() return 'Display: ' .. (mod.Config.CoopHUD.pocket[i].text.display == 0 and 'Always' or (mod.Config.CoopHUD.pocket[i].text.display == 1 and 'Map' or (mod.Config.CoopHUD.pocket[i].text.display == 2 and 'No Map' or 'Never'))); end,
+			Maximum = 4,
+			Display = function() return 'Display: ' .. (mod.Config.CoopHUD.pocket[i].text.display == 0 and 'Always' or (mod.Config.CoopHUD.pocket[i].text.display == 1 and 'Map' or (mod.Config.CoopHUD.pocket[i].text.display == 2 and 'No Map' or (mod.Config.CoopHUD.pocket[i].text.display == 3 and 'Toggle' or 'Never')))); end,
 			OnChange = function(n) mod.Config.CoopHUD.pocket[i].text.display = n; end,
 		}
 	);

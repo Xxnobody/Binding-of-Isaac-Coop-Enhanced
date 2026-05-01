@@ -9,8 +9,8 @@ ModConfigMenu.AddSetting(
 		Type = ModConfigMenu.OptionType.NUMBER,
 		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.display; end,
 		Minimum = 0,
-		Maximum = 3,
-		Display = function() return 'Display: ' .. (mod.Config.CoopHUD.inventory.items.display == 0 and 'Always' or (mod.Config.CoopHUD.inventory.items.display == 1 and 'Map' or (mod.Config.CoopHUD.inventory.items.display == 2 and 'No Map' or 'Never'))); end,
+		Maximum = 4,
+		Display = function() return 'Display: ' .. (mod.Config.CoopHUD.inventory.items.display == 0 and 'Always' or (mod.Config.CoopHUD.inventory.items.display == 1 and 'Map' or (mod.Config.CoopHUD.inventory.items.display == 2 and 'No Map' or (mod.Config.CoopHUD.inventory.items.display == 3 and 'Toggle' or 'Never')))); end,
 		OnChange = function(n) mod.Config.CoopHUD.inventory.items.display = n; end,
 	}
 );
@@ -253,8 +253,8 @@ ModConfigMenu.AddSetting(
 		Type = ModConfigMenu.OptionType.NUMBER,
 		CurrentSetting = function() return mod.Config.CoopHUD.inventory.special.display; end,
 		Minimum = 0,
-		Maximum = 3,
-		Display = function() return 'Display: ' .. (mod.Config.CoopHUD.inventory.special.display == 0 and 'Always' or (mod.Config.CoopHUD.inventory.special.display == 1 and 'Map' or (mod.Config.CoopHUD.inventory.special.display == 2 and 'No Map' or 'Never'))); end,
+		Maximum = 4,
+		Display = function() return 'Display: ' .. (mod.Config.CoopHUD.inventory.special.display == 0 and 'Always' or (mod.Config.CoopHUD.inventory.special.display == 1 and 'Map' or (mod.Config.CoopHUD.inventory.special.display == 2 and 'No Map' or (mod.Config.CoopHUD.inventory.special.display == 3 and 'Toggle' or 'Never')))); end,
 		OnChange = function(n) mod.Config.CoopHUD.inventory.special.display = n; end,
 	}
 );

@@ -8,7 +8,7 @@ local game = Game();
 local hud = game:GetHUD();
 
 function CoopLabels.RenderLabels(_)
-	if (not mod.Config.modules.CoopLabels or mod.Config.CoopLabels.display == 0 or Utils.IsPauseMenuOpen() or (game:GetRoom():GetType() == RoomType.ROOM_BOSS and game:GetRoom():IsFirstVisit() and game:GetRoom():GetFrameCount() < 5)) then return;
+	if (not mod.Config.modules.CoopLabels or mod.Config.CoopLabels.display == 0 or (mod.Config.CoopLabels.coop_only and mod.Players.Total <= 1) or Utils.IsPauseMenuOpen() or (game:GetRoom():GetType() == RoomType.ROOM_BOSS and game:GetRoom():IsFirstVisit() and game:GetRoom():GetFrameCount() < 5)) then return;
 	elseif mod.Fonts.CoopLabels == nil then
 		mod.Debug("Fonts not loaded properly due to an unknown error. Labels must abort!",CoopLabels.Name);
 		return;

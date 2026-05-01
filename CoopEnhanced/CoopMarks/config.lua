@@ -8,29 +8,34 @@ mod.CoopMarks.DefaultConfig = {
 
 	players = {
 		[1] = {
+			offset = Vector(0,0),
 			color = Utils.GetColorIndexByName("Red"),
 			name = "",
 			type = 0
 		},
 		[2] = {
+			offset = Vector(0,0),
 			color = Utils.GetColorIndexByName("Blue"),
 			name = "",
 			type = 0
 		},
 		[3] = {
+			offset = Vector(0,0),
 			color = Utils.GetColorIndexByName("Green"),
 			name = "",
 			type = 0
 		},
 		[4] = {
+			offset = Vector(0,0),
 			color = Utils.GetColorIndexByName("Yellow"),
 			name = "",
 			type = 0
 		}
 	},
-	display = 2,
+	display = 3,
 	coop_only = false,
 	coop_menu = true,
+	player_one = false,
 	colors = false,
 	text_colors = true,
 	head_colors = false,
@@ -39,14 +44,17 @@ mod.CoopMarks.DefaultConfig = {
 	tint_amount = 0.5,
 	player_sync = "Global",
 	opacity = 1,
-	offset = Vector(0,0),
-	text_offset = Vector(0,0),
+	text_opacity = 1,
+	head_opacity = 1,
+	offset = Vector(120,-60),
+	player_one_offset = Vector(-72,-84),
+	text_offset = Vector(24,-16),
 	head_offset = Vector(0,0),
 	menu_offset = Vector(0,0),
-	rel_offset = Vector(0,0),
 	scale = Vector(0.5,0.5),
 	text_scale = Vector(1.5,1.5),
 	head_scale = Vector(1,1),
+	space = Vector(0,40),
 	fonts = {mark = 'luaminioutlined',}
 };
 	
@@ -76,18 +84,29 @@ ModConfigMenu.AddSetting(
 	CoopMarks.MCM.category,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopMarks.head_colors; end,
-		Display = function() return 'Head Colors: ' .. (mod.Config.CoopMarks.head_colors and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopMarks.head_colors = b; end,
+		CurrentSetting = function() return mod.Config.CoopMarks.player_one; end,
+		Display = function() return 'Include P1: ' .. (mod.Config.CoopMarks.player_one and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopMarks.player_one = b; end,
+		Info = {'Enable to render an extra mark sheet for player 1.'},
 	}
 );
 ModConfigMenu.AddSetting(
 	CoopMarks.MCM.category,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopMarks.text_colors; end,
-		Display = function() return 'Text Colors: ' .. (mod.Config.CoopMarks.text_colors and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopMarks.text_colors = b; end,
+		CurrentSetting = function() return mod.Config.CoopMarks.coop_only; end,
+		Display = function() return 'Coop Only: ' .. (mod.Config.CoopMarks.coop_only and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopMarks.coop_only = b; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopMarks.coop_menu; end,
+		Display = function() return 'Coop Menu: ' .. (mod.Config.CoopMarks.coop_menu and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopMarks.coop_menu = b; end,
+		Info = {'Enable to show completion marks with the Coop character select menu.'},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -138,6 +157,7 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopMarks.offset.X; end,
 		Display = function() return 'Offset (X): ' .. mod.Config.CoopMarks.offset.X; end,
 		OnChange = function(n) mod.Config.CoopMarks.offset.X = n; end,
+		Info = {'Main offset for extra marks.'},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -147,6 +167,98 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopMarks.offset.Y; end,
 		Display = function() return 'Offset (Y): ' .. mod.Config.CoopMarks.offset.Y; end,
 		OnChange = function(n) mod.Config.CoopMarks.offset.Y = n; end,
+		Info = {'Main offset for extra marks.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.menu_offset.X; end,
+		Display = function() return 'Menu Offset (X): ' .. mod.Config.CoopMarks.menu_offset.X; end,
+		OnChange = function(n) mod.Config.CoopMarks.menu_offset.X = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.menu_offset.Y; end,
+		Display = function() return 'Menu Offset (Y): ' .. mod.Config.CoopMarks.menu_offset.Y; end,
+		OnChange = function(n) mod.Config.CoopMarks.menu_offset.Y = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.space.X; end,
+		Display = function() return 'Spacing (X): ' .. mod.Config.CoopMarks.space.X; end,
+		OnChange = function(n) mod.Config.CoopMarks.space.X = n; end,
+		Info = {'Space between extra marks.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.space.Y; end,
+		Display = function() return 'Spacing (Y): ' .. mod.Config.CoopMarks.space.Y; end,
+		OnChange = function(n) mod.Config.CoopMarks.space.Y = n; end,
+		Info = {'Space between extra marks.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.player_one_offset.X; end,
+		Display = function() return 'P1 Offset (X): ' .. mod.Config.CoopMarks.player_one_offset.X; end,
+		OnChange = function(n) mod.Config.CoopMarks.player_one_offset.X = n; end,
+		Info = {'Offset applied to player one when Include P1 is disabled.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopMarks.player_one_offset.Y; end,
+		Display = function() return 'P1 Offset (Y): ' .. mod.Config.CoopMarks.player_one_offset.Y; end,
+		OnChange = function(n) mod.Config.CoopMarks.player_one_offset.Y = n; end,
+		Info = {'Offset applied to player one when Include P1 is disabled.'},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0.0,
+		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.scale.X * 100)); end,
+		Display = function() return 'Scale: ' .. string.format('%.0f', mod.Config.CoopMarks.scale.X * 100) .. '%'; end,
+		OnChange = function(n) mod.Config.CoopMarks.scale = Vector(n/100, n/100); end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0.0,
+		Maximum = 100.0,
+		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.opacity * 100)); end,
+		Display = function() return 'Opacity: ' .. string.format('%.0f', mod.Config.CoopMarks.opacity * 100) .. '%'; end,
+		OnChange = function(n) mod.Config.CoopMarks.opacity = n / 100; end,
+	}
+);
+
+ModConfigMenu.AddSpace(CoopMarks.MCM.category)
+ModConfigMenu.AddTitle(CoopMarks.MCM.category, 'Text Settings');
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopMarks.text_colors; end,
+		Display = function() return 'Text Colors: ' .. (mod.Config.CoopMarks.text_colors and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopMarks.text_colors = b; end,
 	}
 );
 ModConfigMenu.AddSetting(
@@ -171,6 +283,39 @@ ModConfigMenu.AddSetting(
 	CoopMarks.MCM.category,
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0.0,
+		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.text_scale.X * 100)); end,
+		Display = function() return 'Text Scale: ' .. string.format('%.0f', mod.Config.CoopMarks.text_scale.X * 100) .. '%'; end,
+		OnChange = function(n) mod.Config.CoopMarks.text_scale = Vector(n/100, n/100); end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0.0,
+		Maximum = 100.0,
+		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.text_opacity * 100)); end,
+		Display = function() return 'Text Opacity: ' .. string.format('%.0f', mod.Config.CoopMarks.text_opacity * 100) .. '%'; end,
+		OnChange = function(n) mod.Config.CoopMarks.text_opacity = n / 100; end,
+	}
+);
+
+ModConfigMenu.AddSpace(CoopMarks.MCM.category)
+ModConfigMenu.AddTitle(CoopMarks.MCM.category, 'Head Settings');
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopMarks.head_colors; end,
+		Display = function() return 'Head Colors: ' .. (mod.Config.CoopMarks.head_colors and 'on' or 'off'); end,
+		OnChange = function(b) mod.Config.CoopMarks.head_colors = b; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopMarks.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
 		CurrentSetting = function() return mod.Config.CoopMarks.head_offset.X; end,
 		Display = function() return 'Head Offset (X): ' .. mod.Config.CoopMarks.head_offset.X; end,
 		OnChange = function(n) mod.Config.CoopMarks.head_offset.X = n; end,
@@ -189,44 +334,6 @@ ModConfigMenu.AddSetting(
 	CoopMarks.MCM.category,
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
-		CurrentSetting = function() return mod.Config.CoopMarks.rel_offset.X; end,
-		Display = function() return 'Relative Offset (X): ' .. mod.Config.CoopMarks.rel_offset.X; end,
-		OnChange = function(n) mod.Config.CoopMarks.rel_offset.X = n; end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopMarks.MCM.category,
-	{
-		Type = ModConfigMenu.OptionType.NUMBER,
-		CurrentSetting = function() return mod.Config.CoopMarks.rel_offset.Y; end,
-		Display = function() return 'Relative Offset (Y): ' .. mod.Config.CoopMarks.rel_offset.Y; end,
-		OnChange = function(n) mod.Config.CoopMarks.rel_offset.Y = n; end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopMarks.MCM.category,
-	{
-		Type = ModConfigMenu.OptionType.NUMBER,
-		Minimum = 0.0,
-		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.scale.X * 100)); end,
-		Display = function() return 'Scale: ' .. string.format('%.0f', mod.Config.CoopMarks.scale.X * 100) .. '%'; end,
-		OnChange = function(n) mod.Config.CoopMarks.scale = Vector(n/100, n/100); end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopMarks.MCM.category,
-	{
-		Type = ModConfigMenu.OptionType.NUMBER,
-		Minimum = 0.0,
-		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.text_scale.X * 100)); end,
-		Display = function() return 'Text Scale: ' .. string.format('%.0f', mod.Config.CoopMarks.text_scale.X * 100) .. '%'; end,
-		OnChange = function(n) mod.Config.CoopMarks.text_scale = Vector(n/100, n/100); end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopMarks.MCM.category,
-	{
-		Type = ModConfigMenu.OptionType.NUMBER,
 		Minimum = 0.0,
 		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.head_scale.X * 100)); end,
 		Display = function() return 'Head Scale: ' .. string.format('%.0f', mod.Config.CoopMarks.head_scale.X * 100) .. '%'; end,
@@ -239,49 +346,13 @@ ModConfigMenu.AddSetting(
 		Type = ModConfigMenu.OptionType.NUMBER,
 		Minimum = 0.0,
 		Maximum = 100.0,
-		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.opacity * 100)); end,
-		Display = function() return 'Opacity: ' .. string.format('%.0f', mod.Config.CoopMarks.opacity * 100) .. '%'; end,
-		OnChange = function(n) mod.Config.CoopMarks.opacity = n / 100; end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopMarks.MCM.category,
-	{
-		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopMarks.coop_only; end,
-		Display = function() return 'Coop Only: ' .. (mod.Config.CoopMarks.coop_only and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopMarks.coop_only = b; end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopMarks.MCM.category,
-	{
-		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopMarks.coop_menu; end,
-		Display = function() return 'Coop Menu: ' .. (mod.Config.CoopMarks.coop_menu and 'on' or 'off'); end,
-		OnChange = function(b) mod.Config.CoopMarks.coop_menu = b; end,
-		Info = {'Enable to show completion marks with the Coop character select menu.'},
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopMarks.MCM.category,
-	{
-		Type = ModConfigMenu.OptionType.NUMBER,
-		CurrentSetting = function() return mod.Config.CoopMarks.menu_offset.X; end,
-		Display = function() return 'Menu Offset (X): ' .. mod.Config.CoopMarks.menu_offset.X; end,
-		OnChange = function(n) mod.Config.CoopMarks.menu_offset.X = n; end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopMarks.MCM.category,
-	{
-		Type = ModConfigMenu.OptionType.NUMBER,
-		CurrentSetting = function() return mod.Config.CoopMarks.menu_offset.Y; end,
-		Display = function() return 'Menu Offset (Y): ' .. mod.Config.CoopMarks.menu_offset.Y; end,
-		OnChange = function(n) mod.Config.CoopMarks.menu_offset.Y = n; end,
+		CurrentSetting = function() return tonumber(string.format('%.0f', mod.Config.CoopMarks.head_opacity * 100)); end,
+		Display = function() return 'Head Opacity: ' .. string.format('%.0f', mod.Config.CoopMarks.head_opacity * 100) .. '%'; end,
+		OnChange = function(n) mod.Config.CoopMarks.head_opacity = n / 100; end,
 	}
 );
 
+ModConfigMenu.AddSpace(CoopMarks.MCM.category)
 local sync_modules = {"Global"};
 mod.Registry:AddCallback(mod.Callbacks.POST_REGISTRY_EXECUTE, function()
 	for name,_ in pairs(mod.Registry.Modules) do
@@ -299,6 +370,30 @@ ModConfigMenu.AddSetting(
 		Info = {'Choose which config this uses for Player Color/Names.'},
 	}
 );
+
+
+ModConfigMenu.AddSpace(CoopMarks.MCM.category)
+ModConfigMenu.AddTitle(CoopMarks.MCM.category, 'Player Offsets');
+for i = 1, 4 do
+	ModConfigMenu.AddSetting(
+		CoopMarks.MCM.category,
+		{
+			Type = ModConfigMenu.OptionType.NUMBER,
+			CurrentSetting = function() return mod.Config.CoopMarks.players[i].offset.X; end,
+			Display = function() return 'Player ' .. tostring(i) ..' Offset (X): ' .. mod.Config.CoopMarks.players[i].offset.X; end,
+			OnChange = function(n) mod.Config.CoopMarks.players[i].offset.X = n; end,
+		}
+	);
+	ModConfigMenu.AddSetting(
+		CoopMarks.MCM.category,
+		{
+			Type = ModConfigMenu.OptionType.NUMBER,
+			CurrentSetting = function() return mod.Config.CoopMarks.players[i].offset.Y; end,
+			Display = function() return 'Player ' .. tostring(i) ..' Offset (Y): ' .. mod.Config.CoopMarks.players[i].offset.Y; end,
+			OnChange = function(n) mod.Config.CoopMarks.players[i].offset.Y = n; end,
+		}
+	);
+end
 
 ModConfigMenu.AddSpace(CoopMarks.MCM.category)
 ModConfigMenu.AddTitle(CoopMarks.MCM.category, 'Player Names');

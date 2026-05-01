@@ -28,7 +28,7 @@ function CoopHUD.VoidedItems()
 		if CoopHUD.Refresh then
 			void_data.Data = {};
 			local isPlayerMapDown = CoopHUD.IsPlayerMapDown[player_data.Controller];
-			local visible = mod.Config.CoopHUD.compat.VOIDED.display == 0 or (mod.Config.CoopHUD.compat.VOIDED.display == 1 and isPlayerMapDown or (mod.Config.CoopHUD.compat.VOIDED.display == 2 and not isPlayerMapDown or false));
+			local visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.compat.VOIDED.display);
 			if not visible then return; end
 			
 			local inventory = player_entity:GetVoidedCollectiblesList();

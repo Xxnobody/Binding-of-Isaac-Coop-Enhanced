@@ -1,5 +1,5 @@
 CoopEnhanced = RegisterMod("Co-Op Enhanced", 1);
-CoopEnhanced.Version = 1.15;
+CoopEnhanced.Version = 1.0;
 
 -- TO-DO
 -- - Animated Pickups Support ?

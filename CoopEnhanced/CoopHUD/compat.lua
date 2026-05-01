@@ -132,8 +132,8 @@ local function configSetup()
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.EID.display; end,
 				Minimum = 0,
-				Maximum = 3,
-				Display = function() return 'EID Display: ' .. (mod.Config.CoopHUD.compat.EID.display == 0 and 'Always' or (mod.Config.CoopHUD.compat.EID.display == 1 and 'Map' or (mod.Config.CoopHUD.compat.EID.display == 2 and 'No Map' or 'Never'))); end,
+				Maximum = 4,
+				Display = function() return 'EID Display: ' .. (mod.Config.CoopHUD.compat.EID.display == 0 and 'Always' or (mod.Config.CoopHUD.compat.EID.display == 1 and 'Map' or (mod.Config.CoopHUD.compat.EID.display == 2 and 'No Map' or (mod.Config.CoopHUD.compat.EID.display == 3 and 'Toggle' or 'Never')))); end,
 				OnChange = function(n) mod.Config.CoopHUD.compat.EID.display = n; end,
 			}
 		);
@@ -233,8 +233,8 @@ local function configSetup()
 		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
 	
-	if FancyBossBar then
-		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Enhanced Boss Bars');
+	if FancyBossBarXX then
+		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, 'Fancy Boss Bar');
 		ModConfigMenu.AddSetting(
 			CoopHUD.MCM.title,
 			CoopHUD.MCM.categories.compat,
@@ -310,8 +310,8 @@ local function configSetup()
 				Type = ModConfigMenu.OptionType.NUMBER,
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display; end,
 				Minimum = 0,
-				Maximum = 3,
-				Display = function() return 'Display: ' .. (mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display == 0 and 'Always' or (mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display == 1 and 'Map' or (mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display == 2 and 'No Map' or (mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display == 3 and 'Reflourished' or 'Never')))); end,
+				Maximum = 4,
+				Display = function() return 'Display: ' .. (mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display == 0 and 'Always' or (mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display == 1 and 'Map' or (mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display == 2 and 'No Map' or (mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display == 3 and 'Toggle' or (mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display == 4 and 'Reflourished' or 'Never'))))); end,
 				OnChange = function(n) mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.display = n; end,
 			}
 		);
@@ -821,7 +821,7 @@ local mods = {
 	{
 		name = "Fancy Boss Bar",
 		file = function() CoopHUD.FancyBossBar() end,
-		condition = function() return FancyBossBar ~= nil end,
+		condition = function() return FancyBossBarXX ~= nil end,
 	},
 	{
 		name = "Isaac Reflourished",

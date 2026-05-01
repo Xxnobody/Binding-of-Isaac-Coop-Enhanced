@@ -10,6 +10,7 @@ mod.Animations = {
 	Fortune = "gfx/ui/ui_fortunepaper.anm2",
 	Inventory = "gfx/ui/coopHUD_inventory.anm2", -- taken from coopHUD+ (Konoca)
 	Item = "gfx/005.100_collectible.anm2",
+	Marks = "gfx/ui/completion_widget.anm2",
 	Misc = "gfx/ui/hudpickups.anm2",
 	Pocket = "gfx/ui/coopHUD_cardspills.anm2", -- taken from coopHUD+ (Konoca)
 	Poops = "gfx/ui/ui_poops.anm2",
