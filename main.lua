@@ -26,17 +26,6 @@ function CoopEnhanced.Debug(msg,modul);
 	Isaac.DebugString(msg);
 end
 
- -- Add Modded Character data (Name, Type, Unlock Achievement ID (ID if one exists, nil for none, 0 to represent not unlocked, -ID for non existent achievments), Sprite Data (Can be a Sprite or a table))
- -- - Sprite data can include Spritesheet data, so if you wish to change a spritesheet add it to Sheets as [sheet_id] = "path/to/png" (i.e. Sheets = {[0] = "Blank.png"})
-function CoopEnhanced.AddCharacter(name,player_type,achievement,sprite)
-	if REPENTOGON == nil then return; end
-	local sprite_data = sprite;
-	if sprite.PlaybackSpeed then sprite_data = {Anm2 = sprite:GetFilename(), Frame = sprite:GetFrame(), Animation = sprite:GetAnimation(), Sheets = {}}; end
-	local character_entry = {Name = name, Type = (player_type or -1), Achievement = achievement,Sprite = sprite_data};
-	CoopEnhanced.Debug(character_entry);
-	table.insert(CoopEnhanced.CharactersModded,character_entry);
-	table.sort(CoopEnhanced.CharactersModded,function (a,b) return a.Type < b.Type end);
-end
 
 -- Initialize Variables & Utilities
 require(CoopEnhanced.Directory .. "enums");
@@ -79,7 +68,7 @@ local function onUpdate()
 		local joining_total = CoopEnhanced.GetJoiningTotal();
 		for i = 1, CoopEnhanced.MaxControllers, 1 do
 			local controller_index = (i - 1);
-			if joining_total < 4 and CoopEnhanced.Players.Joining[i] == nil and CoopEnhanced.Utils.GetMainPlayerByController(controller_index) == nil and Input.IsActionPressed(ButtonAction.ACTION_JOINMULTIPLAYER, controller_index) then
+			if joining_total < 4 and CoopEnhanced.Players.Joining[i] == nil and CoopEnhanced.Utils.GetMainPlayerByController(controller_index) == nil and Input.IsActionPressed(ButtonAction.ACTION_JOINMULTIPLAYER, controller_index) and CoopEnhanced.Utils.CanStartTrueCoop() then
 				local screen_dimensions = CoopEnhanced.Utils.GetScreenDimensions();
 				local player_index = CoopEnhanced.Players.Total + 1;
 				for i, joining in pairs(CoopEnhanced.Players.Joining) do if joining.Index == player_index then player_index = player_index + 1; else break; end end
@@ -143,7 +132,7 @@ local function onGameStart(_, isCont)
 	local data = CoopEnhanced.Utils.decodeData(savedData);
 
 	if data.Config and data.Version ~= nil then
-		CoopEnhanced.Config = CoopEnhanced.Utils.ensureCompatibility(CoopEnhanced.Config, data.Config);
+		CoopEnhanced.Config = CoopEnhanced.Utils.MergeTables(CoopEnhanced.Config, data.Config);
 	end
 
 	CoopEnhanced.Utils.LoadFonts();

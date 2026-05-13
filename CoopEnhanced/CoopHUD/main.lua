@@ -50,7 +50,7 @@ function CoopHUD.createBanner(name, desc, banner_type, display_bottom_paper)
 	local banner_timer = game:GetFrameCount() + (banner_type == CoopHUD.BannerType.FLOOR and 1800 or (30 * mod.Config.CoopHUD.banner.duration));
 	if not display_bottom_paper then sprite:ReplaceSpritesheet(1, mod.Images.Blank); end
 	sprite:LoadGraphics();
-	sprite:Play('Text', false);
+	sprite:Play("Text", false);
 	sprite.PlaybackSpeed = mod.Config.CoopHUD.banner.speed;
 	CoopHUD.DATA.Banner = {Sprite = sprite, Name = (name or ""), Desc = (desc or ""), Curse = display_bottom_paper, Type = banner_type, Timer = banner_timer};
 end
@@ -190,17 +190,19 @@ function CoopHUD.RenderCoopMenuSprite(joining)
 end
 
 function CoopHUD.IsElementVisible(display)
+	if display == nil then return false; end
 	return display == 0 or (display == 1 and CoopHUD.IsMapDown or (display == 2 and not CoopHUD.IsMapDown or (display == 3 and CoopHUD.IsMapToggled or false))) or false;
 end
 
 -- Ititialize the rest of the HUD
-require(mod.Directory .. 'CoopHUD.HUD.stats');
-require(mod.Directory .. 'CoopHUD.HUD.item');
-require(mod.Directory .. 'CoopHUD.HUD.player');
-require(mod.Directory .. 'CoopHUD.HUD.misc');
-require(mod.Directory .. 'CoopHUD.HUD.render');
+require(mod.Directory .. "CoopHUD.main.stats");
+require(mod.Directory .. "CoopHUD.main.item");
+require(mod.Directory .. "CoopHUD.main.player");
+require(mod.Directory .. "CoopHUD.main.misc");
+require(mod.Directory .. "CoopHUD.main.render");
 
 -- Callbacks
+-- Add Collectible
 local function addCollectible(_, collectible_type, _, _, _, _, player_entity)
 	local item = Isaac.GetItemConfig():GetCollectible(collectible_type);
 	local player_data = CoopEnhanced.CoopHUD.getDataFromEntity(player_entity);
@@ -209,6 +211,8 @@ local function addCollectible(_, collectible_type, _, _, _, _, player_entity)
 	CoopHUD.Item.Inventory.Add(player_data, item);
 end
 mod:AddCallback(ModCallbacks.MC_PRE_ADD_COLLECTIBLE, addCollectible);
+
+-- Remove Collectible
 local function removeCollectible(_, player_entity, collectible_type)
 	local item = Isaac.GetItemConfig():GetCollectible(collectible_type);
 	local player_data = CoopEnhanced.CoopHUD.getDataFromEntity(player_entity);
@@ -218,19 +222,24 @@ local function removeCollectible(_, player_entity, collectible_type)
 end
 mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, removeCollectible);
 
+-- Display Fortune banner
 local function fortuneDisplay(_, name, description)
 	local fortunesprite = game:GetHUD():GetFortuneSprite();
+	if not CoopHUD.isVisible then return; end
 	CoopEnhanced.CoopHUD.createBanner(name, description, CoopHUD.BannerType.FORTUNE, IsCurse);
 	CoopHUD.DATA.Banner.Sprite = fortunesprite;
 end
 mod:AddCallback(ModCallbacks.MC_PRE_FORTUNE_DISPLAY, fortuneDisplay);
+
+-- Display Floor/Item banner
 local function displayBanner(_, name, description, isSticky, IsCurse)
-	if name == CoopHUD.DATA.Banner.Name then return; end
+	if not CoopHUD.isVisible or name == CoopHUD.DATA.Banner.Name then return; end
 	local banner_type = isSticky and CoopHUD.BannerType.FLOOR or CoopHUD.BannerType.ITEM;
 	CoopEnhanced.CoopHUD.createBanner(name, description, banner_type, IsCurse);
 	return false;
 end
 mod:AddCallback(ModCallbacks.MC_PRE_ITEM_TEXT_DISPLAY, displayBanner);
+
 
 local hotkey_timer = 0;
 local function onRender()

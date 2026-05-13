@@ -24,10 +24,10 @@ end
 function Utils.encodeData(data)-- Taken from CoopHUD+, credit to Kona
 	local new_data = {};
 	for key, value in pairs(data) do
-		if type(value) == 'table' then
+		if type(value) == "table" then
 			value = Utils.encodeData(value);
 		end
-		if type(value) == 'userdata' then
+		if type(value) == "userdata" then
 			new_data[key..'X'] = value.X;
 			new_data[key..'Y'] = value.Y;
 			goto skip_encode;
@@ -40,7 +40,7 @@ end
 function Utils.decodeData(data) -- Taken from CoopHUD+, credit to Kona
 	local new_data = {}
 	for key, value in pairs(data) do
-		if type(key) == 'string' then
+		if type(key) == "string" then
 			if tonumber(key) ~= nil then key = tonumber(key);
 			elseif key:sub(-1) == "Y" then goto skip_decode;
 			elseif key:sub(-1) == "X" then
@@ -57,26 +57,14 @@ function Utils.decodeData(data) -- Taken from CoopHUD+, credit to Kona
 	end
 	return new_data;
 end
-function Utils.ensureCompatibility(default, data)
-	local new_config = {};
-	for key, value in pairs(default) do
-		local new_value = type(data) == "table" and data[key];
-		if type(new_value) ~= type(value) then new_value = value;
-		elseif type(new_value) == "table" then
-			new_value = Utils.ensureCompatibility(value, new_value);
-		end
-		new_config[key] = new_value;
-	end
-	return new_config;
-end
 
 function Utils.GetLocalizedString(category, input, language)
-	if not input or input:sub(1, 1) ~= '#' then return input; end
+	if not input or input:sub(1, 1) ~= "#" then return input; end
 	language = type(language) == "number" and language or Language.ENGLISH;
 	if REPENTOGON and category then
 		input = Isaac.GetLocalizedString(category,input,language);
 	else
-		input = name:sub(2, -5):gsub('_', ' '):lower():gsub('%f[%a].', string.upper);
+		input = name:sub(2, -5):gsub("_", " "):lower():gsub("%f[%a].", string.upper);
 	end
 	return input;
 end
@@ -92,11 +80,25 @@ function Utils.GetTableIndex(tbl, val)
 	end
 	return 0;
 end
-function Utils.MergeTables(tbl1, tbl2)
-	for k, v in pairs(tbl2) do
-		tbl1[k] = v;
+
+function Utils.MergeTables(default, new_data, use_nil) -- Overwrites data in the default table with new data if the types are the same, otherwise default is used for that data point. When use_nil is set to true, it will also iterate the new data and add any values not in default.
+	local new_output = {};
+	if type(default) == "table" then
+		for key, value in pairs(default) do
+			local new_value = type(new_data) == "table" and new_data[key];
+			if type(new_value) ~= type(value) then new_value = value;
+			elseif type(new_value) == "table" then
+				new_value = Utils.MergeTables(value, new_value, use_nil);
+			end
+			new_output[key] = new_value;
+		end
+		if use_nil and type(new_data) == "table" then
+			for key, new_value in pairs(new_data) do
+				if default[key] == nil then new_output[key] = new_value; end
+			end
+		end
 	end
-	return tbl1;
+	return new_output;
 end
 function Utils.ShiftTable(tbl,step)
 	if step == 0 then return; end
@@ -125,6 +127,8 @@ function Utils.Stringify(var, level)
 		end
 	elseif type(var) == "function" then
 		output = output .. "function(" .. tostring(var) .. ")";
+	elseif type(var) == "string" then
+		output = output .. "'" .. var .. "'";
 	else
 		output = output .. tostring(var or "nil");
 	end
@@ -159,6 +163,7 @@ function Utils.Clone(val)
 end
 function Utils.CloneSprite(sprite,sprite_data)
 	if not sprite then return; end
+	if not sprite_data and REPENTOGON then return sprite:Copy(); end
 	sprite_data = sprite_data or {};
 	sprite_data.Anm2 = sprite_data.Anm2 or sprite:GetFilename();
 	sprite_data.Animation = sprite_data.Animation or (sprite:GetAnimation():len() > 0 and sprite:GetAnimation() or sprite:GetDefaultAnimation());
@@ -167,8 +172,10 @@ function Utils.CloneSprite(sprite,sprite_data)
 	
 	local new_sprite = Sprite(sprite_data.Anm2, true);
 	
-	for i,layer in pairs(sprite:GetAllLayers()) do
-		sprite_data.Sheets[i] = sprite_data.Sheets[i] or layer:GetSpritesheetPath();
+	if REPENTOGON then
+		for i,layer in pairs(sprite:GetAllLayers()) do
+			sprite_data.Sheets[i] = sprite_data.Sheets[i] or layer:GetSpritesheetPath();
+		end
 	end
 	
 	if sprite_data.Sheets then 
@@ -188,7 +195,7 @@ end
 
 -- Game Utilities
 function Utils.IsPauseMenuOpen()
-	return (REPENTOGON ~= nil and game:IsPauseMenuOpen()) or game:IsPaused() or Utils.IsMCMenuOpen() or Utils.IsDSSMenuOpen();
+	return (REPENTOGON ~= nil and game:IsPauseMenuOpen() or game:IsPaused()) or Utils.IsMCMenuOpen() or Utils.IsDSSMenuOpen();
 end
 function Utils.IsMCMenuOpen()
 	return ModConfigMenu ~= nil and ModConfigMenu.IsVisible;
@@ -251,7 +258,7 @@ function Utils.GetColorIndexByName(color_name)
 	return 0;
 end
 
--- Player/Character Utils
+-- Player Manager Utils
 function Utils.GetPlayers()
 	if REPENTOGON then return PlayerManager.GetPlayers(); end
 	local players = {};
@@ -309,42 +316,88 @@ function Utils.GetNumCollectibles(collectible_type)
 	end
 	return total;
 end
-
 function Utils.CanStartTrueCoop()
 	return REPENTOGON ~= nil and Isaac.CanStartTrueCoop() or Game():GetStateFlag(GameStateFlag.STATE_BOSSPOOL_SWITCHED);
 end
 function Utils.IsCoopPlay()
-	if REPENTOGON then return PlayerManager.IsCoopPlay(); end
-	if mod.Players.Total > 1 then
-		for i = 2, game:GetNumPlayers(), 1 do
-			if mod.Players.Twins[i] then return true; end
-		end
-	end
-	return false;
+	return (mod.Players.Total + mod.GetJoiningTotal()) > 1;
 end
 
+-- Character data utils
+ -- Add Modded Character data (Name, Type, Unlock Achievement ID (ID if one exists, nil for none, 0 to represent not unlocked, -ID for non existent achievments), Hidden (Won't show in character select), Tainted (is player type tainted version), Parent (player type of paract character (i.e. Dark Judas = Judas, Tainted Isaac = Isaac, etc)), Sprite Data (Can be a Sprite or a table))
+ -- - Sprite data can include Spritesheet data, so if you wish to change a spritesheet add it to Sheets as [sheet_id] = "path/to/png" (i.e. Sheets = {[0] = "Blank.png"})
+function Utils.AddCharacter(name,player_type,achievement,hidden,tainted,parent,sprite)
+	if REPENTOGON == nil then return; end
+	local sprite_data = sprite;
+	if sprite.PlaybackSpeed then sprite_data = {Anm2 = sprite:GetFilename(), Frame = 0, Animation = name, Sheets = {}}; end
+	local character_entry = {Name = name, Type = (player_type or -1), Achievement = achievement, Hidden = hidden, Tainted = tainted, Parent = parent, Sprite = sprite_data};
+	table.insert(mod.Characters,character_entry);
+	table.sort(mod.Characters,function (a,b) return a.Type < b.Type end);
+end
+function Utils.EditCharacter(character_search,edits) -- Character search can be name (String) or Player Type (Number)
+	local index = type(character_search) == "string" and Utils.GetCharacterIndexByName(character_search) or (type(character_search) == "number" and Utils.GetCharacterIndexByType(character_search));
+	local character = mod.Characters[index];
+	if not character then return; end
+	mod.Characters[index] = Utils.MergeTables(character,edits,true);
+end
+function Utils.RemoveCharacter(character_search,remove_subcharacters) -- Character search can be name (String) or Player Type (Number), Remove sub characters removes all characters who use the search character as a parent. Returns true if any characters were removed.
+	local character_entry = Utils.Clone(type(character_search) == "string" and Utils.GetCharacterByName(character_search) or type(character_search) == "number" and Utils.GetCharacterByType(character_search));
+	local success = false;
+	for i,character in pairs(mod.Characters) do
+		if (remove_subcharacters and character_entry ~= nil and character.Parent == character_entry.Type) or (type(character_search) == "string" and character.Name == character_search) or (type(character_search) == "number" and character.Type == character_search) then
+			table.remove(mod.Characters,i);
+			success = true;
+			if not remove_subcharacters then break; end
+		end
+	end
+	return success;
+end
 function Utils.GetCharacterByType(player_type)
 	if REPENTOGON then
 		for i,character in pairs(mod.Characters) do
 			if character.Type == player_type then return character, i; end
 		end
-		for i,character in pairs(mod.CharactersModded) do
-			if character.Type == player_type then return character, #mod.Characters + i; end
-		end
 	end
-	return nil,-1;
+	return nil;
 end
 function Utils.GetCharacterByName(player_name)
 	if REPENTOGON then
 		for i,character in pairs(mod.Characters) do
 			if character.Name == player_name then return character, i; end
 		end
-		for i,character in pairs(CharactersModded) do
-			if character.Name == player_name then return character, #mod.Characters + i; end
+	end
+	return nil;
+end
+function Utils.GetCharacterIndexByType(player_type)
+	if REPENTOGON then
+		for i,character in pairs(mod.Characters) do
+			if character.Type == player_type then return i; end
 		end
 	end
-	return nil,-1;
+	return -1;
 end
+function Utils.GetCharacterIndexByName(player_name)
+	if REPENTOGON then
+		for i,character in pairs(mod.Characters) do
+			if character.Name == player_name then return i; end
+		end
+	end
+	return -1;
+end
+function Utils.GetUnlockedCharacters(no_mods,no_random)
+	if not REPENTOGON then return {}; end
+	local characters = {};
+	for i,character in pairs(mod.Characters) do
+		if no_mods and i >= PlayerType.NUM_PLAYER_TYPES then break; end
+		if not character.Hidden and (not character.Achievement or (character.Achievement > 0 and Isaac.GetPersistentGameData():Unlocked(character.Achievement))) then
+			table.insert(characters,character);
+		end
+	end
+	if not no_random and #characters > 1 then table.insert(characters,{Name = "Random", Type = PlayerType.PLAYER_POSSESSOR, Achievement = nil, Sprite = {Anm2 = mod.Animations.Coop, Animation = "Main", Frame = 0,Sheets = {[1] = mod.Images.Blank}}}); end -- Insert Random player last
+	return characters;
+end
+
+-- Player Utils
 function Utils.GetPlayerID(player_entity) -- Taken from CustomHealthAPI
 	if not player_entity then return "nil"; end
 	local rng = player_entity:GetPlayerType() == PlayerType.PLAYER_LAZARUS2_B and player_entity:GetCollectibleRNG(2) or player_entity:GetCollectibleRNG(1);
@@ -490,46 +543,33 @@ function Utils.GetHeadSprite(sprite, player_entity, player_type) -- Taken from c
 	return sprite;
 end
 
-local random_player = {Name = "Random", Type = PlayerType.PLAYER_POSSESSOR, Achievement = nil, Sprite = {Anm2 = mod.Animations.Coop, Animation = "Main", Frame = 0,Sheets = {[1] = mod.Images.Blank}}};
-function Utils.GetUnlockedCharacters(no_mods,no_random)
-	if not REPENTOGON then return {}; end
-	local characters = {mod.Characters[1]};
-	local last_achievement = 0;
-	for i,character in pairs(mod.Characters) do
-		if character.Achievement and character.Achievement ~= last_achievement and Isaac.GetPersistentGameData():Unlocked(character.Achievement) then
-			table.insert(characters,character);
-		end
-		last_achievement = character.Achievement;
-	end
-	if not no_mods then
-		for i,character in pairs(mod.CharactersModded) do
-			if not character.Achievement or (character.Achievement > 0 and character.Achievement ~= last_achievement and Isaac.GetPersistentGameData():Unlocked(character.Achievement)) then
-				table.insert(characters,character);
-			end
-			last_achievement = character.Achievement;
-		end
-	end
-	if not no_random and #characters > 1 then table.insert(characters,random_player); end
-	return characters;
-end
 
-function Utils.GetDevilPrice(player_entity,player_health,collectible_type)
+function Utils.GetPrice(player_entity,player_health,collectible_type,isDevil)
 	local price = 0;
 	local player_type = player_entity:GetPlayerType();
-	player_health = player_health or CustomHealthAPI and CustomHealthAPI.PersistentData.OverriddenFunctions.GetHearts(player_entity) or player_entity:GetHearts();
-	local devil_price = player_entity:HasTrinket(TrinketType.TRINKET_JUDAS_TONGUE) and 1 or Isaac.GetItemConfig():GetCollectible(collectible_type).DevilPrice;
-	if player_entity:HasTrinket(TrinketType.TRINKET_YOUR_SOUL) or Utils.IsLost(player_type) then price = PickupPrice.PRICE_SOUL;
-	elseif Utils.IsKeeper(player_type) then 
-		price = (15 * devil_price) / (Utils.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
-	elseif player_health < 1 and not CustomHealthAPI.Helper.PlayerIsSoulHeartOnly(player_entity,true) then price = PickupPrice.PRICE_THREE_SOULHEARTS; else
-		if devil_price == 1 then
-			if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_ONE_SOUL_HEART;
-			else price = PickupPrice.PRICE_ONE_HEART; end
+	local item_config = Isaac.GetItemConfig():GetCollectible(collectible_type);
+	
+	if isDevil then
+		player_health = player_health or CustomHealthAPI and CustomHealthAPI.PersistentData.OverriddenFunctions.GetHearts(player_entity) or player_entity:GetHearts();
+		local devil_price = player_entity:HasTrinket(TrinketType.TRINKET_JUDAS_TONGUE) and 1 or item_config.DevilPrice;
+		
+		if player_entity:HasTrinket(TrinketType.TRINKET_YOUR_SOUL) or Utils.IsLost(player_type) then price = PickupPrice.PRICE_SOUL;
+		elseif Utils.IsKeeper(player_type) then 
+			price = (15 * devil_price) / (Utils.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
+		elseif player_health < 1 and not player_type == PlayerType.PLAYER_BLUEBABY then
+			price = PickupPrice.PRICE_THREE_SOULHEARTS;
 		else
-			if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_TWO_SOUL_HEARTS;
-			elseif player_health < 2 then price = PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS;				
-			else price = PickupPrice.PRICE_TWO_HEARTS end
+			if devil_price == 1 then
+				if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_ONE_SOUL_HEART;
+				else price = PickupPrice.PRICE_ONE_HEART; end
+			else
+				if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_TWO_SOUL_HEARTS;
+				elseif player_health < 2 then price = PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS;				
+				else price = PickupPrice.PRICE_TWO_HEARTS end
+			end
 		end
+	else
+		price = item_config.ShopPrice / (Utils.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);;
 	end
 	return price;
 end
@@ -540,7 +580,7 @@ function Utils.CanPayPrice(player_entity,price)
 	elseif price < 0 then
 		player_health = {Red = (player_entity:GetHearts() / 2), Soul = (player_entity:GetSoulHearts() / 2)};
 		
-		if devil_price == PickupPrice.PRICE_ONE_HEART and player_health.Red > 0 or (devil_price == PickupPrice.PRICE_TWO_HEARTS and player_health.Red > 1 or (devil_price == PickupPrice.PRICE_THREE_SOULHEARTS and player_health.Soul > 2 or (devil_price == PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS and (player_health.Red > 1 and player_health.Soul > 1) or (devil_price == PickupPrice.PRICE_ONE_SOUL_HEART and player_health.Soul > 0 or (devil_price == PickupPrice.PRICE_TWO_SOUL_HEARTS and player_health.Soul > 1 or (devil_price == PickupPrice.PRICE_ONE_HEART_AND_ONE_SOUL_HEART and (player_health.Red > 0 and player_health.Soul > 0) or (devil_price == PickupPrice.PRICE_SOUL or devil_price == PickupPrice.PRICE_SPIKES))))))) then return true; else return false; end
+		if price == PickupPrice.PRICE_ONE_HEART and player_health.Red > 0 or (price == PickupPrice.PRICE_TWO_HEARTS and player_health.Red > 1 or (price == PickupPrice.PRICE_THREE_SOULHEARTS and player_health.Soul > 2 or (price == PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS and (player_health.Red > 1 and player_health.Soul > 1) or (price == PickupPrice.PRICE_ONE_SOUL_HEART and player_health.Soul > 0 or (price == PickupPrice.PRICE_TWO_SOUL_HEARTS and player_health.Soul > 1 or (price == PickupPrice.PRICE_ONE_HEART_AND_ONE_SOUL_HEART and (player_health.Red > 0 and player_health.Soul > 0) or (price == PickupPrice.PRICE_SOUL or price == PickupPrice.PRICE_SPIKES))))))) then return true; else return false; end
 	end
 	return true;
 end

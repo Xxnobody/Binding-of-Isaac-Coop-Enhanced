@@ -89,31 +89,31 @@ CoopHUD.Item.Active.Special = { -- taken from coopHUD+ (Konoca)
 			elseif varData == Active.D_INFINITY.D100 then tmpFrame = 18;
 			end
 		end
-		sprite_data.Animation = 'DInfinity';
+		sprite_data.Animation = "DInfinity";
 		sprite_data.Frame = (tmpFrame + sprite_data.Frame);
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
 	[CollectibleType.COLLECTIBLE_THE_JAR] = function(_,_,sprite_data,player_entity)
 		local path = mod.Images.TheJar;
-		sprite_data.Animation = 'Jar';
+		sprite_data.Animation = "Jar";
 		sprite_data.Frame = math.ceil(player_entity:GetJarHearts() / 2);
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
 	[CollectibleType.COLLECTIBLE_JAR_OF_FLIES] = function(_,_,sprite_data,player_entity)
 		local path = mod.Images.JarOfFlies;
-		sprite_data.Animation = 'Jar';
+		sprite_data.Animation = "Jar";
 		sprite_data.Frame = player_entity:GetJarFlies();
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
 	[CollectibleType.COLLECTIBLE_JAR_OF_WISPS] = function(_,item_data,sprite_data,_)
 		local path = mod.Images.JarOfWisps;
-		sprite_data.Animation = 'WispJar';
+		sprite_data.Animation = "WispJar";
 		sprite_data.Frame = ((item_data.Item.Desc.VarData - 1) + (15 * sprite_data.Frame));
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
 	[CollectibleType.COLLECTIBLE_EVERYTHING_JAR] = function(_,_,sprite_data,_)
 		local path = mod.Images.EverythingJar;
-		sprite_data.Animation = 'EverythingJar';
+		sprite_data.Animation = "EverythingJar";
 		sprite_data.Frame = (item_data.Bar.Charge.Current + 1);
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
@@ -127,7 +127,7 @@ CoopHUD.Item.Active.Special = { -- taken from coopHUD+ (Konoca)
 	end,
 	[CollectibleType.COLLECTIBLE_GLOWING_HOUR_GLASS] = function(_,item_data,sprite_data,_)
 		local path = mod.Images.GlowingHourGlass;
-		sprite_data.Animation = 'GlowingHourGlass';
+		sprite_data.Animation = "GlowingHourGlass";
 		sprite_data.Frame = ((3 - data.Item.Desc.VarData) + 1);
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
@@ -136,13 +136,13 @@ CoopHUD.Item.Active.Special = { -- taken from coopHUD+ (Konoca)
 		--((21 * player_entity:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_URN_OF_SOULS)) + player_entity:GetUrnSouls() + 1)
 		
 		local path = mod.Images.UrnOfSouls;
-		sprite_data.Animation = 'SoulUrn';
+		sprite_data.Animation = "SoulUrn";
 		sprite_data.Frame = (0); -- currently player_entity:GetUrnSouls() is broken and returns the number 1065353216 regardlesss of Urn amount
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
 	[CollectibleType.COLLECTIBLE_FLIP] = function(_,_,sprite_data,player_entity)
 		local path = mod.Images.Flip;
-		sprite_data.Animation = 'Flip';
+		sprite_data.Animation = "Flip";
 		sprite_data.Frame = (player_entity:GetType() == PlayerType.PLAYER_LAZARUS2_B and 1 or 0);
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end,
@@ -172,7 +172,7 @@ CoopHUD.Item.Inventory.GetSprite = { -- taken from coopHUD+ (Konoca)
 	[PlayerType.PLAYER_ISAAC_B] = function(sprite, item, i)
 		sprite = sprite or Sprite();
 		sprite:Load(mod.Animations.Inventory, false);
-		sprite:SetFrame('Idle', i - 1);
+		sprite:SetFrame("Idle", i - 1);
 		if item then sprite:ReplaceSpritesheet(2, item); end
 		sprite:LoadGraphics();
 		return sprite;
@@ -180,14 +180,14 @@ CoopHUD.Item.Inventory.GetSprite = { -- taken from coopHUD+ (Konoca)
 	[PlayerType.PLAYER_CAIN_B] = function(sprite, item, i)
 		sprite = sprite or Sprite();
 		sprite:Load(mod.Animations.Crafting, false);
-		sprite:SetFrame('Idle', (item or 0));
+		sprite:SetFrame("Idle", (item or 0));
 		sprite:LoadGraphics();
 		return sprite;
 	end,
 	[PlayerType.PLAYER_BLUEBABY_B] = function(sprite, item, i)
 		sprite = sprite or Sprite();
 		sprite:Load(mod.Animations.Poops, false);
-		sprite:SetFrame(i == 1 and 'Idle' or 'IdleSmall', item);
+		sprite:SetFrame(i == 1 and "Idle" or "IdleSmall", item);
 		sprite:LoadGraphics();
 		return sprite;
 	end
@@ -211,7 +211,7 @@ CoopHUD.Item.Inventory.ExtraFunctions = { -- taken from coopHUD+ (Konoca)
 			sprite.Scale = mod.Config.CoopHUD.inventory.special.result_scale;
 			
 			sprite.FlipX = player_data.Edge.Multipliers.X < 0;
-			sprite:SetFrame('Result', 0);
+			sprite:SetFrame("Result", 0);
 			
 			sprite:LoadGraphics();
 			sprite:Render(result_pos);
@@ -223,7 +223,7 @@ CoopHUD.Item.Inventory.ExtraFunctions = { -- taken from coopHUD+ (Konoca)
 				result_sprite:ReplaceSpritesheet(0, result);
 				result_sprite:ReplaceSpritesheet(1, result);
 				result_sprite:ReplaceSpritesheet(2, result);
-				result_sprite:SetFrame('Idle', 0);
+				result_sprite:SetFrame("Idle", 0);
 				result_sprite:LoadGraphics();
 				result_sprite:Render((result_pos + Vector(0,22 * result_sprite.Scale.Y)));
 				player_data.Inventory.Special.ResultSprite = result_sprite;
@@ -246,21 +246,6 @@ CoopHUD.Item.Inventory.IgnoredCollectibles = {
 	[CollectibleType.COLLECTIBLE_DADS_NOTE] = true,
 	[CollectibleType.COLLECTIBLE_DAMOCLES_PASSIVE] = true,
 	[CollectibleType.COLLECTIBLE_DOGMA] = true,
-};
-CoopHUD.StatType = {
-	SPEED = 0,
-	FIRE_DELAY = 1,
-	DAMAGE = 2,
-	RANGE = 3,
-	SHOT_SPEED = 4,
-	LUCK = 5,
-	DEVIL = 6,
-	ANGEL = 7,
-	PLANETARIUM = 8,
-	GREED = 9,
-	DUALITY = 10,
-	LIBRARY = 11,
-	NUMBER = 12,
 };
 CoopHUD.MiscType = {
 	COIN = 0,

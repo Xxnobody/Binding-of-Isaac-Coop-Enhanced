@@ -22,14 +22,15 @@ function Player.Render(player_number, screen_dimensions)
 	local isTemporary = Utils.IsTemporary(player_entity);
 	
 	if CoopHUD.Refresh then
+		local twinOpacity = mod.Config.CoopHUD.players.twins.esau_display > 0 and Options.JacobEsauControls == 1 and (player.Type == PlayerType.PLAYER_JACOB and Input.IsActionPressed(ButtonAction.ACTION_DROP,player_data.Controller) or (isTwin and player.Type == PlayerType.PLAYER_ESAU and not Input.IsActionPressed(ButtonAction.ACTION_DROP,player_data.Controller)));
 		if not isTemporary and not isBaby then -- Don't render anything except Health for strawmen or similar player types		
 			-- Stats
-			mod.CoopHUD.DATA.Players[player_number].Stats.Visible = (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.stats.ghosts) and CoopHUD.IsElementVisible(mod.Config.CoopHUD.stats.display) or false;
+			mod.CoopHUD.DATA.Players[player_number].Stats.Visible = (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.stats.ghosts) and (player.Type ~= PlayerType.PLAYER_THESOUL_B or mod.Config.CoopHUD.stats.dead_weight) and CoopHUD.IsElementVisible(mod.Config.CoopHUD.stats.display) or false;
 			if player_number == 1 then mod.CoopHUD.Stats.Deals.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.stats.deals.display); end
 			
 			if mod.CoopHUD.DATA.Players[player_number].Stats.Visible or (player_number == 1 and mod.CoopHUD.Stats.Deals.Visible) then
 				local stats = Stats.GetStats(player_entity, player_number);
-				local opacity = mod.Config.CoopHUD.stats.opacity;
+				local opacity = twinOpacity and mod.Config.CoopHUD.players.twins.esau_display > 1 and math.max(0.1,mod.Config.CoopHUD.stats.opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.stats.opacity;
 				local scale = mod.Config.CoopHUD.stats.scale;
 				local size = (16 * scale.X);
 				local seperation = 14 * scale.Y;
@@ -44,13 +45,13 @@ function Player.Render(player_number, screen_dimensions)
 				end
 					
 				if mod.CoopHUD.DATA.Players[player_number].Stats.Visible then
-					for slot = CoopHUD.StatType.SPEED, CoopHUD.StatType.LUCK, 1 do
+					for slot = mod.StatTypes.SPEED, mod.StatTypes.LUCK, 1 do
 						local stat = stats[slot];
 						if stat ~= nil then
 							stat.Sprite = stat.Sprite or Sprite(mod.Animations.Stats, true);
 							stat.Scale = (stat.Scale or Vector.One) * scale;
 							stat.Color = Utils.ColorOpacity((mod.Config.CoopHUD.stats.text.colors and player.Color or Color.Default),opacity);
-							if slot > CoopHUD.StatType.SPEED then pos = pos + (mod.Config.CoopHUD.stats.rel_offset + Vector(0,seperation)) * edge_multipliers; end
+							if slot > mod.StatTypes.SPEED then pos = pos + (mod.Config.CoopHUD.stats.rel_offset + Vector(0,seperation)) * edge_multipliers; end
 							stat.Pos = Utils.Clone(pos);
 							stat.Render = not isTwin and player.Index < 3; -- Set whether the sprite image is rendered
 							stat.Edge = Vector(edge_multipliers.X, 1);
@@ -58,9 +59,9 @@ function Player.Render(player_number, screen_dimensions)
 							
 							if CoopHUD.DATA.Players[player_number].Stats.Updates[slot] then
 								local value = CoopHUD.DATA.Players[player_number].Stats.Updates[slot].Value;
-								local prefix = value > 0 and '+' or '-';
+								local prefix = value > 0 and "+" or "-";
 								
-								local value_text = string.format(stat.IsPercent and '%.1f%%' or '%.2f', math.abs(value));
+								local value_text = string.format(stat.IsPercent and "%.1f%%" or "%.2f", math.abs(value));
 								if ((player.Index) % 2) ~= 0 then value_text = prefix .. value_text; else value_text = value_text .. prefix; end
 								local update_pos = stat.Text.Pos + ((mod.Config.CoopHUD.stats.text.update.offset + Vector(((stat.Edge.X > 0 and mod.Fonts.CoopHUD.stats:GetStringWidth(stat.Text.Value) or mod.Fonts.CoopHUD.stats:GetStringWidth(value_text)) + 2) * mod.Config.CoopHUD.stats.text.scale.X, 0)) * stat.Edge);
 								
@@ -78,17 +79,17 @@ function Player.Render(player_number, screen_dimensions)
 					deals.Amount = 0;
 					deals.Data = {};
 					deals.Pos = Vector.Zero;
-					for i = CoopHUD.StatType.DEVIL, CoopHUD.StatType.NUMBER, 1 do if stats[i] ~= nil then deals.Amount = deals.Amount + 1; end end
+					for i = mod.StatTypes.DEVIL, mod.StatTypes.NUMBER, 1 do if stats[i] ~= nil then deals.Amount = deals.Amount + 1; end end
 					deals.Pos.X = deals.Anchor < 2 and (screen_dimensions.Center.X - (((seperation * 3) * deals.Amount) / 2)) or (deals.Anchor == 2 and screen_dimensions.Max.X - pos.X or pos.X);
 					deals.Pos.Y = deals.Anchor == 0 and screen_dimensions.Max.Y - size or deals.Anchor == 1 and -2 or 0;
 					
-					for slot = CoopHUD.StatType.DEVIL, CoopHUD.StatType.NUMBER, 1 do
+					for slot = mod.StatTypes.DEVIL, mod.StatTypes.NUMBER, 1 do
 						local stat = stats[slot];
 						if stat ~= nil then
 							stat.Sprite = stat.Sprite or Sprite(mod.Animations.Stats, true);
 							stat.Scale = (stat.Scale or Vector.One) * scale;
 							stat.Color = Utils.ColorOpacity((mod.Config.CoopHUD.stats.text.colors and (deals.Anchor == 3 and player.Color) or (deals.Anchor == 2 and mod.CoopHUD.DATA.Players[2] and mod.CoopHUD.DATA.Players[2].Player.Color) or Color.Default),opacity);
-							if slot == CoopHUD.StatType.DEVIL then 
+							if slot == mod.StatTypes.DEVIL then 
 								if deals.Anchor == 2 then edge_multipliers.X = -1; end
 								pos = deals.Anchor < 2 and deals.Pos or (deals.Anchor == 2 and Vector(deals.Pos.X,pos.Y) or pos);
 							else
@@ -101,9 +102,9 @@ function Player.Render(player_number, screen_dimensions)
 							
 							if CoopHUD.DATA.Players[player_number].Stats.Updates[slot] then
 								local value = CoopHUD.DATA.Players[player_number].Stats.Updates[slot].Value;
-								local prefix = value > 0 and '+' or '-';
+								local prefix = value > 0 and "+" or "-";
 								
-								local value_text = string.format(stat.IsPercent and '%.1f%%' or '%.2f', math.abs(value));
+								local value_text = string.format(stat.IsPercent and "%.1f%%" or "%.2f", math.abs(value));
 								value_text = value_text .. prefix;
 								local update_pos = stat.Text.Pos + (((deals.Anchor < 2 and Vector(4, 4 * (deals.Anchor == 0 and -1 or 1)) or mod.Config.CoopHUD.stats.text.update.offset + Vector((mod.Fonts.CoopHUD.stats:GetStringWidth(stat.Text.Value) + 2) * mod.Config.CoopHUD.stats.text.scale.X, 0))) * stat.Edge);
 								if stat.Edge.X < 0 then update_pos.X = update_pos.X - (mod.Fonts.CoopHUD.stats:GetStringWidth(value_text) * mod.Config.CoopHUD.stats.text.scale.X); end
@@ -144,16 +145,19 @@ function Player.Render(player_number, screen_dimensions)
 					local blood_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY_B and (player_entity:GetBloodCharge() + current_charge) or 0;
 					local extra_charge = player_entity:GetBatteryCharge(slot);
 					
+					local full_charge = not twinOpacity and current_charge + soul_charge >= max_charge and max_charge > 0;
+					
 					local book = nil
 					if slot == ActiveSlot.SLOT_PRIMARY then
 						book = Item.Active.GetBook(player_entity, item_id);
 						if book then item_pos = item_pos + mod.Config.CoopHUD.active.book_correction_offset; end
 					end
 					
-					local color = mod.Config.CoopHUD.active.colors and Utils.ConvertColorToColorize(player.Color,mod.Config.CoopHUD.active[slot].opacity) or Color.Default;
-					local bar_color = mod.Config.CoopHUD.active.bar_colors and Utils.ConvertColorToColorize(player.Color,mod.Config.CoopHUD.active[slot].opacity) or Color.Default;
+					local opacity = twinOpacity and math.max(0.1,mod.Config.CoopHUD.active[slot].opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.active[slot].opacity;
+					local color = mod.Config.CoopHUD.active.colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
+					local bar_color = mod.Config.CoopHUD.active.bar_colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
 					
-					local data = {Slot = slot, Item = {ID = item_id, Pos = item_pos, Desc = player_entity:GetActiveItemDesc(slot), Book = book}, Bar = {Display = mod.Config.CoopHUD.active[slot].chargebar.display, Flip = (bar_flip < 0), Pos = bar_pos, Charge = {Current = current_charge, Max = max_charge, Blood = blood_charge, Soul = soul_charge, Extra = extra_charge, Partial = partial_charge}, Scale = bar_scale, Color = color}, Scale = item_scale, Color = bar_color};
+					local data = {Slot = slot, Item = {ID = item_id, Pos = item_pos, Desc = player_entity:GetActiveItemDesc(slot), Book = book}, Bar = {Display = mod.Config.CoopHUD.active[slot].chargebar.display, Flip = (bar_flip < 0), Pos = bar_pos, Charge = {Current = current_charge, Max = max_charge, Blood = blood_charge, Soul = soul_charge, Extra = extra_charge, Partial = partial_charge, Full = full_charge}, Scale = bar_scale, Color = color}, Scale = item_scale, Color = bar_color};
 					
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].Data = data;
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].ChargeSprite = max_charge > 0 and Item.ChargeBar.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].ChargeSprite, data.Bar) or nil;
@@ -183,8 +187,9 @@ function Player.Render(player_number, screen_dimensions)
 					if mod.Config.CoopHUD.pocket.chargebar.invert then bar_flip = bar_flip > 0 and -bar_flip or math.abs(bar_flip); end
 					
 					local bar_pos = item.Pos + ((mod.Config.CoopHUD.pocket.chargebar.offset + Vector(item_size + (bar_flip < 0 and -bar_size or 0), 0)) * Vector(bar_flip, player_data.Edge.Multipliers.Y));
-					local color = mod.Config.CoopHUD.pocket.colors and Utils.ConvertColorToColorize(player.Color,mod.Config.CoopHUD.pocket[slot].opacity) or Color.Default;
-					local bar_color = mod.Config.CoopHUD.pocket.bar_colors and Utils.ConvertColorToColorize(player.Color,mod.Config.CoopHUD.active[slot].opacity) or Color.Default;
+					local opacity = twinOpacity and math.max(0.1,mod.Config.CoopHUD.pocket[slot].opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.pocket[slot].opacity;
+					local color = mod.Config.CoopHUD.pocket.colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
+					local bar_color = mod.Config.CoopHUD.pocket.bar_colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
 					
 					local data = {Slot = slot, Item = item, Bar = {Display = mod.Config.CoopHUD.pocket.chargebar.display, Flip = (bar_flip < 0), Pos = bar_pos, Scale = bar_scale, Color = color}, Scale = item_scale, Color = bar_color};
 					
@@ -193,18 +198,20 @@ function Player.Render(player_number, screen_dimensions)
 						local current_charge = player_entity:GetActiveCharge(item.Slot);
 						local max_charge = player_entity:GetActiveMaxCharge(item.Slot) or 0;
 						local extra_charge = player_entity:GetBatteryCharge(item.Slot);
-					local soul_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY and player_entity:GetSoulCharge() or 0;
-					local blood_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY_B and (player_entity:GetBloodCharge() + current_charge) or 0;
-						data.Bar.Charge = {Current = current_charge, Max = max_charge, Blood = blood_charge, Soul = soul_charge, Extra = extra_charge, Partial = partial_charge};
+						local soul_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY and player_entity:GetSoulCharge() or 0;
+						local blood_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY_B and (player_entity:GetBloodCharge() + current_charge) or 0;
+						local full_charge = not twinOpacity and current_charge + soul_charge >= max_charge and max_charge > 0;
+						data.Bar.Charge = {Current = current_charge, Max = max_charge, Blood = blood_charge, Soul = soul_charge, Extra = extra_charge, Partial = partial_charge, Full = full_charge};
 					end
 						
 					local isTextVisible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.pocket[slot].text.display);
 					if isTextVisible then
 						local text_scale = mod.Config.CoopHUD.pocket[slot].text.scale * player.Scale;
+						local text_opacity = twinOpacity and math.max(0.1,mod.Config.CoopHUD.pocket[slot].text.opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.pocket[slot].text.opacity;
 						local text_pos = item.Pos + ((mod.Config.CoopHUD.pocket[slot].text.offset + Vector(item_size + (6 * text_scale.X) + (bar_flip > 0 and bar_size * player_data.Edge.Multipliers.X or 0), -(mod.Fonts.CoopHUD.pocket:GetBaselineHeight(item.Name) / 1.5) * text_scale.Y)) * player_data.Edge.Multipliers);
 						if player_data.Edge.Multipliers.X < 0 then text_pos.X = text_pos.X - (mod.Fonts.CoopHUD.pocket:GetStringWidth(item.Name) * text_scale.X); end
 						if player_data.Edge.Multipliers.Y < 0 then text_pos.Y = text_pos.Y - mod.Fonts.CoopHUD.pocket:GetBaselineHeight(item.Name); end
-						data.Text = {Value = item.Name,Pos = text_pos,Scale = text_scale, Color = Utils.ConvertColorToFont(color,mod.Config.CoopHUD.pocket[slot].text.opacity)};
+						data.Text = {Value = item.Name,Pos = text_pos,Scale = text_scale, Color = Utils.ConvertColorToFont(color,text_opacity)};
 					end
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Data = data;
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].ChargeSprite = data.Bar.Charge and Item.ChargeBar.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].ChargeSprite, data.Bar) or nil;
@@ -223,7 +230,8 @@ function Player.Render(player_number, screen_dimensions)
 					local pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Trinket[slot] + mod.Config.CoopHUD.trinket[slot].offset + extra_offset) * player.Scale) * player_data.Edge.Multipliers);
 					if isTwin then pos.Y = pos.Y - (25 * player.Scale.Y); end
 					if player_data.Edge.Multipliers.Y < 0 then pos.Y = pos.Y + 20; end
-					local color = Utils.ColorOpacity((mod.Config.CoopHUD.trinket.colors and player.Color or Color.Default),mod.Config.CoopHUD.trinket[slot].opacity);
+					local opacity = twinOpacity and mod.Config.CoopHUD.players.twins.esau_display > 1 and math.max(0.1,mod.Config.CoopHUD.trinket[slot].opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.trinket[slot].opacity;
+					local color = Utils.ColorOpacity((mod.Config.CoopHUD.trinket.colors and player.Color or Color.Default),opacity);
 					local data = {Item = {ID = item_id, Pos = pos}, Scale = scale, Color = color};
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket[slot].Data = data;
 					mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket[slot].Sprite = Item.Trinket.GetSprite(player_data.Inventory.Trinket[slot].Sprite, data);
@@ -273,6 +281,9 @@ function Player.Render(player_number, screen_dimensions)
 				local space = mod.Config.CoopHUD.inventory.items.space;
 				local pos = Vector.Zero;
 					
+				local opacity = twinOpacity and mod.Config.CoopHUD.players.twins.esau_display > 1 and math.max(0.1,mod.Config.CoopHUD.inventory.items.opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.inventory.items.opacity;
+				local color = Utils.ConvertColorToColorize(player_data.Player.Color,opacity);
+					
 				if anchor > 0 then
 					local edge = anchor == 1 and player_data.Edge.Pos.X or ((anchor == 3 and (screen_dimensions.Max.X - ((10 + space.X * (mod.Config.CoopHUD.inventory.items.dead and mod.Players.Total or mod.Players.Alive)) * scale.X)) or 0) + mod.Config.CoopHUD.offset.X);
 					local edge_indexed = Vector(edge, screen_dimensions.Max.Y - mod.Config.CoopHUD.offset.Y);
@@ -288,10 +299,10 @@ function Player.Render(player_number, screen_dimensions)
 					
 					pos = player_data.Edge.Pos + player_data.Edge.Offset + ((CoopHUD.Positions.Inventory + offset + extra_offset) * player_data.Edge.Multipliers);
 				end
-				mod.CoopHUD.Item.Inventory.Sprite = mod.CoopHUD.Item.Inventory.Sprite or Sprite(mod.Animations.Item, false);
-				mod.CoopHUD.Item.Inventory.Sprite:SetFrame('Idle', 0);
-				mod.CoopHUD.Item.Inventory.Sprite.Scale = scale;
-				mod.CoopHUD.Item.Inventory.Sprite.Color = mod.Config.CoopHUD.inventory.items.colors and Utils.ConvertColorToColorize(player_data.Player.Color,mod.Config.CoopHUD.inventory.items.opacity) or Color(1, 1, 1, mod.Config.CoopHUD.inventory.items.opacity);
+				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Sprite = player_data.Inventory.Passive.Sprite or Sprite(mod.Animations.Item, false);
+				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Sprite:SetFrame("Idle", 0);
+				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Sprite.Scale = scale;
+				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Sprite.Color = mod.Config.CoopHUD.inventory.items.colors and color or Color(1, 1, 1, opacity);
 					
 				local inventory = player_data.Inventory.Passive.Images or {};
 				if #inventory > 0 then
@@ -347,6 +358,8 @@ function Player.Render(player_number, screen_dimensions)
 				-- Player Names
 				if mod.Config.CoopHUD.players.names.display then
 					local player_name = player.Config.type == 1 and (mainTwin ~= nil and (player.Name .. " & " .. Utils.GetPlayerName(mainTwin, player.Index, player.Config.type, "", mod.Config.players.tainted_names))) or player.Name;
+					local opacity = mod.Config.CoopHUD.players.names.opacity;
+					local color = Utils.ConvertColorToFont(player.Color, opacity);
 					local name_size = Vector(mod.Fonts.CoopHUD.players:GetStringWidth(player_name),mod.Fonts.CoopHUD.players:GetBaselineHeight(player_name));
 					local max_scale = math.min(1,(50 / name_size.X));
 					local scale = ((mod.Config.CoopHUD.players.names.scale * player.Scale) * max_scale);
@@ -356,7 +369,7 @@ function Player.Render(player_number, screen_dimensions)
 					if player_data.Edge.Multipliers.X < 0 then name_pos.X = name_pos.X - (name_size.X * max_scale); end
 					if player_data.Edge.Multipliers.Y < 0 then name_pos.Y = name_pos.Y - (name_size.Y * max_scale); end
 					name_pos.X = math.min((screen_dimensions.Max.X - name_size.X),math.max(screen_dimensions.Min.X,name_pos.X)); -- Prevent it from leaving the screen
-					mod.CoopHUD.DATA.Players[player_number].Label.Text = {Value = player_name, Pos = name_pos, Scale = scale,  Color = Utils.ConvertColorToFont(player.Color, mod.Config.CoopHUD.players.names.opacity)};
+					mod.CoopHUD.DATA.Players[player_number].Label.Text = {Value = player_name, Pos = name_pos, Scale = scale,  Color = color};
 				end
 				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_LABEL_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Label); -- Execute Post Label data update Callbacks (player_index (Number), label_data(table))
 			end
@@ -367,6 +380,8 @@ function Player.Render(player_number, screen_dimensions)
 			local bar_pos,_ = CustomHealthAPI and CustomHealthAPI.Helper.GetHealthBarPos(player_entity, (player.Index - 1)) or Vector.Zero;
 			local flip = false;
 			local scale = mod.Config.CoopHUD.health.scale * player.Scale;
+			local opacity = twinOpacity and mod.Config.CoopHUD.players.twins.esau_display > 1 and math.max(0.1,mod.Config.CoopHUD.health.opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.health.opacity;
+			local color = mod.Config.CoopHUD.health.colors and Utils.ConvertColorToColorize(player.Color, opacity) or Color(1,1,1,opacity);
 			local health_pos = (player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Health + mod.Config.CoopHUD.health.offset + (isTwin and mod.Config.CoopHUD.health.twin.offset or Vector.Zero))) * scale) * player_data.Edge.Multipliers) - bar_pos;
 			if (player.Index % 2) == 0 then
 				flip = mod.Config.CoopHUD.health.invert;
@@ -376,7 +391,7 @@ function Player.Render(player_number, screen_dimensions)
 			if player.Index > 2 then
 				health_pos.Y = health_pos.Y + 1 - mod.Config.CoopHUD.health.space.Y;
 			end
-			mod.CoopHUD.DATA.Players[player_number].Health = {Pos = health_pos, Flip = flip, Scale = scale};
+			mod.CoopHUD.DATA.Players[player_number].Health = {Pos = health_pos, Flip = flip, Scale = scale, Color = color};
 		end
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_HEALTH_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Health); -- Execute Post Health data update Callbacks (player_index (Number), health_data(table))
 	end
@@ -416,12 +431,12 @@ function Player.Render(player_number, screen_dimensions)
 	local player_health = mod.CoopHUD.DATA.Players[player_number].Health;
 	if not player_health then return; end
 	if CustomHealthAPI then
-		if isTemporary or (isTwin and mod.Config.CoopHUD.health.twin.snap) or (not isTwin and mod.Config.CoopHUD.health.snap[player.Index]) then -- Render Health above character
+		if isTemporary or (isTwin and mod.Config.CoopHUD.health.twin.snap[player.Index]) or (not isTwin and mod.Config.CoopHUD.health.snap[player.Index]) then -- Render Health above character
 			if not Utils.IsPauseMenuOpen() then -- Dont render over menus
-				CustomHealthAPI.Helper.RenderPlayerHPBar(player_entity, -1);
+				CustomHealthAPI.Helper.RenderPlayerHPBar(player_entity, -1, mod.Config.CoopHUD.health.snap_offset, mod.Config.CoopHUD.health.ignore_curse, false, mod.Config.CoopHUD.health.snap_scale, player_health.Color);
 			end
 		else -- Render Normal Health
-			CustomHealthAPI.Helper.RenderPlayerHPBar(player_entity, (player.Index - 1), player_health.Pos, mod.Config.CoopHUD.health.ignore_curse, player_health.Flip, player_health.Scale);
+			CustomHealthAPI.Helper.RenderPlayerHPBar(player_entity, (player.Index - 1), player_health.Pos, mod.Config.CoopHUD.health.ignore_curse, player_health.Flip, player_health.Scale, player_health.Color);
 		end
 	elseif not isTemporary then
 		local hearts_sprite = Game():GetHUD():GetHeartsSprite();

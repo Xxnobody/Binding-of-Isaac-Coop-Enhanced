@@ -5,7 +5,7 @@ local Callbacks = mod.Callbacks;
 
 function Registry.AddCallback(modID, callbackID, func, ...)
 	if not callbackID or type(callbackID) ~= "number" or callbackID < 0 or callbackID > Callbacks.NUM_CALLBACKS or not Registry.Callbacks[callbackID] then
-		mod.Debug('Invalid Callback ID ' .. (callbackID or "nil") .. " entered.");
+		mod.Debug("Invalid Callback ID " .. (callbackID or "nil") .. " entered.");
 		return;
 	end
 	table.insert(Registry.Callbacks[callbackID],{CallbackID = callbackID,Function = func,Params = {...},Priority = 0});
@@ -14,7 +14,7 @@ end
 function Registry.AddPriorityCallback(modID, callbackID, priority, func, ...)
 	priority = priority or 0;
 	if not callbackID or type(callbackID) ~= "number" or callbackID < 0 or callbackID > Callbacks.NUM_CALLBACKS or not Registry.Callbacks[callbackID] then
-		mod.Debug('Invalid Callback ID ' .. callbackID .. " entered.");
+		mod.Debug("Invalid Callback ID " .. callbackID .. " entered.");
 		return;
 	end
 	
@@ -32,7 +32,7 @@ end
 function Registry.RemoveCallback(modID, callbackID, func)
 	if not callbackID then return; end
 	if type(callbackID) ~= "number" or callbackID < 0 or callbackID > Callbacks.NUM_CALLBACKS or not Registry.Callbacks[callbackID] then
-		mod.Debug('Invalid Callback ID ' .. callbackID .. " entered.");
+		mod.Debug("Invalid Callback ID " .. callbackID .. " entered.");
 		return;
 	end
 	for i = #Registry.Callbacks[callbackID], 1, -1 do
@@ -46,7 +46,7 @@ function Registry.RemoveCallback(modID, callbackID, func)
 end
 
 function Registry.RegisterCallback(modID, callback_name)
-	if Callbacks[callback_name] ~= nil then mod.Debug('Callback with name' .. callback_name .. " already registered!."); return; end
+	if Callbacks[callback_name] ~= nil then mod.Debug("Callback with name" .. callback_name .. " already registered!."); return; end
 	local new_index = 0;
 	for callback,i in pairs(Callbacks) do
 		new_index = math.max(new_index,i);

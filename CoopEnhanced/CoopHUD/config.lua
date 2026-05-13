@@ -177,13 +177,15 @@ mod.CoopHUD.DefaultConfig = {
 		twins = {
 			offset = Vector(15, 45),
 			scale = Vector(0.75, 0.75),
-			offset_w_pockets = false,
+			offset_w_pockets = true,
+			esau_display = 1,
+			esau_opacity = 0.75,
 		},
 		menu = {
 			display = 1,
 			distance = 1,
 			fade = 1,
-			opacity = 1,
+			opacity = 1.0,
 			max = 2,
 			offset = Vector(0, 0),
 			scale = Vector(1, 1),
@@ -193,7 +195,8 @@ mod.CoopHUD.DefaultConfig = {
 		}
 	},
 	health = {
-		opacity = 1,
+		opacity = 1.0,
+		colors = false,
 		hearts_per_row = 6,
 		offset = Vector(0,0),
 		scale = Vector(1,1),
@@ -201,20 +204,24 @@ mod.CoopHUD.DefaultConfig = {
 		ignore_curse = false,
 		invert = true,
 		snap = {false,false,false,false},
+		snap_offset = Vector(0,0),
+		snap_scale = Vector(1,1),
 		twin = {
-			snap = false,
-			offset = Vector(0,0)
+			offset = Vector(0,0),
+			scale = Vector(1,1),
+			snap = {false,false,false,false},
 		},
 	},
 	stats = {
 		display = 0,
 		ghosts = false,
+		dead_weight = false,
 		library_chance = false,
 		greed_display = true,
 		opacity = 0.5,
 		offset = Vector(0, 0),
 		rel_offset = Vector(0, 0),
-		twin_offset = Vector(40, 0),
+		twin_offset = Vector(20, 0),
 		lowered_offset = Vector(6, 6),
 		scale = Vector(1, 1),
 		mirrored_offset = Vector(0, 0),
@@ -432,17 +439,17 @@ mod.CoopHUD.DefaultConfig = {
 		},
 	},
 	fonts = {
-		banners = 'upheaval',
-		curse = 'teammeatfont10',
-		description = 'pftempestasevencondensed',
-		lives = 'pftempestasevencondensed',
-		misc = 'pftempestasevencondensed',
-		pickups = 'pftempestasevencondensed',
-		players = 'terminus',
-		pocket = 'pftempestasevencondensed',
-		score = 'teammeatfont10',
-		stats = 'luaminioutlined',
-		timer = 'teammeatfont10',
+		banners = "upheaval",
+		curse = "teammeatfont10",
+		description = "pftempestasevencondensed",
+		lives = "pftempestasevencondensed",
+		misc = "pftempestasevencondensed",
+		pickups = "pftempestasevencondensed",
+		players = "terminus",
+		pocket = "pftempestasevencondensed",
+		score = "teammeatfont10",
+		stats = "luaminioutlined",
+		timer = "teammeatfont10",
 	}
 };
 
@@ -456,18 +463,18 @@ if ModConfigMenu == nil then return; end
 CoopHUD.MCM = {};
 CoopHUD.MCM.title = "Co-op HUD";
 CoopHUD.MCM.categories = {
-	general = 'General',
-	players = 'Players',
-	health = 'Health',
-	active = 'Actives',
-	pocket = 'Pockets',
-	trinket = 'Trinket',
-	inventory = 'Inventory',
-	stats = 'Stats',
-	misc = 'Misc.',
-	banner = 'Banners',
-	fonts = 'Fonts',
-	compat = 'Mods',
+	general = "General",
+	players = "Players",
+	health = "Health",
+	active = "Actives",
+	pocket = "Pockets",
+	trinket = "Trinket",
+	inventory = "Inventory",
+	stats = "Stats",
+	misc = "Misc.",
+	banner = "Banners",
+	fonts = "Fonts",
+	compat = "Mods",
 };
 
 ModConfigMenu.AddSetting(
@@ -476,9 +483,9 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopHUD.toggle_hud.pause_display; end,
-		Display = function() return 'Enable HUD on pause: ' .. (mod.Config.CoopHUD.toggle_hud.pause_display and 'on' or 'off'); end,
+		Display = function() return "Enable HUD on pause: " .. (mod.Config.CoopHUD.toggle_hud.pause_display and "on" or "off"); end,
 		OnChange = function(b) CoopHUD.isVisible = (b and Utils.IsPauseMenuOpen()) mod.Config.CoopHUD.toggle_hud.pause_display = b; end,
-		Info = {'Sets whether the HUD renders when a pause menu is loaded. Useful for tweaking HUD values.'},
+		Info = {"Sets whether the HUD renders when a pause menu is loaded. Useful for tweaking HUD values."},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -487,9 +494,9 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopHUD.toggle_hud.coop_only; end,
-		Display = function() return 'Coop Only HUD: ' .. (mod.Config.CoopHUD.toggle_hud.coop_only and 'on' or 'off'); end,
+		Display = function() return "Coop Only HUD: " .. (mod.Config.CoopHUD.toggle_hud.coop_only and "on" or "off"); end,
 		OnChange = function(b) mod.Config.CoopHUD.toggle_hud.coop_only = b; end,
-		Info = {'HUD only appears during Coop games.'},
+		Info = {"HUD only appears during Coop games."},
 	}
 );
 
@@ -500,7 +507,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
 		CurrentSetting = function() return mod.Config.CoopHUD.offset.X; end,
-		Display = function() return 'HUD X Offset: ' .. (mod.Config.CoopHUD.offset.X); end,
+		Display = function() return "HUD X Offset: " .. (mod.Config.CoopHUD.offset.X); end,
 		OnChange = function(n) mod.Config.CoopHUD.offset.X = n; end,
 	}
 );
@@ -510,7 +517,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
 		CurrentSetting = function() return mod.Config.CoopHUD.offset.Y; end,
-		Display = function() return 'HUD Y Offset: ' .. (mod.Config.CoopHUD.offset.Y); end,
+		Display = function() return "HUD Y Offset: " .. (mod.Config.CoopHUD.offset.Y); end,
 		OnChange = function(n) mod.Config.CoopHUD.offset.Y = n; end,
 	}
 );
@@ -534,9 +541,9 @@ ModConfigMenu.AddSetting(
 		Minimum = 1,
 		Maximum = #mod.Controls,
 		CurrentSetting = function() return mod.Config.CoopHUD.toggle_hud.button; end,
-		Display = function() return 'Toggle HUD Button: ' .. mod.Controls[mod.Config.CoopHUD.toggle_hud.button].Name; end,
+		Display = function() return "Toggle HUD Button: " .. mod.Controls[mod.Config.CoopHUD.toggle_hud.button].Name; end,
 		OnChange = function(b) mod.Config.CoopHUD.toggle_hud.button = b; end,
-		Info = {'Press this button to toggle between Co-Op Enhanced HUD and the Default HUD'},
+		Info = {"Press this button to toggle between Co-Op Enhanced HUD and the Default HUD"},
 	}
 );
 
@@ -556,9 +563,9 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopHUD.renderer.callback; end,
 		Minimum = 1,
 		Maximum = #callbacks,
-		Display = function() return 'Render Callback: ' .. (mod.Config.CoopHUD.renderer.callback == 1 and 'Hud Render' or (mod.Config.CoopHUD.renderer.callback == 2 and 'Post Hud Render' or (mod.Config.CoopHUD.renderer.callback == 3 and 'Hud Update' or (mod.Config.CoopHUD.renderer.callback == 4 and 'Post Hud Update' or 'Post Game Render')))); end,
+		Display = function() return "Render Callback: " .. (mod.Config.CoopHUD.renderer.callback == 1 and "Hud Render" or (mod.Config.CoopHUD.renderer.callback == 2 and "Post Hud Render" or (mod.Config.CoopHUD.renderer.callback == 3 and "Hud Update" or (mod.Config.CoopHUD.renderer.callback == 4 and "Post Hud Update" or "Post Game Render")))); end,
 		OnChange = function(c) mod.Config.CoopHUD.renderer.callback = c; end,
-		Info = {'Set what callback will trigger the mod. Useful if you want the mod to trigger before/after another mod. REQUIRES RESTART'},
+		Info = {"Set what callback will trigger the mod. Useful if you want the mod to trigger before/after another mod. REQUIRES RESTART"},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -569,9 +576,9 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopHUD.renderer.priority; end,
 		Minimum = 1,
 		Maximum = #mod.Priorities,
-		Display = function() return 'Render Priority: ' .. (mod.Config.CoopHUD.renderer.priority == 1 and 'Very Early' or (mod.Config.CoopHUD.renderer.priority == 2 and 'Early' or (mod.Config.CoopHUD.renderer.priority == 3 and 'Default' or (mod.Config.CoopHUD.renderer.priority == 4 and 'Late' or 'Very Late')))); end,
+		Display = function() return "Render Priority: " .. (mod.Config.CoopHUD.renderer.priority == 1 and "Very Early" or (mod.Config.CoopHUD.renderer.priority == 2 and "Early" or (mod.Config.CoopHUD.renderer.priority == 3 and "Default" or (mod.Config.CoopHUD.renderer.priority == 4 and "Late" or "Very Late")))); end,
 		OnChange = function(p) mod.Config.CoopHUD.renderer.priority = p; end,
-		Info = {'Set when the mod is called. Useful if you want the mod to trigger before/after another mod. REQUIRES RESTART'},
+		Info = {"Set when the mod is called. Useful if you want the mod to trigger before/after another mod. REQUIRES RESTART"},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -582,9 +589,9 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopHUD.renderer.refresh; end,
 		Minimum = 1,
 		Maximum = 6,
-		Display = function() return 'Refresh Rate: ' .. (60 / mod.Config.CoopHUD.renderer.refresh) .. " FPS"; end,
+		Display = function() return "Refresh Rate: " .. (60 / mod.Config.CoopHUD.renderer.refresh) .. " FPS"; end,
 		OnChange = function(n) mod.Config.CoopHUD.renderer.refresh = n; end,
-		Info = {'Set HUD refresh rate. Lower = less lag but the HUD takes extra time to update.'},
+		Info = {"Set HUD refresh rate. Lower = less lag but the HUD takes extra time to update."},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -595,7 +602,7 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopHUD.toggle_hud.frames; end,
 		Minimum = 2,
 		Maximum = 60,
-		Display = function() return 'Toggle Frames: ' .. mod.Config.CoopHUD.toggle_hud.frames; end,
+		Display = function() return "Toggle Frames: " .. mod.Config.CoopHUD.toggle_hud.frames; end,
 		OnChange = function(n) mod.Config.CoopHUD.toggle_hud.frames = n; end,
 		Info = {"How many frames the Map button is allowed to be down to be considered 'toggled'."},
 	}
@@ -608,20 +615,20 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return true; end,
-		Display = function() return 'Reset settings'; end,
+		Display = function() return "Reset settings"; end,
 		OnChange = function(_) mod.CoopHUD.ResetConfig(); end,
 	}
 );
 
 -- Other Config Categories
-local dir = CoopHUD.Directory .. 'config.';
-require(dir..'players');
-require(dir..'health');
-require(dir..'active');
-require(dir..'pocket');
-require(dir..'trinket');
-require(dir..'inventory');
-require(dir..'stats');
-require(dir..'misc');
-require(dir..'banner');
-require(dir..'fonts');
+local dir = CoopHUD.Directory .. "config.";
+require(dir.."players");
+require(dir.."health");
+require(dir.."active");
+require(dir.."pocket");
+require(dir.."trinket");
+require(dir.."inventory");
+require(dir.."stats");
+require(dir.."misc");
+require(dir.."banner");
+require(dir.."fonts");

@@ -27,7 +27,7 @@ ModConfigMenu.AddSetting(
 		Minimum = 1,
 		Maximum = 15,
 		CurrentSetting = function() return mod.Config.CoopTwins.tp_distance; end,
-		Display = function() return 'Distance: ' .. mod.Config.CoopTwins.tp_distance .. " Grids"; end,
+		Display = function() return "Distance: " .. mod.Config.CoopTwins.tp_distance .. " Grids"; end,
 		OnChange = function(n) mod.Config.CoopTwins.tp_distance = n; end,
 	}
 );

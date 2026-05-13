@@ -6,13 +6,13 @@ local Utils = mod.Utils;
 function CoopHUD.VoidedItems()
 	if not VoidedItems then return; end
 	
-	local void_id = DIVIDED_VOID and (Isaac.GetItemIdByName('[DIVIDED VOID]Tech ID') + 1) or CollectibleType.COLLECTIBLE_VOID;
+	local void_id = DIVIDED_VOID and (Isaac.GetItemIdByName("[DIVIDED VOID]Tech ID") + 1) or CollectibleType.COLLECTIBLE_VOID;
 	local position = CoopHUD.Positions.Inventory + Vector(30,-30);
 	
 	local voided_data = {};
 	for i = 1, 4, 1 do
 		local sprite = Sprite(mod.Animations.Item, false);
-		sprite:SetFrame('Idle', 0);
+		sprite:SetFrame("Idle", 0);
 		voided_data[i] = {Sprite = sprite, Data = {}};
 	end
 

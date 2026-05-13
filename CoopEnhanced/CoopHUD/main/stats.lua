@@ -116,7 +116,7 @@ end
 function Stats.GetStat(value, stat, is_percent)
 	return {
 		Frame = stat,
-		Text = {Value = string.format(is_percent and '%.1f%%' or '%.2f', value)},
+		Text = {Value = string.format(is_percent and "%.1f%%" or "%.2f", value)},
 		IsPercent = is_percent,
 		Value = value,
 	};
@@ -124,32 +124,32 @@ end
 
 function Stats.GetStats(player_entity, player_number)
 	local stats = {};
-	stats[CoopHUD.StatType.SPEED] = Stats.GetStat(player_entity.MoveSpeed, CoopHUD.StatType.SPEED, false);
-	stats[CoopHUD.StatType.FIRE_DELAY] = Stats.GetStat(30 / (player_entity.MaxFireDelay + 1), CoopHUD.StatType.FIRE_DELAY, false);
-	stats[CoopHUD.StatType.DAMAGE] = Stats.GetStat(player_entity.Damage, CoopHUD.StatType.DAMAGE, false);
-	stats[CoopHUD.StatType.RANGE] = Stats.GetStat(player_entity.TearRange / 40, CoopHUD.StatType.RANGE, false);
-	stats[CoopHUD.StatType.SHOT_SPEED] = Stats.GetStat(player_entity.ShotSpeed, CoopHUD.StatType.SHOT_SPEED, false);
-	stats[CoopHUD.StatType.LUCK] = Stats.GetStat(player_entity.Luck, CoopHUD.StatType.LUCK, false);
+	stats[mod.StatTypes.SPEED] = Stats.GetStat(player_entity.MoveSpeed, mod.StatTypes.SPEED, false);
+	stats[mod.StatTypes.FIRE_DELAY] = Stats.GetStat(30 / (player_entity.MaxFireDelay + 1), mod.StatTypes.FIRE_DELAY, false);
+	stats[mod.StatTypes.DAMAGE] = Stats.GetStat(player_entity.Damage, mod.StatTypes.DAMAGE, false);
+	stats[mod.StatTypes.RANGE] = Stats.GetStat(player_entity.TearRange / 40, mod.StatTypes.RANGE, false);
+	stats[mod.StatTypes.SHOT_SPEED] = Stats.GetStat(player_entity.ShotSpeed, mod.StatTypes.SHOT_SPEED, false);
+	stats[mod.StatTypes.LUCK] = Stats.GetStat(player_entity.Luck, mod.StatTypes.LUCK, false);
 
 	if player_number == 1 then
 		local chances = Stats.GetDevilAngelChance()
 		if chances.duality then
-			stats[CoopHUD.StatType.DEVIL] = Stats.GetStat(chances.devil * 100, CoopHUD.StatType.DUALITY, true);
+			stats[mod.StatTypes.DEVIL] = Stats.GetStat(chances.devil * 100, mod.StatTypes.DUALITY, true);
 		else
-			stats[CoopHUD.StatType.DEVIL] = Stats.GetStat(chances.devil * 100, CoopHUD.StatType.DEVIL, true);
-			stats[CoopHUD.StatType.ANGEL] = Stats.GetStat(chances.angel * 100, CoopHUD.StatType.ANGEL, true);
+			stats[mod.StatTypes.DEVIL] = Stats.GetStat(chances.devil * 100, mod.StatTypes.DEVIL, true);
+			stats[mod.StatTypes.ANGEL] = Stats.GetStat(chances.angel * 100, mod.StatTypes.ANGEL, true);
 		end
-		stats[CoopHUD.StatType.PLANETARIUM] = Stats.GetStat(Stats.GetPlanetariumChance(), CoopHUD.StatType.PLANETARIUM, true);
+		stats[mod.StatTypes.PLANETARIUM] = Stats.GetStat(Stats.GetPlanetariumChance(), mod.StatTypes.PLANETARIUM, true);
 		if mod.Config.CoopHUD.stats.library_chance then
 			local library_chance = Stats.GetLibraryChance();
-			stats[CoopHUD.StatType.LIBRARY] = Stats.GetStat(library_chance * 100, 0, true);
-			stats[CoopHUD.StatType.LIBRARY].Sprite = Sprite("gfx/ui/ui_librarychance.anm2", true);
-			stats[CoopHUD.StatType.LIBRARY].Scale = Vector(0.85,0.85);
+			stats[mod.StatTypes.LIBRARY] = Stats.GetStat(library_chance * 100, 0, true);
+			stats[mod.StatTypes.LIBRARY].Sprite = Sprite("gfx/ui/ui_librarychance.anm2", true);
+			stats[mod.StatTypes.LIBRARY].Scale = Vector(0.85,0.85);
 		end
 		if game:IsGreedMode() and mod.UnlocksAllowed and (mod.Config.CoopHUD.stats.greed_display or #Isaac.FindByType(EntityType.ENTITY_SLOT,SlotVariant.GREED_DONATION_MACHINE, -1) > 0) then
-			stats[CoopHUD.StatType.GREED] = Stats.GetStat(player_entity:GetGreedDonationBreakChance(),CoopHUD.MiscType.GREED_MACHINE,true);
-			stats[CoopHUD.StatType.GREED].Sprite = Sprite(mod.Animations.Misc, true);
-			stats[CoopHUD.StatType.GREED].Scale = Vector(0.8,0.9);
+			stats[mod.StatTypes.GREED] = Stats.GetStat(player_entity:GetGreedDonationBreakChance(),CoopHUD.MiscType.GREED_MACHINE,true);
+			stats[mod.StatTypes.GREED].Sprite = Sprite(mod.Animations.Misc, true);
+			stats[mod.StatTypes.GREED].Scale = Vector(0.8,0.9);
 		end
 	end
 
@@ -178,11 +178,11 @@ function Stats.Render(player_number)
 	local updates = stats.Updates;
 	
 	for i,stat in pairs(stats.Data) do
-		if stat and stat.Sprite and ((stats.Visible and i < CoopHUD.StatType.DEVIL) or (mod.CoopHUD.Stats.Deals.Visible and i >= CoopHUD.StatType.DEVIL)) then
+		if stat and stat.Sprite and ((stats.Visible and i < mod.StatTypes.DEVIL) or (mod.CoopHUD.Stats.Deals.Visible and i >= mod.StatTypes.DEVIL)) then
 			
 			if stat.Render then
 				stat.Sprite.Scale = stat.Scale;
-				stat.Sprite:SetFrame('Idle', stat.Frame);
+				stat.Sprite:SetFrame("Idle", stat.Frame);
 				stat.Sprite:Render(stat.Pos);
 			end
 			

@@ -84,7 +84,7 @@ function Misc.GetPickups(screen_dimensions)
 			else
 				pos.Y = pos.Y + size;
 			end
-			local text_value = string.format('%02d', pickup.Value);
+			local text_value = string.format("%02d", pickup.Value);
 			local text_pos = (pos + ((Vector((size + 2) - (anchor == 2 and (mod.Fonts.CoopHUD.pickups:GetStringWidth(string.rep("0",text_value:len())) * 2) or 0),1) * scale) + mod.Config.CoopHUD.misc.pickups.text_offset));
 			pickup_data.Sprite = pickup.Sprite;
 			pickup_data.Data = {Pos = Utils.Clone(pos), Text = {Pos = text_pos, Value = text_value, Scale = scale, Font = mod.Fonts.CoopHUD.pickups}, Scale = scale, Type = pickup.Type};
@@ -137,7 +137,7 @@ function Misc.GetWave(screen_dimensions)
 	local size = 15 * scale.X;
 	local edge_multipliers = Vector(anchor < 3 and -1 or 1,anchor == 0 and -1 or 1);
 	
-	local text = {Value = string.format('%d/%d', wave, max_waves), Pos = Vector.Zero, Font = mod.Fonts.CoopHUD.misc, Width = 1, Center = false};
+	local text = {Value = string.format("%d/%d", wave, max_waves), Pos = Vector.Zero, Font = mod.Fonts.CoopHUD.misc, Width = 1, Center = false};
 	text.Scale = mod.Config.CoopHUD.misc.wave.text_scale;
 	local text_width = mod.Fonts.CoopHUD.misc:GetStringWidth("00/00") * text.Scale.X;
 	local text_height = mod.Fonts.CoopHUD.misc:GetBaselineHeight(text.Value) * text.Scale.Y;
@@ -291,7 +291,7 @@ end
 function Misc.GetSprite(sprite, frame, anim)
 	sprite = sprite or Sprite();
 	sprite:Load(mod.Animations.Misc, true);
-	sprite:SetFrame((anim or 'Idle'), frame);
+	sprite:SetFrame((anim or "Idle"), frame);
 	return sprite;
 end
 

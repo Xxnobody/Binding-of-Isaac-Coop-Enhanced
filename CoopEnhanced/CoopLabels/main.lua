@@ -16,6 +16,7 @@ function CoopLabels.RenderLabels(_)
 	
 	local player_sync = mod.Config.CoopLabels.player_sync;
 	local num_twins = 0;
+	local screen_dimensions = Utils.GetScreenDimensions();
 	for i = 1, game:GetNumPlayers(), 1 do
 		local player_entity = Isaac.GetPlayer(i - 1);
 		if (game:GetFrameCount() % 15) == 0 then -- Only update data twice per second
@@ -68,6 +69,7 @@ function CoopLabels.RenderLabels(_)
 			local player_data = CoopLabels.DATA[i].Data;
 			if not player_data then goto continue; end
 			player_data.Pos = Isaac.WorldToScreen(player_entity.Position) + mod.Config.CoopLabels.offset;
+			if game:GetRoom():IsMirrorWorld() then player_data.Pos.X = screen_dimensions.Max.X - player_data.Pos.X; end
 			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.LABELS_PRE_RENDER, i, player_data); -- Execute Pre Label Render Callbacks (player_index, player_data(table))
 			if player_data.Text and player_data.Text.Value then
 				local text_offset = mod.Config.CoopLabels.text_offset;
@@ -92,4 +94,4 @@ function CoopLabels.RenderLabels(_)
 end
 mod:AddPriorityCallback(ModCallbacks.MC_POST_RENDER, CallbackPriority.LATE, CoopLabels.RenderLabels);
 
-require(mod.Directory .. 'CoopLabels.compat');
+require(mod.Directory .. "CoopLabels.compat");

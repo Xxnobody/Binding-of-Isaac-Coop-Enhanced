@@ -62,7 +62,7 @@ if REPENTOGON then
 		if CoopFixes.DATA.Controllers then
 			for player_id,controller_index in pairs(CoopFixes.DATA.Controllers) do
 				local player_entity = Utils.GetPlayerByID(player_id);
-				if player_entity then player_entity:SetControllerIndex(controller_index); end
+				if player_entity and controller_index >= 0 and controller_index <= mod.MaxControllers then player_entity:SetControllerIndex(controller_index); end
 			end
 		else
 			CoopFixes.DATA.Controllers = {};

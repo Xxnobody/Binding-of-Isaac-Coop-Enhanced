@@ -78,7 +78,7 @@ end
 
 -- Perfection per Player
 function CoopExtras.PerPlayerFection(_,entity,damage_flags,source)
-	if not mod.Config.CoopExtras.perfection.enabled then return; end
+	if not mod.Config.CoopExtras.perfection.enabled or not CoopExtras.DATA.Perfect then return; end
 	if (damage_flags & DamageFlag.DAMAGE_NO_PENALTIES == 0) then
 		local player_index = Utils.GetMainPlayerIndex(entity:ToPlayer());
 		CoopExtras.DATA.Perfect.Players[player_index] = CoopExtras.DATA.Perfect.Players[player_index] or 0;
@@ -145,6 +145,7 @@ function CoopExtras.CoopPrices(_,pickup)
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_PRICE_DATA, room_data); -- Execute Pre item Pricing Callbacks (room_data(table))
 		if room_data[pickup_id].Price == nil then return; end -- Make sure that Couponed items and old replaced actives stay free
 		local price = room_data[pickup_id].Price + 0;
+		local isDevilPrice = (price >= PickupPrice.PRICE_ONE_HEART_AND_ONE_SOUL_HEART and price <= PickupPrice.PRICE_ONE_HEART);
 		
 		local player, health, distance = nil, nil, nil;
 		
@@ -152,19 +153,15 @@ function CoopExtras.CoopPrices(_,pickup)
 			local player_entity = Isaac.GetPlayer(i - 1);
 			local player_health = CustomHealthAPI.PersistentData.OverriddenFunctions.GetHearts(player_entity);
 			local player_distance = player_entity.Position:Distance(pickup.Position);
-			local isOwner = (not mod.Config.modules.CoopTreasure or mod.CoopTreasure.GetRoomAssignment(room_type) < 2 or mod.CoopTreasure.IsOwner(Utils.GetMainPlayerIndex(player_entity),pickup));
-			if not player_entity:IsCoopGhost() and isOwner and player_health and (not distance or player_distance < distance) then
+			local isOwner = (not mod.Config.modules.CoopTreasure or mod.CoopTreasure.GetRoomAssignment(room_type) < 2 or mod.CoopTreasure.CanPickup(Utils.GetMainPlayerIndex(player_entity),pickup));
+			if (not player_entity:IsCoopGhost() or isOwner) and isOwner and player_health and (not distance or player_distance < distance) then
 				player, health, distance = player_entity, player_health, player_distance;
 			end
 		end
-		if player then
-			if price >= PickupPrice.PRICE_ONE_HEART_AND_ONE_SOUL_HEART and price <= PickupPrice.PRICE_ONE_HEART then
-				price = Utils.GetDevilPrice(player,health,pickup.SubType);
-			elseif player:GetPlayerType() == PlayerType.PLAYER_KEEPER_B then
-				pickup.AutoUpdatePrice = true;
-				pickup.ShopItemId = -1;
-				price = Isaac.GetItemConfig():GetCollectible(pickup.SubType).ShopPrice / (Utils.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
-			end
+		if player ~= nil and (isDevilPrice or player:GetPlayerType() == PlayerType.PLAYER_KEEPER_B) then
+			price = Utils.GetPrice(player,health,pickup.SubType,isDevilPrice);
+			pickup.AutoUpdatePrice = true;
+			pickup.ShopItemId = -1;
 		end
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_PRICE_DATA, price); -- Execute Post item Pricing Callbacks (price(int))
 		if pickup.Price == 0 and (price ~= 0 and price == room_data[pickup_id].Last) or pickup.Touched then room_data[pickup_id].Price = nil; return; end

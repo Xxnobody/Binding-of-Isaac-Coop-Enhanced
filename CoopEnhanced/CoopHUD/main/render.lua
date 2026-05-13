@@ -8,46 +8,24 @@ local Utils = mod.Utils;
 
 local game = Game();
 
-local function setDefaultHUDNEW(bool) -- Not Working, Need more HUD api to truly work
-	local SPRITES = {
-		CARDS = Game():GetHUD():GetCardsPillsSprite(),
-		CHARGE = Game():GetHUD():GetChargeBarSprite(),
-		CRAFT = Game():GetHUD():GetCraftingSprite(),
-		COOP = Game():GetHUD():GetCoopMenuSprite(),
-		FORTUNE = Game():GetHUD():GetFortuneSprite(),
-		INVENTORY = Game():GetHUD():GetInventorySprite(),
-		PICKUPS = Game():GetHUD():GetPickupsHUDSprite(),
-		Banner = Game():GetHUD():GetBannerSprite(),
-		POOP = Game():GetHUD():GetPoopSpellSprite(),
-	};
-	Game():GetHUD():GetPickupsHUDSprite():GetLayer(0):SetVisible(false);
-	Game():GetHUD():GetPickupsHUDSprite():GetLayer(1):SetVisible(false);
-	Game():GetHUD():GetPickupsHUDSprite():Update();
-	for k,v in pairs(SPRITES) do
-		for i = 0, #v:GetAllLayers() - 1, 1 do
-			v:GetLayer(i):SetVisible(CoopHUD.isVisible);
-			print(v:GetLayer(i):GetName());
+
+local function refreshTimer(timer_value)
+	timer_value = timer_value or "00:00:00";
+	if game:IsPaused() then return timer_value; end
+	
+	local function leadingZero(val)
+		if val < 10 and val >= 0 then
+			return "0" .. val;
 		end
+		return val;
 	end
-end
-
-local function leadingZero(val)
-	if val<10 and val>=0 then
-		return '0'..val;
-	end
-	return val;
-end
-
-local function refreshTimer(timeString)
-	if game:IsPaused() then	return timeString or "00:00:00"; end
 
 	local time = game.TimeCounter;
 	local secs = math.floor(time/30)%60;
 	local mins = math.floor(time/30/60)%60;
 	local hours = math.floor(time/30/60/60)%24;
-	timeString = leadingZero(hours)..':'..leadingZero(mins)..':'..leadingZero(secs);
-
-	return timeString;
+	timer_value = leadingZero(hours) .. ":" .. leadingZero(mins) .. ":" .. leadingZero(secs);
+	return timer_value;
 end
 
 local map_frames = 0;
@@ -200,7 +178,7 @@ function CoopHUD.RenderScore(screen_dimensions)
 	if mod.CoopHUD.DATA.Score.Visible then
 		if CoopHUD.Refresh then
 			ScoreSheet.Calculate();
-			CoopHUD.DATA.Score.Value = ((mod.Config.CoopHUD.misc.score.show_text and "Score:   " or "") .. ScoreSheet.GetTotalScore());
+			CoopHUD.DATA.Score.Value = ScoreSheet.GetTotalScore();
 			if not CoopHUD.DATA.Score.Value then return; end
 			local anchor = mod.Config.CoopHUD.misc.score.anchor;
 			local edge_multi = Vector(1,anchor == 2 and -1 or 1);
@@ -212,7 +190,7 @@ function CoopHUD.RenderScore(screen_dimensions)
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_SCORE_RENDER, mod.CoopHUD.DATA.Score);
 		if CoopHUD.DATA.Score.Value then
 			mod.Fonts.CoopHUD.score:DrawStringScaled(
-				CoopHUD.DATA.Score.Value,
+				(mod.Config.CoopHUD.misc.score.show_text and "Score:   " or "") .. CoopHUD.DATA.Score.Value,
 				CoopHUD.DATA.Score.Pos.X, CoopHUD.DATA.Score.Pos.Y,
 				mod.Config.CoopHUD.misc.score.scale.X, mod.Config.CoopHUD.misc.score.scale.Y,
 				KColor(1, 1, 1, mod.Config.CoopHUD.misc.score.opacity),
@@ -227,7 +205,7 @@ function CoopHUD.RenderTimer(screen_dimensions)
 	
 	if mod.CoopHUD.DATA.Timer.Visible then
 		if CoopHUD.Refresh then
-			CoopHUD.DATA.Timer.Value = ((mod.Config.CoopHUD.misc.timer.show_text and "Time: " or "") .. refreshTimer(CoopHUD.DATA.Timer.Value));
+			CoopHUD.DATA.Timer.Value = refreshTimer(CoopHUD.DATA.Timer.Value);
 			if not CoopHUD.DATA.Timer.Value then return; end
 			local anchor = mod.Config.CoopHUD.misc.timer.anchor;
 			local edge_multi = Vector(1,anchor == 2 and -1 or 1);
@@ -239,7 +217,7 @@ function CoopHUD.RenderTimer(screen_dimensions)
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_TIMER_RENDER, mod.CoopHUD.DATA.Timer);
 		if CoopHUD.DATA.Timer.Value then
 			mod.Fonts.CoopHUD.timer:DrawStringScaled(
-				CoopHUD.DATA.Timer.Value,
+				(mod.Config.CoopHUD.misc.timer.show_text and "Time: " or "") .. CoopHUD.DATA.Timer.Value,
 				CoopHUD.DATA.Timer.Pos.X, CoopHUD.DATA.Timer.Pos.Y,
 				mod.Config.CoopHUD.misc.timer.scale.X, mod.Config.CoopHUD.misc.timer.scale.Y,
 				KColor(1, 1, 1, mod.Config.CoopHUD.misc.timer.opacity),

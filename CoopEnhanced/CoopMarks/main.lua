@@ -135,6 +135,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PAUSE_SCREEN_RENDER, CoopMarks.onPause);
 
 -- Render Marks w/ Co-op Character Select
 function CoopMarks.onRender(_)
+	if not mod.IsPlayerJoining then return; end
 	if mod.Config.CoopMarks.coop_menu and mod.IsPlayerJoining() and not Utils.IsPauseMenuOpen() then
 		for i,joining in pairs(mod.Players.Joining) do
 			local character_data = mod.Players.Unlocked[joining.Selected];
@@ -169,4 +170,4 @@ function CoopMarks.onRender(_)
 end
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, CoopMarks.onRender);
 
-require(mod.Directory .. 'CoopMarks.compat');
+require(mod.Directory .. "CoopMarks.compat");

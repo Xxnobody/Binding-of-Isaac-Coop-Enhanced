@@ -31,10 +31,24 @@ CoopTwins.SetTwin = {
 	end
 };
 
+CoopTwins.ButtonFunctions = {
+	[ButtonAction.ACTION_BOMB] = {
+		[PlayerType.PLAYER_JACOB] = {CoopTwins.BombJacobEsau},
+		[PlayerType.PLAYER_ESAU] = {CoopTwins.BombJacobEsau},
+	},
+};
+
 CoopTwins.ItemFunctions = {
 	[CollectibleType.COLLECTIBLE_BIRTHRIGHT] = {
 		[PlayerType.PLAYER_JACOB] = {CoopTwins.BirthrightJacobEsau},
 		[PlayerType.PLAYER_ESAU] = {CoopTwins.BirthrightJacobEsau},
+	},
+};
+
+CoopTwins.StatFunctions = {
+	[CacheFlag.CACHE_SPEED] = {
+		[PlayerType.PLAYER_JACOB] = {CoopTwins.SpeedJacobEsau},
+		[PlayerType.PLAYER_ESAU] = {CoopTwins.SpeedJacobEsau},
 	},
 };
 

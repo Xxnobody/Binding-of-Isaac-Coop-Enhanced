@@ -268,6 +268,24 @@ CoopTreasure.RoomConfigs = {
 			room_data.Positions[1] = room:GetGridPosition(33);
 			room_data.Positions[2] = room:GetGridPosition(41);
 		end,
+		[40] = function(room,room_data) -- Stairway rooms, Disable
+			room_data.Spawn.Maximum = 0;
+		end,
+		[41] = function(room,room_data) -- Stairway rooms, Disable
+			room_data.Spawn.Maximum = 0;
+		end,
+		[42] = function(room,room_data) -- Stairway rooms, Disable
+			room_data.Spawn.Maximum = 0;
+		end,
+		[43] = function(room,room_data) -- Stairway rooms, Disable
+			room_data.Spawn.Maximum = 0;
+		end,
+		[44] = function(room,room_data) -- Stairway rooms, Disable
+			room_data.Spawn.Maximum = 0;
+		end,
+		[45] = function(room,room_data) -- Stairway rooms, Disable
+			room_data.Spawn.Maximum = 0;
+		end,
 	},
 	[RoomType.ROOM_LIBRARY] = {
 		[5] = function(room,room_data) -- pedestals in each corner behind key blocks, set vertical, Disable safe pos
@@ -330,9 +348,9 @@ CoopTreasure.RemovableGridEntities = {
 };
 CoopTreasure.AssignmentTypes = {
 	[0] = "Disabled",
-	[1] = "Free",
-	[2] = "Auto",
-	[3] = "Self",
+	[1] = "Free for All",
+	[2] = "Auto Assign",
+	[3] = "Self Assign",
 	[4] = "Global",
 	Disabled = 0,
 	Free = 1,

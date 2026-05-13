@@ -7,7 +7,7 @@ local Utils = mod.Utils;
 function CoopHUD.DividedVoid()
 	if not DIVIDED_VOID then return; end
 	local VOID_ID = CollectibleType.COLLECTIBLE_VOID;
-	local DIV_VOID_ID = Isaac.GetItemIdByName('[DIVIDED VOID]Tech ID') + 1;
+	local DIV_VOID_ID = Isaac.GetItemIdByName("[DIVIDED VOID]Tech ID") + 1;
 	
 	DIVIDED_VOID.ChargeColor = Utils.ConvertColorToColorize(Color(0.9,0.5,0.9,1), 1, 0.75, 1);
 	DIVIDED_VOID.ExtraChargeColor = Utils.ConvertColorToColorize(Color(0.0,0.75,1.0,1), 1, 0.75, 1);

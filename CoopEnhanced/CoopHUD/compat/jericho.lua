@@ -9,8 +9,8 @@ function CoopHUD.Jericho()
 	if not _JERICHO_MOD then return end
 
 	local BlessingSprite, _ = Sprite(mod.Animations.Stats, false)
-	BlessingSprite:ReplaceSpritesheet(0, 'gfx/ui/hudstats3.png')
-	BlessingSprite:SetFrame('Idle', 0)
+	BlessingSprite:ReplaceSpritesheet(0, "gfx/ui/hudstats3.png")
+	BlessingSprite:SetFrame("Idle", 0)
 	BlessingSprite:LoadGraphics()
 
 	local function JerichoBlessingStat(stats, _, player_number)
