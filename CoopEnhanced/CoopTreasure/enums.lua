@@ -340,6 +340,41 @@ CoopTreasure.RoomConfigs = {
 			room_data.Spawn.Vertical = false;
 		end,
 	},
+	[RoomType.ROOM_LIBRARY] = {
+		[5] = function(room,room_data) -- reduce maximum, disable safe pos
+			room_data.Safe.Enable = false;
+			room_data.Spawn.Maximum = 1;
+		end,
+		[7] = function(room,room_data) -- move for blocks, reduce maximum, disable safe pos
+			room_data.Positions[1] = room:GetGridPosition(18);
+			room_data.Positions[2] = room:GetGridPosition(26);
+			room_data.Positions[3] = room:GetGridPosition(108);
+			room_data.Positions[4] = room:GetGridPosition(116);
+			room_data.Safe.Enable = false;
+			room_data.Spawn.Maximum = 1;
+		end,
+		[10] = function(room,room_data) -- move for blocks, reduce maximum, ignore center, disable safe pos
+			room_data.Positions[1] = room:GetGridPosition(16);
+			room_data.Positions[2] = room:GetGridPosition(19);
+			room_data.Positions[3] = room:GetGridPosition(25);
+			room_data.Positions[4] = room:GetGridPosition(28);
+			table.insert(room_data.Treasure.Ignored,room:GetGridPosition(22));
+			room_data.Safe.Enable = false;
+			room_data.Spawn.Maximum = 1;
+		end,
+		[14] = function(room,room_data) -- move for rocks, reduce maximum, disable safe pos
+			room_data.Positions[1] = room:GetGridPosition(42);
+			room_data.Positions[2] = room:GetGridPosition(102);
+			room_data.Positions[3] = room:GetGridPosition(58);
+			room_data.Positions[4] = room:GetGridPosition(88);
+			room_data.Safe.Enable = false;
+			room_data.Spawn.Maximum = 1;
+		end,
+	},
+	[RoomType.ROOM_PLANETARIUM] = {},
+	[RoomType.ROOM_SECRET] = {},
+	[RoomType.ROOM_SUPERSECRET] = {},
+	[RoomType.ROOM_ULTRASECRET] = {},
 };
 CoopTreasure.RemovableGridEntities = {
 	[EntityType.ENTITY_MOVABLE_TNT] = true,

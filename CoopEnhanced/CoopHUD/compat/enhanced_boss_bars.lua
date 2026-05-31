@@ -5,12 +5,12 @@ function CoopHUD.EnhancedBossBars()
 	if not HPBars then return; end
 	
 	-- Hacky solution for Rekindled
-	local IsaacRekindled = XMLData.GetModById("2761134241");
+	local IsaacRekindled = XMLData.GetModById("2761134241") ~= nil and XMLData.GetModById("2761134241").enabled == "true";
 	HPBars.handleBadLoad = function()
 		return; -- Just disable the message glued to screen til I find a better workaround for Isaac Rekindled
 	end
 	function HPBars:isIgnoreMegaSatanFight()
-		if not CoopHUD.IsVisible() and IsaacRekindled and IsaacRekindled.enabled == "true" then
+		if (not CoopHUD.IsVisible() and IsaacRekindled) or (Game():GetRoom():GetBossID() == BossType.GREAT_GIDEON or #Isaac.FindByType(EntityType.ENTITY_GIDEON) > 0) then
 			return true;
 		end
 		return not HPBars.Config.ShowMegaSatan and Game():GetRoom():GetBossID() == BossType.MEGA_SATAN;

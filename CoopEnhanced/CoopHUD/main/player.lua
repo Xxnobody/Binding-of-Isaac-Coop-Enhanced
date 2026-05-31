@@ -16,13 +16,13 @@ function Player.Render(player_number, screen_dimensions)
 	local player_entity = player.Entity.Ref:ToPlayer();
 	local isPlayerMapDown = CoopHUD.IsPlayerMapDown[player_data.Controller];
 	local isTwin = player_number < 0;
-	local mainTwin = not isTwin and Utils.GetMainTwin(player_entity) or nil;
+	local mainTwin = not isTwin and Utils.GetMainTwin(player_entity,true) or nil;
 	local isKeeper = Utils.IsKeeper(player.Type);
 	local isBaby = Utils.IsBaby(player_entity);
 	local isTemporary = Utils.IsTemporary(player_entity);
 	
 	if CoopHUD.Refresh then
-		local twinOpacity = mod.Config.CoopHUD.players.twins.esau_display > 0 and Options.JacobEsauControls == 1 and (player.Type == PlayerType.PLAYER_JACOB and Input.IsActionPressed(ButtonAction.ACTION_DROP,player_data.Controller) or (isTwin and player.Type == PlayerType.PLAYER_ESAU and not Input.IsActionPressed(ButtonAction.ACTION_DROP,player_data.Controller)));
+		local twinOpacity = mod.Config.CoopHUD.players.twins.esau_display > 0 and Options.JacobEsauControls == 1 and player_entity:GetOtherTwin() ~= nil and (player.Type == PlayerType.PLAYER_JACOB and Input.IsActionPressed(ButtonAction.ACTION_DROP,player_data.Controller) or (isTwin and player.Type == PlayerType.PLAYER_ESAU and not Input.IsActionPressed(ButtonAction.ACTION_DROP,player_data.Controller)));
 		if not isTemporary and not isBaby then -- Don't render anything except Health for strawmen or similar player types		
 			-- Stats
 			mod.CoopHUD.DATA.Players[player_number].Stats.Visible = (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.stats.ghosts) and (player.Type ~= PlayerType.PLAYER_THESOUL_B or mod.Config.CoopHUD.stats.dead_weight) and CoopHUD.IsElementVisible(mod.Config.CoopHUD.stats.display) or false;
@@ -273,7 +273,7 @@ function Player.Render(player_number, screen_dimensions)
 			
 			-- Collectible/Passive Items
 			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Data = {};
-			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible = (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.inventory.items.dead) and CoopHUD.IsElementVisible(mod.Config.CoopHUD.inventory.items.display);
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible = (player.Type ~= PlayerType.PLAYER_ISAAC_B or mod.Config.CoopHUD.inventory.items.tisaac) and (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.inventory.items.dead) and CoopHUD.IsElementVisible(mod.Config.CoopHUD.inventory.items.display);
 			if mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible and (mod.Config.CoopHUD.inventory.items.anchor == 0 or not isTwin) then
 				local anchor = mod.Config.CoopHUD.inventory.items.anchor;
 				local offset = mod.Config.CoopHUD.inventory.items.offset;
@@ -346,7 +346,7 @@ function Player.Render(player_number, screen_dimensions)
 				-- Player Heads
 				if mod.Config.CoopHUD.players.heads.display then
 					local scale = (mod.Config.CoopHUD.players.heads.sync.scale and player_entity.SpriteScale or mod.Config.CoopHUD.players.heads.scale) * player.Scale;
-					local head_pos = player_data.Edge.Pos + player_data.Edge.Offset + ((CoopHUD.Positions.Active[ActiveSlot.SLOT_PRIMARY] + (Vector((player_data.Edge.Multipliers.X > 0 and -0.5 or 1),8)) + mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].offset + mod.Config.CoopHUD.players.heads.offset + (player_entity:GetActiveItem(ActiveSlot.SLOT_PRIMARY) ~= 0 and not player_entity:IsCoopGhost() and (mod.Config.CoopHUD.players.heads.item_offset * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale) or Vector(0,-4))) * player_data.Edge.Multipliers) * scale;
+					local head_pos = player_data.Edge.Pos + player_data.Edge.Offset + ((CoopHUD.Positions.Active[ActiveSlot.SLOT_PRIMARY] + (Vector((player_data.Edge.Multipliers.X > 0 and -0.5 or 1),8)) + mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].offset + mod.Config.CoopHUD.players.heads.offset + (player_entity:GetActiveItem(ActiveSlot.SLOT_PRIMARY) ~= 0 and not player_entity:IsCoopGhost() and (mod.Config.CoopHUD.players.heads.item_offset * mod.Config.CoopHUD.active[ActiveSlot.SLOT_PRIMARY].scale) or Vector(0,-4))) * player_data.Edge.Multipliers) * player.Scale;
 					local head_opacity = mod.Config.CoopHUD.players.heads.opacity;
 					local head_sprite = Utils.GetHeadSprite(mod.CoopHUD.DATA.Players[player_number].Label.Sprite, player_entity);
 					if head_sprite then
@@ -438,7 +438,7 @@ function Player.Render(player_number, screen_dimensions)
 		else -- Render Normal Health
 			CustomHealthAPI.Helper.RenderPlayerHPBar(player_entity, (player.Index - 1), player_health.Pos, mod.Config.CoopHUD.health.ignore_curse, player_health.Flip, player_health.Scale, player_health.Color);
 		end
-	elseif not isTemporary then
+	elseif not isTemporary and player_health and player_health.Pos then
 		local hearts_sprite = Game():GetHUD():GetHeartsSprite();
 		hearts_sprite.FlipX = player_health.Flip;
 		hearts_sprite:Render(player_health.Pos);

@@ -107,6 +107,12 @@ mod.TrinketSlot = {
 	SECONDARY = 1,
 };
 mod.HealthTypes = {
+	RED = 0,
+	SOUL = 1,
+	CONTAINER = 2,
+	OVERLAY = 3,
+};
+mod.HeartTypes = {
 	[1] = {Name = "Empty Heart", Total = 2},
 	[2] = {Name = "Red Heart", Total = 2},
 	[3] = {Name = "Soul Heart", Total = 2},
@@ -132,9 +138,10 @@ mod.StatTypes = {
 	LIBRARY = 11,
 	NUMBER = 12,
 };
-mod.TwinTypes = {
-	[PlayerType.PLAYER_JACOB] = true,
-	--[PlayerType.PLAYER_THEFORGOTTEN] = true,
+mod.NameTypes = {
+	PLAYER = 0,
+	CHARACTER = 1,
+	CUSTOM = 2,
 };
 mod.StageTypes = {
 	["Special"] = 0,

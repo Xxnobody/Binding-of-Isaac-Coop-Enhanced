@@ -21,7 +21,10 @@ function CoopLabels.RenderLabels(_)
 		local player_entity = Isaac.GetPlayer(i - 1);
 		if (game:GetFrameCount() % 15) == 0 then -- Only update data twice per second
 			if not CoopLabels.DATA[i] then CoopLabels.DATA[i] = {}; end
-			if CoopLabels.IgnoredCharacters[player_entity:GetPlayerType()] then goto continue; end
+			if CoopLabels.IgnoredCharacters[player_entity:GetPlayerType()] or (not mod.Config.CoopLabels.show_temp and Utils.IsTemporary(player_entity)) then
+				CoopLabels.DATA[i] = nil;
+				goto continue;
+			end
 			CoopLabels.DATA[i].Data = {};
 			local player_index = i;
 			if mod.Players.Twins[i] then

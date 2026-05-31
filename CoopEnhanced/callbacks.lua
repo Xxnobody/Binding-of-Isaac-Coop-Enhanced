@@ -42,7 +42,7 @@ function Registry.RemoveCallback(modID, callbackID, func)
 			return;
 		end
 	end
-	print("Function in callback ID " .. callbackID .. " no found! Cannot remove Callback.")
+	print("Function in callback ID " .. callbackID .. " not found! Cannot remove Callback.")
 end
 
 function Registry.RegisterCallback(modID, callback_name)

@@ -42,10 +42,32 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.categories.inventory,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.tisaac; end,
+		Display = function() return "Show for T. Isaac: " .. (mod.Config.CoopHUD.inventory.items.tisaac and "on" or "off"); end,
+		OnChange = function(b) mod.Config.CoopHUD.inventory.items.tisaac = b; end,
+		Info = {"Enable to show passive items for tainted Isaac players. This is basically his inventory just in a different display format."},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.dead; end,
 		Display = function() return "Dead Players: " .. (mod.Config.CoopHUD.inventory.items.dead and "on" or "off"); end,
 		OnChange = function(b) mod.Config.CoopHUD.inventory.items.dead = b; end,
 		Info = {"Enable to show passive items for dead players."},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.items.cycling; end,
+		Display = function() return "Cycle Items: " .. (mod.Config.CoopHUD.inventory.items.cycling and "on" or "off"); end,
+		OnChange = function(b) mod.Config.CoopHUD.inventory.items.cycling = b; end,
+		Info = {"Enable to be able to cycle passive items using the Drop button."},
 	}
 );
 ModConfigMenu.AddSetting(

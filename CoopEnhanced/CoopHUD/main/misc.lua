@@ -115,7 +115,7 @@ function Misc.GetWave(screen_dimensions)
 			local function gideonWaveTracker(_,entity_type,_,_,_,_,spawner_entity)
 				if entity_type == EntityType.ENTITY_EFFECT or entity_type < EntityType.ENTITY_GAPER then return; end
 				local gideon_entity = Isaac.FindByType(EntityType.ENTITY_GIDEON)[1];
-				if not gideon_entity then
+				if not gideon_entity or game:GetRoom():IsClear() then
 					CoopHUD.Misc.Gideon = nil;
 					mod:RemoveCallback(ModCallbacks.MC_PRE_ENTITY_SPAWN, gideonWaveTracker);
 					return;
@@ -245,7 +245,7 @@ function Misc.GetExtra(screen_dimensions)
 		pos.X = pos.X + ((anchor == 2 and (screen_dimensions.Max.X - (pos.X + (size * 2))) or 0) + (offset.X * edge_multipliers.X));
 	end
 	pos = pos + ((mod.Config.CoopHUD.misc.extra.offset) * edge_multipliers) + Vector(diff_offset,0);
-	mod.CoopHUD.Misc.Difficulty[1].Data.Pos.X = mod.CoopHUD.Misc.Difficulty[1].Data.Pos.X - diff_offset;
+	pos.X = pos.X - diff_offset;
 		
 	if not mod.UnlocksAllowed then
 		local sprite = Misc.GetSprite(mod.CoopHUD.Misc.Extra[1].Sprite, CoopHUD.MiscType.NO_ACHIEVEMENTS);
@@ -271,15 +271,15 @@ function Misc.GetDestination()
 		anim_name = "Idle";
 		destination = CoopHUD.MiscType.DAILY;
 	elseif params:GetEndStage() == LevelStage.STAGE3_2 and not params:IsSecretPath() then destination = CoopHUD.Destination.MOM;
-	elseif params:GetEndStage() == LevelStage.STAGE3_2 then destination = CoopHUD.Destination.MOM; sprite.Color = Utils.GetColorByName("Violet"); -- Color Mausoleum Mom
-	elseif params:GetEndStage() == LevelStage.STAGE4_2 then destination = CoopHUD.Destination.HEART;
+	elseif params:GetEndStage() == LevelStage.STAGE3_2 then destination = CoopHUD.Destination.MOM; sprite.Color = Utils.ConvertColorToColorize(Utils.GetColorByName("Violet"),1.0,1.0,0.5); -- Color Mausoleum Mom
+	elseif params:GetEndStage() == LevelStage.STAGE4_2 and not params:IsSecretPath() then destination = CoopHUD.Destination.HEART;
+	elseif params:GetEndStage() == LevelStage.STAGE4_2 then destination = CoopHUD.Destination.CORPSE;
 	elseif params:GetEndStage() == LevelStage.STAGE5 and not params:IsAltPath() then destination = CoopHUD.Destination.SATAN;
 	elseif params:GetEndStage() == LevelStage.STAGE5 and params:IsAltPath() then destination = CoopHUD.Destination.ISAAC;
 	elseif params:GetEndStage() == LevelStage.STAGE6 and not params:IsAltPath() then destination = CoopHUD.Destination.LAMB;
 	elseif params:IsMegaSatanRun() then destination = CoopHUD.Destination.MEGA;
 	elseif params:GetEndStage() == LevelStage.STAGE6 and params:IsAltPath() then destination = CoopHUD.Destination.CHEST;
 	elseif params:GetEndStage() == LevelStage.STAGE4_3 then destination = CoopHUD.Destination.HUSH;
-	elseif params:GetEndStage() == LevelStage.STAGE4_2 and params:IsSecretPath() then destination = CoopHUD.Destination.CORPSE;
 	elseif params:IsBeastPath() then destination = CoopHUD.Destination.BEAST;
 	else
 		anim_name = "Idle";

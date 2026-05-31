@@ -15,16 +15,16 @@ CoopHUD.Item.Active.Special = { -- taken from coopHUD+ (Konoca)
 		local tmpFrame = 0;
 		local varData = item_data.Item.Desc.VarData;
 		local path = mod.Images.DInfinity;
-		if varData then
-			if varData == Active.D_INFINITY.D4 then tmpFrame = 2;
-			elseif varData == Active.D_INFINITY.D6 then tmpFrame = 4;
-			elseif varData == Active.D_INFINITY.E6 then tmpFrame = 6;
-			elseif varData == Active.D_INFINITY.D7 then tmpFrame = 8;
-			elseif varData == Active.D_INFINITY.D8 then tmpFrame = 10;
-			elseif varData == Active.D_INFINITY.D10 then tmpFrame = 12;
-			elseif varData == Active.D_INFINITY.D12 then tmpFrame = 14;
-			elseif varData == Active.D_INFINITY.D20 then tmpFrame = 16;
-			elseif varData == Active.D_INFINITY.D100 then tmpFrame = 18;
+		if varData then -- Requires checking a range since every use results in a different varData depending on die chosen
+			if varData >= Active.D_INFINITY.D4 and varData <= Active.D_INFINITY.D4 + 20 then tmpFrame = 2;
+			elseif varData >= Active.D_INFINITY.D6 and varData <= Active.D_INFINITY.D6 + 20 then tmpFrame = 4;
+			elseif varData >= Active.D_INFINITY.E6 and varData <= Active.D_INFINITY.E6 + 20 then tmpFrame = 6;
+			elseif varData >= Active.D_INFINITY.D7 and varData <= Active.D_INFINITY.D7 + 20 then tmpFrame = 8;
+			elseif varData >= Active.D_INFINITY.D8 and varData <= Active.D_INFINITY.D8 + 20 then tmpFrame = 10;
+			elseif varData >= Active.D_INFINITY.D10 and varData <= Active.D_INFINITY.D10 + 20 then tmpFrame = 12;
+			elseif varData >= Active.D_INFINITY.D12 and varData <= Active.D_INFINITY.D12 + 20 then tmpFrame = 14;
+			elseif varData >= Active.D_INFINITY.D20 and varData <= Active.D_INFINITY.D20 + 20 then tmpFrame = 16;
+			elseif varData >= Active.D_INFINITY.D100 and varData <= Active.D_INFINITY.D100 + 20 then tmpFrame = 18;
 			end
 		end
 		sprite_data.Animation = "DInfinity";
@@ -209,7 +209,7 @@ function ChargeBar.GetCharge(current_charge, max_charge, partial_charge);
 		return Vector(1, 3);
 	elseif ChargeBar.Charge[max_charge] == nil then
 		return Vector(1, 28 - (current_charge * (24 / max_charge)));
-	elseif partial_charge ~= nil and partial_charge > 0 then
+	elseif partial_charge ~= nil and partial_charge > 0 and ChargeBar.Charge[max_charge] and ChargeBar.Charge[max_charge][current_charge + 1] then
 		local init = ChargeBar.Charge[max_charge][current_charge];
 		local partial = (init - ChargeBar.Charge[max_charge][current_charge + 1]) * partial_charge;
 		return Vector(1, init - partial);
@@ -237,8 +237,10 @@ function Inventory.Remove(player_data, item)
 end
 
 function Inventory.Shift(player_data)
-	for _ = 1, #player_data.Inventory - 1, 1 do
-		table.insert(player_data.Inventory.Passive.Images, 1, table.remove(player_data.Inventory.Passive.Images, #player_data.Inventory.Passive.Images));
+	if mod.Config.CoopHUD.inventory.items.cycling or player_data.Player.Type == PlayerType.PLAYER_ISAAC_B then
+		for _ = 1, #player_data.Inventory.Passive.Images - 1, 1 do
+			table.insert(player_data.Inventory.Passive.Images, 1, table.remove(player_data.Inventory.Passive.Images, #player_data.Inventory.Passive.Images));
+		end
 	end
 end
 
@@ -260,7 +262,7 @@ function Active.GetSprite(sprite, active_data, player_entity)
 	
 	local item_image = Isaac.GetItemConfig():GetCollectible(active_data.Item.ID).GfxFileName;
 	local sprite_data = {Anm2 = mod.Animations.Active, Animation = "Idle", Frame = 0, Sheets = {[0] = item_image, [1] = item_image, [2] = item_image},Play = nil};
-	if (active_data.Bar.Charge.Full) then sprite_data.Frame = 1; end
+	if active_data.Bar.Charge.Full then sprite_data.Frame = 1; end
 	
 	if active_data.Item.Book then
 		sprite_data.Sheets[3] = active_data.Item.Book;
@@ -290,7 +292,7 @@ function Active.GetSprite(sprite, active_data, player_entity)
 end
 
 function Pocket.GetSprite(sprite, pocket_data, player_entity)
-	if not pocket_data.Item then return; end
+	if not pocket_data.Item or pocket_data.Item.Type < 0 then return; end
 	local sprite_data = {Anm2 = "", Animation = "", Frame = 0, Sheets = {}};
 	
 	sprite = sprite or Sprite();
@@ -347,7 +349,7 @@ function Pocket.GetSprite(sprite, pocket_data, player_entity)
 		sprite_data.Anm2 = mod.Animations.Active;
 		sprite_data.Animation = "Idle";
 		sprite_data.Sheets = {[0] = item_image, [1] = item_image, [2] = item_image};
-		if (pocket_data.Bar.Charge.Full) then sprite_data.Frame = 1; end
+		if pocket_data.Bar.Charge and pocket_data.Bar.Charge.Full then sprite_data.Frame = 1; end
 		
 		if special_func then
 			special_func(sprite, pocket_data, sprite_data, player_entity);

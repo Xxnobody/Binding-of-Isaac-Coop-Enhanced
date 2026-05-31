@@ -30,7 +30,8 @@ mod.CoopTreasure.DefaultConfig = {
 	player_sync = "Global",
 	dead = false,
 	clean = false,
-	single = false,
+	coop_only = true,
+	single_mode = false,
 	extras = 0,
 	safe = 1,
 	radius = 0,
@@ -116,7 +117,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
 		Minimum = 0,
-		Maximum = 3,
+		Maximum = 12,
 		CurrentSetting = function() return mod.Config.CoopTreasure.extras; end,
 		Display = function() return "Spawn Extras: " .. mod.Config.CoopTreasure.extras; end,
 		OnChange = function(n) mod.Config.CoopTreasure.extras = n; end,
@@ -129,7 +130,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
 		Minimum = 1,
-		Maximum = 4,
+		Maximum = 12,
 		CurrentSetting = function() return mod.Config.CoopTreasure.max; end,
 		Display = function() return "Max Per Player: " .. mod.Config.CoopTreasure.max; end,
 		OnChange = function(n) mod.Config.CoopTreasure.max = n; end,
@@ -141,10 +142,21 @@ ModConfigMenu.AddSetting(
 	CoopTreasure.MCM.categories.general,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopTreasure.single; end,
-		Display = function() return "Singleplayer Extras: " .. (mod.Config.CoopTreasure.single and "on" or "off"); end,
-		OnChange = function(b) mod.Config.CoopTreasure.single = b; end,
-		Info = {"Enable to spawn extra pedestals in non-Coop games. (You Cheater!)"},
+		CurrentSetting = function() return mod.Config.CoopTreasure.single_mode; end,
+		Display = function() return "Shared Pedestal(s): " .. (mod.Config.CoopTreasure.single_mode and "on" or "off"); end,
+		OnChange = function(b) mod.Config.CoopTreasure.single_mode = b; end,
+		Info = {"Enable to have the mod instead share the original pedestal(s) in the room, similar to Boss Reward Predestals."},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopTreasure.MCM.title,
+	CoopTreasure.MCM.categories.general,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopTreasure.coop_only; end,
+		Display = function() return "Coop Only: " .. (mod.Config.CoopTreasure.coop_only and "on" or "off"); end,
+		OnChange = function(b) mod.Config.CoopTreasure.coop_only = b; end,
+		Info = {"Disable to spawn extra pedestals in non-Coop games. (You Cheater!)"},
 	}
 );
 ModConfigMenu.AddSetting(

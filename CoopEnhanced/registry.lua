@@ -20,8 +20,14 @@ end
 local ModuleRegistry = {
 	CoopFixes = function(module_name)
 		local dir = mod.Directory .. module_name .. ".";
-		CoopEnhanced[module_name] = {Directory = dir, DATA = {PLAYERS = {}}};
+		CoopEnhanced[module_name] = {Directory = dir, DATA = {PLAYERS = {}}, Rejoin = {}, Join = {}, Rewind = {}};
+		if not mod.Config.modules[module_name] then return; end
 		CoopEnhanced.Registry:RegisterCallback("FIXES_PRE_REJOIN_EXECUTE");
+		CoopEnhanced.Registry:RegisterCallback("FIXES_PRE_REJOIN_REVIVE");
+		CoopEnhanced.Registry:RegisterCallback("FIXES_PRE_REJOIN_PLAYERTYPE");
+		CoopEnhanced.Registry:RegisterCallback("FIXES_PRE_REJOIN_HEALTH");
+		CoopEnhanced.Registry:RegisterCallback("FIXES_PRE_REJOIN_ACTIVES");
+		CoopEnhanced.Registry:RegisterCallback("FIXES_PRE_REJOIN_POCKETS");
 		CoopEnhanced.Registry:RegisterCallback("FIXES_POST_REJOIN_EXECUTE");
 		CoopEnhanced.Registry:RegisterCallback("FIXES_POST_REJOIN_BACKUP_LOAD");
 		CoopEnhanced.Registry:RegisterCallback("FIXES_POST_REJOIN_BACKUP_SAVE");
@@ -53,6 +59,7 @@ local ModuleRegistry = {
 	CoopExtras = function(module_name)
 		local dir = mod.Directory .. module_name .. ".";
 		CoopEnhanced[module_name] = {Directory = dir, DATA = {Pickups = {}}};
+		if not mod.Config.modules[module_name] then return; end
 		CoopEnhanced.Registry:RegisterCallback("EXTRAS_PRE_GREED_REVIVE");
 		CoopEnhanced.Registry:RegisterCallback("EXTRAS_POST_GREED_REVIVE");
 		CoopEnhanced.Registry:RegisterCallback("EXTRAS_PRE_PRICE_DATA");
@@ -74,6 +81,7 @@ local ModuleRegistry = {
 	CoopLabels = function(module_name)
 		local dir = mod.Directory .. module_name .. ".";
 		CoopEnhanced[module_name] = {Directory = dir, DATA = {}};
+		if not mod.Config.modules[module_name] then return; end
 		CoopEnhanced.Registry:RegisterCallback("LABELS_POST_DATA");
 		CoopEnhanced.Registry:RegisterCallback("LABELS_PRE_RENDER");
 		require(dir .. "enums");
@@ -88,6 +96,7 @@ local ModuleRegistry = {
 		if not REPENTOGON then return; end
 		local dir = mod.Directory .. module_name .. ".";
 		CoopEnhanced[module_name] = {Directory = dir,DATA = {}};
+		if not mod.Config.modules[module_name] then return; end
 		CoopEnhanced.Registry:RegisterCallback("MARKS_POST_DATA");
 		CoopEnhanced.Registry:RegisterCallback("MARKS_PRE_RENDER");
 		require(dir .. "enums");
@@ -100,7 +109,8 @@ local ModuleRegistry = {
 	end,
 	CoopTwins = function(module_name)
 		local dir = mod.Directory .. module_name .. ".";
-		CoopEnhanced[module_name] = {Directory = dir,DATA = {}};
+		CoopEnhanced[module_name] = {Directory = dir,DATA = {},Syncing = false};
+		if not REPENTOGON or not mod.Config.modules[module_name] then return; end
 		require(dir .. "config");
 		require(dir .. "main");
 		require(dir .. "enums");
@@ -112,6 +122,7 @@ local ModuleRegistry = {
 	CoopTreasure = function(module_name)
 		local dir = mod.Directory .. module_name .. ".";
 		CoopEnhanced[module_name] = {Directory = dir,DATA = {}};
+		if not mod.Config.modules[module_name] then return; end
 		CoopEnhanced.Registry:RegisterCallback("TREASURE_POST_COMPAT");
 		CoopEnhanced.Registry:RegisterCallback("TREASURE_PRE_ROOM_DATA");
 		CoopEnhanced.Registry:RegisterCallback("TREASURE_POST_ROOM_DATA");
@@ -138,9 +149,9 @@ local ModuleRegistry = {
 		mod.Registry.Commands.Auto[(mod.Config[module_name].CMD .. " clearcache <reset_room>")] = "Clears the current rooms cache which removes all owners.";
 	end,
 	CoopHUD = function(module_name)
-		if not REPENTOGON then return; end
 		local dir = mod.Directory .. module_name .. ".";
 		CoopEnhanced[module_name] = {Directory = dir,IsVisible = true,IsMapDown = false,IsMapToggled = false,IsPlayerMapDown = {},Refresh = false,DATA = {Players = {},Joining = {},Score = {},Timer = {},Banner = {}},Player = {},Item = {Active = {},Trinket = {},Pocket = {},ChargeBar = {},Inventory = {}},Stats = {Deals = {}, Stat = {}},Misc = {Pickups = {}, Difficulty = {[0] = {},[1] = {}}, Wave = {[0] = {}}, Extra = {[0] = {}}}};
+		if not REPENTOGON or not mod.Config.modules[module_name] then return; end
 		CoopEnhanced.Registry:RegisterCallback("HUD_PLAYER_INIT");
 		CoopEnhanced.Registry:RegisterCallback("HUD_PRE_COOP_MENU_RENDER");
 		CoopEnhanced.Registry:RegisterCallback("HUD_PRE_PLAYER_RENDER");
@@ -299,7 +310,7 @@ mod.Registry.Commands = {
 		local player_entity = Utils.GetMainPlayerByIndex(player_index);
 		if twin_index > 0 then player_entity = Utils.GetPlayerTwins(player_entity)[twin_index]; end
 		local health_type = tonumber(args[2]) or 0;
-		local health_types = Utils.GetHealthTypes();
+		local health_types = Utils.GetHeartTypes();
 		if player_entity and args[2] == "heal" then player_entity:AddHearts(health_amount); return;
 		elseif not player_entity or health_type <= 0 or health_type > #health_types or health_amount == 0 then
 			print("Incorrect arguments for command. ('health <player_index> <health_type> <health_amount> <twin_index>')");
@@ -386,7 +397,7 @@ mod.Registry.Commands = {
 		elseif item_type == XMLNode.PILL then -- Pills (p)
 			player_entity:SetPill(slot,collectible_type);
 		end
-		print("Successfully added " .. XMLData.GetEntryById(item_type,collectible_type).name .. " to Player (' .. player_index ..')");
+		print("Successfully added " .. XMLData.GetEntryById(item_type,collectible_type).name .. " to Player (" .. player_index ..")");
 	end,
 	["removeitem"] = function(args) -- Remove item from player index
 		local item_type = args[1]:find("t") and 1 or (args[1]:find("k") and 2 or (args[1]:find("p") and 3 or 0));
@@ -461,7 +472,7 @@ for key,registry_func in pairs(mod.Registry.Modules) do
 	registry_func(key);
 	if CoopEnhanced[key] then
 		CoopEnhanced[key].Name = key;
-		if mod.Config.commands.config then AutoConfig(mod.Config[key], (mod.Config[key].CMD .. " config")); end
+		if mod.Config.commands.config and mod.Config[key] then AutoConfig(mod.Config[key], (mod.Config[key].CMD .. " config")); end
 	end
 end
 
@@ -547,9 +558,21 @@ if not REPENTOGON then return; end
 
 -- Mod Compat Registry
 local function modCompats()
-	local anim2 = "gfx/ui/coop_menu.anm2";
-	
+	-- CustomHealthAPI
+	if CustomHealthAPI then
+		if not CustomHealthAPI.Constants.Health then -- Build a data table to seperate which keys are what types.
+			CustomHealthAPI.Constants.Health = {RED = {},SOUL = {},CONTAINER = {},OVERLAY = {}};
+			for key, info in pairs(CustomHealthAPI.PersistentData.HealthDefinitions) do
+				if info.Type == CustomHealthAPI.Enums.HealthTypes.RED then table.insert(CustomHealthAPI.Constants.Health.RED,key);
+				elseif info.Type == CustomHealthAPI.Enums.HealthTypes.SOUL then table.insert(CustomHealthAPI.Constants.Health.SOUL,key);
+				elseif info.Type == CustomHealthAPI.Enums.HealthTypes.CONTAINER then table.insert(CustomHealthAPI.Constants.Health.CONTAINER,key);
+				elseif info.Type == CustomHealthAPI.Enums.HealthTypes.OVERLAY then table.insert(CustomHealthAPI.Constants.Health.OVERLAY,key);
+				end
+			end
+		end
+	end
 	-- Character Adds
+	local anim2 = "gfx/ui/coop_menu.anm2";
 	if EdithRestored then
 		Utils.AddCharacter("Edith",EdithRestored.Enums.PlayerType.EDITH,EdithRestored.Enums.Achievements.Characters.EDITH,false,false,nil,{Anm2 = anim2,Animation = "Edith",Frame = 0});
 		Utils.AddCharacter("The Restored",EdithRestored.Enums.PlayerType.EDITH_B,EdithRestored.Enums.Achievements.Characters.TAINTED,false,true,EdithRestored.Enums.PlayerType.EDITH,{Anm2 = anim2,Animation = "Edith",Frame = 1});

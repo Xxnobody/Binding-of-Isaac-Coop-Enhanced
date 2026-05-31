@@ -187,6 +187,22 @@ function CoopHUD.RenderCoopMenuSprite(joining)
 	arrow_sprite.FlipX = true;
 	arrow_sprite:RenderLayer(2,main_pos);
 	arrow_sprite.FlipX = false;
+	
+	-- Render Names
+	if mod.Config.CoopHUD.players.menu.display > 1 then
+		local character_name = character_data.Tainted and not mod.Config.players.tainted_names and character_data.Parent and ("T. " .. Utils.GetCharacterByType(character_data.Parent).Name) or character_data.Name;
+		local text_scale = math.min(1,(50 / mod.Fonts.CoopHUD.players:GetStringWidth(character_name))) * mod.Config.CoopHUD.players.menu.text_scale;
+		local text_pos = (main_pos + mod.Config.CoopHUD.players.menu.text_offset) - Vector(((mod.Fonts.CoopHUD.players:GetStringWidth(character_name) / 2) * text_scale.X),(joining.Index > 2 and 14 + mod.Fonts.CoopHUD.players:GetBaselineHeight("0") or -12) * mod.Config.CoopHUD.players.menu.scale.Y);
+		local player_config = player_sync == "Global" and mod.Config.players[joining.Index] or (mod.Config[player_sync] and mod.Config[player_sync].players[joining.Index] or mod.Config.CoopHUD.players[joining.Index]);
+		local color = Utils.ConvertColorToFont(mod.Colors[player_config.color].Value,mod.Config.CoopHUD.players.menu.opacity);
+		
+		mod.Fonts.CoopHUD.players:DrawStringScaled(
+			character_data.Name,
+			text_pos.X, text_pos.Y,
+			text_scale.X,text_scale.Y,
+			color or KColor.White, 0, true
+		);
+	end
 end
 
 function CoopHUD.IsElementVisible(display)

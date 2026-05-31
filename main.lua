@@ -11,6 +11,8 @@ CoopEnhanced.Challenge = {ID = 0};
 CoopEnhanced.Config = {};
 CoopEnhanced.Fonts = {};
 CoopEnhanced.Utils = {};
+CoopEnhanced.Started = false;
+CoopEnhanced.Ended = false;
 CoopEnhanced.Directory = "CoopEnhanced.";
 CoopEnhanced.Players = {Alive = 0,Total = 0,Joining = {},Types = {},Twins = {},Unlocked = {}};
 CoopEnhanced.Registry = {Callbacks = {}, Commands = {}};
@@ -46,10 +48,12 @@ local function onUpdate()
 		if Game():GetNumPlayers() < 1 then return; end
 		local players = {}
 		local num_twins = 0;
+		local started = true;
 		for i = 1, Game():GetNumPlayers(), 1 do
 			local player_entity = Isaac.GetPlayer(i - 1);
 			local controller_index = player_entity.ControllerIndex;
 			CoopEnhanced.Players.Types[i] = player_entity:GetPlayerType();
+			if player_entity.FrameCount < 30 or controller_index < 0 or controller_index > 500 then started = false; end
 			if players[controller_index] then
 				num_twins = num_twins + 1;
 				CoopEnhanced.Players.Twins[i] = players[controller_index];
@@ -61,6 +65,7 @@ local function onUpdate()
 			end
 			
 		end
+		CoopEnhanced.Started = started;
 		CoopEnhanced.Players.Unlocked = CoopEnhanced.Utils.GetUnlockedCharacters();
 	end
 	CoopEnhanced.FrameCount = CoopEnhanced.FrameCount > 60 and 1 or CoopEnhanced.FrameCount + 1;
@@ -124,29 +129,50 @@ function CoopEnhanced.RefreshFrameCount();
 	onUpdate();
 end
 
+function CoopEnhanced.Render(sprite,sprite_data,text_data);
+	sprite = sprite or Sprite();
+	if sprite_data then
+		for key,var in pairs(sprite_data) do
+			if key == "Sheets" then
+				for id,sheet in pairs(var) do
+					sprite:ReplaceSpritesheet(id,sheet);
+				end
+			elseif sprite[key] then
+				sprite[key] = var;
+			end
+		end
+	end
+	if sprite and sprite_data.Pos then sprite:Render(sprite_data.Pos); end
+	if text_data and text_data.Value then 
+		local font = text_data.Font or CoopEnhanced.Fonts.CoopHUD.misc;
+		font:DrawStringScaled(
+			text_data.Value,
+			(text_data.Pos.X or 0), (text_data.Pos.Y or 0),
+			(text_data.Scale.X or 1), (text_data.Scale.Y or 1),
+			(text_data.Color or KColor.White), (text_data.Width or 0), (text_data.Center or true)
+		);
+	end
+end
+
 -- Loading and Saving Callbacks
 local json = require("json");
-local function onGameStart(_, isCont)
-	if not CoopEnhanced:HasData() then return; end
-	local savedData = json.decode(CoopEnhanced:LoadData());
-	local data = CoopEnhanced.Utils.decodeData(savedData);
 
-	if data.Config and data.Version ~= nil then
-		CoopEnhanced.Config = CoopEnhanced.Utils.MergeTables(CoopEnhanced.Config, data.Config);
-	end
+local function onGameStart(_, isCont)
+	local data = CoopEnhanced.LoadConfigs();
 
 	CoopEnhanced.Utils.LoadFonts();
-	
 	CoopEnhanced.Players.Joining = {};
-	
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.LOAD_GAME_DATA,data);
+	CoopEnhanced.Ended = false;
 
-	CoopEnhanced.UnlocksAllowed = REPENTOGON ~= nil and not Game():AchievementUnlocksDisallowed() or true;
+	CoopEnhanced.UnlocksAllowed = true;
+	if REPENTOGON then CoopEnhanced.UnlocksAllowed = not (Game():AchievementUnlocksDisallowed()); end
 	CoopEnhanced.Challenge = REPENTOGON ~= nil and {ID = Isaac:GetChallenge(), IsDaily = (Game():GetChallengeParams():GetName() == DailyChallenge.GetChallengeParams():GetName()), Params = Game():GetChallengeParams()} or {ID = Isaac:GetChallenge()};
 
 	for name,registry_func in pairs(CoopEnhanced.Registry.Modules) do
 		if CoopEnhanced.Config.modules[name] and CoopEnhanced[name] and CoopEnhanced[name].gameStart then CoopEnhanced[name].gameStart(isCont,data); end
 	end
+	CoopEnhanced.FrameCount = 0;
 end
 CoopEnhanced:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, onGameStart);
 
@@ -169,6 +195,7 @@ local function saveGame(doSave)
 end
 
 local function onGameExit(_, doSave)
+	CoopEnhanced.Ended = true;
 	saveGame(doSave);
 	CoopEnhanced.Utils.UnloadFonts();
 end
@@ -182,6 +209,6 @@ local function onNewFloor(_)
 		saveGame(true);
 	end
 end
-CoopEnhanced:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, onNewFloor)
+CoopEnhanced:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, onNewFloor);
 
 print("Co-op Enhanced Mod - v"..CoopEnhanced.Version);

@@ -32,25 +32,25 @@ function CoopMarks.getMarks(player_entity, player_index, position)
 		
 	local isTainted = Utils.IsTainted(player_type);
 	local player_color = Colors[player_config.color].Value;
-	local player_one = player_index == 1 and not mod.Config.CoopMarks.player_one;
+	local player_one_normal = player_index == 1 and not mod.Config.CoopMarks.player_one;
 			
 	local player_data = {};
 	player_data.Total = 0;
 	player_data.Scale = mod.Config.CoopMarks.scale;
 	player_data.Color = Utils.ConvertColorToColorize(player_color, mod.Config.CoopMarks.opacity, 1, mod.Config.CoopMarks.tint_amount);
 	
-	player_data.Pos = position or (screen_dimensions.Center  + mod.Config.CoopMarks.players[player_index].offset + (mod.Config.CoopMarks.space * math.max(0,player_index - (mod.Config.CoopMarks.player_one and 1 or 2))) + (player_one and mod.Config.CoopMarks.player_one_offset or mod.Config.CoopMarks.offset));
+	player_data.Pos = position or (screen_dimensions.Center  + mod.Config.CoopMarks.players[player_index].offset + (mod.Config.CoopMarks.space * math.max(0,player_index - (mod.Config.CoopMarks.player_one and 1 or 2))) + (player_one_normal and mod.Config.CoopMarks.player_one_offset or mod.Config.CoopMarks.offset));
 	
 	-- Label
 	if mod.Config.CoopMarks.display > 1 then 
-		local text_scale = (player_one and Vector(1.5,1.5) or mod.Config.CoopMarks.text_scale * player_data.Scale);
+		local text_scale = (player_one_normal and Vector(1.5,1.5) or mod.Config.CoopMarks.text_scale * player_data.Scale);
 		player_data.Text = {Value = (Utils.GetPlayerName(player_entity, player_index, player_config.type, player_config.name, mod.Config.players.tainted_names)), Pos = (player_data.Pos + (mod.Config.CoopMarks.text_offset) * text_scale), Scale = text_scale, Color = Utils.ConvertColorToFont(player_color, mod.Config.CoopMarks.text_opacity)};
 		player_data.Text.Pos.X = player_data.Text.Pos.X - ((mod.Fonts.CoopMarks.mark:GetStringWidth(player_data.Text.Value) / 2) * text_scale.X);
 	end
 	-- Head
 	if mod.Config.CoopMarks.display == 1 or mod.Config.CoopMarks.display == 3 then
-		local head_scale = (player_one and Vector(1,1) or mod.Config.CoopMarks.head_scale * player_data.Scale);
-		local head_sprite = Utils.GetHeadSprite(nil,nil,player_type);
+		local head_scale = (player_one_normal and Vector(1,1) or mod.Config.CoopMarks.head_scale * player_data.Scale);
+		local head_sprite = Utils.GetHeadSprite(nil,player_entity,player_type);
 		head_sprite.Color = Utils.ColorOpacity(Color.Default, mod.Config.CoopMarks.head_opacity);
 		player_data.Head = {Sprite = head_sprite, Pos = (player_data.Pos + (mod.Config.CoopMarks.head_offset + Vector(2,-10)) * head_scale), Scale = head_scale};
 	end
@@ -58,10 +58,10 @@ function CoopMarks.getMarks(player_entity, player_index, position)
 	-- P1 Extra Sprite stuff
 	if player_index == 1 then
 		for i,layer in pairs(PauseMenu.GetCompletionMarksSprite():GetAllLayers()) do
-			if (layer:IsVisible() and player_one) or (not layer:IsVisible() and not player_one) then break; end
-			layer:SetVisible(player_one);
+			if (layer:IsVisible() and player_one_normal) or (not layer:IsVisible() and not player_one_normal) then break; end
+			layer:SetVisible(player_one_normal);
 		end
-		player_data.Sprite = player_one and PauseMenu.GetCompletionMarksSprite() or CoopMarks.getMarksSprite();
+		player_data.Sprite = player_one_normal and PauseMenu.GetCompletionMarksSprite() or CoopMarks.getMarksSprite();
 	end
 	if not player_data.Sprite then player_data.Sprite = CoopMarks.getMarksSprite(); end
 	player_data.Sprite.Color = mod.Config.CoopMarks.colors and player_data.Color or Color.Default;
@@ -78,7 +78,7 @@ function CoopMarks.getMarks(player_entity, player_index, position)
 				if value > 2 and not isTainted and not mod.Config.CoopMarks.online_colors then value = value - 1; end -- Fix REPENTOGON rendering aqua color 
 				if value == 2 or value == 4 then total_hardmode = total_hardmode + 1; end
 			end
-			player_data.Sprite:SetLayerFrame(CoopMarks.Layers[mark],value);
+			if not player_one_normal then player_data.Sprite:SetLayerFrame(CoopMarks.Layers[mark],value); end
 		end
 	end
 	local all_hard = total_hardmode == CoopMarks.Layers.Total;
@@ -99,8 +99,8 @@ function CoopMarks.getMarks(player_entity, player_index, position)
 end
 
 function CoopMarks.onPause(_)
-	if mod.Challenge.ID ~= Challenge.CHALLENGE_NULL or PauseMenu.GetState() ~= PauseMenuStates.OPEN or pause:GetAnimation() ~= "Idle" then return; end
-	if mod.Config.modules.CoopMarks or (Isaac:GetFrameCount() % 30) == 0 then
+	if not mod.Config.modules.CoopMarks or mod.Challenge.ID ~= Challenge.CHALLENGE_NULL or PauseMenu.GetState() ~= PauseMenuStates.OPEN or pause:GetAnimation() ~= "Idle" or (mod.Players.Total == 1 and mod.Config.CoopMarks.coop_only) then return; end
+	if (Isaac:GetFrameCount() % 15) == 0 then
 		local players = Utils.GetMainPlayers();
 		for i,player_entity in ipairs(players) do
 			CoopMarks.DATA[i] = CoopMarks.getMarks(player_entity, i);
@@ -111,7 +111,7 @@ function CoopMarks.onPause(_)
 		local player_data = CoopMarks.DATA[i];
 		local player_one = i == 1 and mod.Config.CoopMarks.player_one;
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.MARKS_PRE_RENDER, i, player_data, false); -- Execute Pre Marks Render Callbacks (player_index, player_data(table), isCoopSelectMenu(Boolean))
-		if player_data and player_data.Total > 0 and ((player_one or i > 1) or mod.Players.Total > 1 or not mod.Config.CoopMarks.coop_only) then -- Dont render if nothing has been completed, same as vanilla
+		if player_data and player_data.Total > 0 then -- Dont render if nothing has been completed, same as vanilla
 			if player_one or i > 1 then
 				player_data.Sprite.Scale = player_data.Scale;
 				player_data.Sprite:Render(player_data.Pos);
@@ -141,7 +141,7 @@ function CoopMarks.onRender(_)
 			local character_data = mod.Players.Unlocked[joining.Selected];
 			if character_data.Type < 0 or CoopMarks.IgnoredCharacters[character_data.Type] then goto continue; end
 			
-			local extra_offset = mod.CoopHUD.IsVisible() and Vector(((joining.Index % 2) == 0 and -160 or 80),(joining.Index > 2 and -40 or 10)) or Vector((joining.Index % 2) == 0 and 25 or 0,(joining.Index > 2 and -50 or 10));
+			local extra_offset = mod.CoopHUD.IsVisible() and Vector(((joining.Index % 2) == 0 and -155 or 85),(joining.Index > 2 and -40 or 0)) or Vector((joining.Index % 2) == 0 and 25 or 0,(joining.Index > 2 and -50 or 10));
 			local joining_pos = joining.Pos + mod.Config.CoopMarks.menu_offset + (extra_offset * mod.Config.CoopMarks.scale);
 			local player_config = EntityConfig.GetPlayer(character_data.Type);
 			local player_data = CoopMarks.getMarks(player_config, joining.Index, joining_pos);

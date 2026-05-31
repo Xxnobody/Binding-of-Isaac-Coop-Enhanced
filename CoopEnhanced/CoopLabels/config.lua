@@ -30,6 +30,7 @@ mod.CoopLabels.DefaultConfig = {
 	},
 	display = 2,
 	coop_only = true,
+	show_temp = true,
 	opacity = 1,
 	tint_amount = 1,
 	tear_tint_amount = 1,
@@ -75,6 +76,17 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return mod.Config.CoopLabels.coop_only; end,
 		Display = function() return "Coop Only: " .. (mod.Config.CoopLabels.coop_only and "on" or "off"); end,
 		OnChange = function(b) mod.Config.CoopLabels.coop_only = b; end,
+		Info = {"Enable to only show labels during True Coop."},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopLabels.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopLabels.show_temp; end,
+		Display = function() return "Temporary Players: " .. (mod.Config.CoopLabels.show_temp and "on" or "off"); end,
+		OnChange = function(b) mod.Config.CoopLabels.show_temp = b; end,
+		Info = {"Enable to show labels for temporary characters like Strawman."},
 	}
 );
 ModConfigMenu.AddSetting(

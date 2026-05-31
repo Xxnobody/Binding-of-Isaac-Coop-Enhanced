@@ -147,23 +147,22 @@ function CoopExtras.CoopPrices(_,pickup)
 		local price = room_data[pickup_id].Price + 0;
 		local isDevilPrice = (price >= PickupPrice.PRICE_ONE_HEART_AND_ONE_SOUL_HEART and price <= PickupPrice.PRICE_ONE_HEART);
 		
-		local player, health, distance = nil, nil, nil;
+		local player_entity, player_distance = nil, nil;
 		
 		for i = 1, Game():GetNumPlayers(), 1 do
-			local player_entity = Isaac.GetPlayer(i - 1);
-			local player_health = CustomHealthAPI.PersistentData.OverriddenFunctions.GetHearts(player_entity);
-			local player_distance = player_entity.Position:Distance(pickup.Position);
-			local isOwner = (not mod.Config.modules.CoopTreasure or mod.CoopTreasure.GetRoomAssignment(room_type) < 2 or mod.CoopTreasure.CanPickup(Utils.GetMainPlayerIndex(player_entity),pickup));
-			if (not player_entity:IsCoopGhost() or isOwner) and isOwner and player_health and (not distance or player_distance < distance) then
-				player, health, distance = player_entity, player_health, player_distance;
+			local temp_player = Isaac.GetPlayer(i - 1);
+			local temp_distance = temp_player.Position:Distance(pickup.Position);
+			local isOwner = (not mod.Config.modules.CoopTreasure or mod.CoopTreasure.GetRoomAssignment(room_type) < 2 or mod.CoopTreasure.CanPickup(Utils.GetMainPlayerIndex(temp_player),pickup));
+			if (not temp_player:IsCoopGhost() or isOwner) and isOwner and (not player_distance or temp_distance < player_distance) then
+				player_entity, player_distance = temp_player, temp_distance;
 			end
 		end
-		if player ~= nil and (isDevilPrice or player:GetPlayerType() == PlayerType.PLAYER_KEEPER_B) then
-			price = Utils.GetPrice(player,health,pickup.SubType,isDevilPrice);
+		if player_entity ~= nil and (isDevilPrice or player_entity:GetPlayerType() == PlayerType.PLAYER_KEEPER_B) then
+			price = Utils.GetPrice(player_entity,pickup.SubType,isDevilPrice);
 			pickup.AutoUpdatePrice = true;
 			pickup.ShopItemId = -1;
 		end
-		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_PRICE_DATA, price); -- Execute Post item Pricing Callbacks (price(int))
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_PRICE_DATA, player_entity, pickup, price); -- Execute Post item Pricing Callbacks (player (EntityPlayer), pickup(EntityPickup), price(int))
 		if pickup.Price == 0 and (price ~= 0 and price == room_data[pickup_id].Last) or pickup.Touched then room_data[pickup_id].Price = nil; return; end
 		room_data[pickup_id].Last = price;
 		pickup.Price = price;

@@ -443,6 +443,26 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.categories.players,
 	{
 		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.players.menu.text_offset.X; end,
+		Display = function() return "Text Offset (X): " .. mod.Config.CoopHUD.players.menu.text_offset.X; end,
+		OnChange = function(n) mod.Config.CoopHUD.players.menu.text_offset.X = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.players,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.players.menu.text_offset.Y; end,
+		Display = function() return "Text Offset (Y): " .. mod.Config.CoopHUD.players.menu.text_offset.Y; end,
+		OnChange = function(n) mod.Config.CoopHUD.players.menu.text_offset.Y = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.players,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
 		CurrentSetting = function() return mod.Config.CoopHUD.players.menu.rel_offset.X; end,
 		Display = function() return "Relative Offset (X): " .. mod.Config.CoopHUD.players.menu.rel_offset.X; end,
 		OnChange = function(n) mod.Config.CoopHUD.players.menu.rel_offset.X = n; end,
@@ -487,6 +507,17 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return tonumber(string.format("%.0f", mod.Config.CoopHUD.players.menu.scale.X * 100)); end,
 		Display = function() return "Scale: " .. string.format("%.0f", mod.Config.CoopHUD.players.menu.scale.X * 100) .. "%"; end,
 		OnChange = function(n) mod.Config.CoopHUD.players.menu.scale = Vector(n/100, n/100); end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.players,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0.0,
+		CurrentSetting = function() return tonumber(string.format("%.0f", mod.Config.CoopHUD.players.menu.text_scale.X * 100)); end,
+		Display = function() return "Text Scale: " .. string.format("%.0f", mod.Config.CoopHUD.players.menu.text_scale.X * 100) .. "%"; end,
+		OnChange = function(n) mod.Config.CoopHUD.players.menu.text_scale = Vector(n/100, n/100); end,
 	}
 );
 ModConfigMenu.AddSetting(

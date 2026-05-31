@@ -54,7 +54,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.modules.CoopHUD; end,
-		Display = function() return "Enhanced HUD: " .. (mod.Config.modules.CoopHUD and "on" or "off"); end,
+		Display = function() return "Co-op HUD: " .. (mod.Config.modules.CoopHUD and "on" or "off"); end,
 		OnChange = function(b) mod.Config.modules.CoopHUD = b; end,
 		Info = {"A reformatted HUD with many features and settings to make your Co-op games awesome!"},
 	}
@@ -64,7 +64,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.modules.CoopLabels; end,
-		Display = function() return "Enhanced Labels: " .. (mod.Config.modules.CoopLabels and "on" or "off"); end,
+		Display = function() return "Co-op Labels: " .. (mod.Config.modules.CoopLabels and "on" or "off"); end,
 		OnChange = function(b) mod.Config.modules.CoopLabels = b; end,
 		Info = {"Co-op Labels to help track where your character is or isnt."},
 	}
@@ -74,7 +74,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.modules.CoopTreasure; end,
-		Display = function() return "Enhanced Treasure: " .. (mod.Config.modules.CoopTreasure and "on" or "off"); end,
+		Display = function() return "Co-op Treasure: " .. (mod.Config.modules.CoopTreasure and "on" or "off"); end,
 		OnChange = function(b) mod.Config.modules.CoopTreasure = b; end,
 		Info = {"Co-op Treasure Rooms with a pedestal for every player and more."},
 	}
@@ -84,7 +84,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.modules.CoopMarks; end,
-		Display = function() return "Enhanced Marks: " .. (mod.Config.modules.CoopMarks and "on" or "off"); end,
+		Display = function() return "Co-op Marks: " .. (mod.Config.modules.CoopMarks and "on" or "off"); end,
 		OnChange = function(b) mod.Config.modules.CoopMarks = b; end,
 		Info = {"Co-op Completion Marks on the pause screen."},
 	}
@@ -94,7 +94,7 @@ ModConfigMenu.AddSetting(
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.modules.CoopExtras; end,
-		Display = function() return "Enhanced Extras: " .. (mod.Config.modules.CoopExtras and "on" or "off"); end,
+		Display = function() return "Co-op Extras: " .. (mod.Config.modules.CoopExtras and "on" or "off"); end,
 		OnChange = function(b) mod.Config.modules.CoopExtras = b; end,
 		Info = {"Fixes for Co-op bugs that can cause issue for, or even destroy, Co-op fun."},
 	}
@@ -103,8 +103,18 @@ ModConfigMenu.AddSetting(
 	mod.MCM.category,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.modules.CoopTwins; end,
+		Display = function() return "Co-op Twins: " .. (mod.Config.modules.CoopTwins and "on" or "off"); end,
+		OnChange = function(b) mod.Config.modules.CoopTwins = b; end,
+		Info = {"Play Co-op as twin characters like Jacob & Esau."},
+	}
+);
+ModConfigMenu.AddSetting(
+	mod.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.modules.CoopFixes; end,
-		Display = function() return "Enhanced Fixes: " .. (mod.Config.modules.CoopFixes and "on" or "off"); end,
+		Display = function() return "Co-op Fixes: " .. (mod.Config.modules.CoopFixes and "on" or "off"); end,
 		OnChange = function(b) mod.Config.modules.CoopFixes = b; end,
 		Info = {"Fixes for Co-op bugs that can annoy or even destroy Co-op fun."},
 	}
@@ -167,3 +177,17 @@ for i = 1, 4 do
 		}
 	);
 end
+
+local json = require("json");
+
+function CoopEnhanced.LoadConfigs()
+	if not CoopEnhanced:HasData() then return; end
+	local savedData = json.decode(CoopEnhanced:LoadData());
+	local data = CoopEnhanced.Utils.decodeData(savedData);
+
+	if data.Config and data.Version ~= nil then
+		CoopEnhanced.Config = CoopEnhanced.Utils.MergeTables(CoopEnhanced.Config, data.Config);
+	end
+	return data;
+end
+CoopEnhanced.LoadConfigs();
