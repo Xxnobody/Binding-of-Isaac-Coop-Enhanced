@@ -487,8 +487,8 @@ function CoopTreasure:onVoid(pedestal_entity)
 	local room_data = CoopTreasure.DATA[room_ID];
 	local player_entity = void_player;
 	
-	if not CoopEnhanced.Config.modules.CoopTreasure or not room_data or room_data.Assign < CoopTreasure.AssignmentTypes.Auto or not player_entity or not pedestal_entity or room_data.Spawn.Total == 1 then return; end
-	local player_index = Utils.GetMainPlayerIndex(player_entity);
+	if not CoopEnhanced.Config.modules.CoopTreasure or not room_data or room_data.Assign < CoopTreasure.AssignmentTypes.Auto or not void_player or not pedestal_entity or room_data.Spawn.Total == 1 then return; end
+	local player_index = Utils.GetMainPlayerIndex(void_player);
 	local pedestal_index,pedestal_sub_index = CoopTreasure.GetPedestalIndex(pedestal_entity);
 	local owned_amount = CoopTreasure.GetOwnedAmount(player_index);
 	if owned_amount < mod.Config.CoopTreasure.max and room_data.Treasure.Assignments[pedestal_index] == 0 then
@@ -505,6 +505,7 @@ function CoopTreasure:onVoid(pedestal_entity)
 		room_data.Treasure.Main = pedestal_index;
 		room_data.Reroll = pedestal_index;
 	end
+	void_player = nil;
 end
 mod:AddPriorityCallback(ModCallbacks.MC_PRE_PICKUP_VOIDED_ABYSS, mod.Priorities[5], CoopTreasure.onVoid, PickupVariant.PICKUP_COLLECTIBLE);
 mod:AddPriorityCallback(ModCallbacks.MC_PRE_PICKUP_VOIDED, mod.Priorities[5], CoopTreasure.onVoid, PickupVariant.PICKUP_COLLECTIBLE);

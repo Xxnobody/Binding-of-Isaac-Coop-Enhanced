@@ -23,9 +23,12 @@ function Player.Render(player_number, screen_dimensions)
 	
 	if CoopHUD.Refresh then
 		local twinOpacity = mod.Config.CoopHUD.players.twins.esau_display > 0 and Options.JacobEsauControls == 1 and player_entity:GetOtherTwin() ~= nil and (player.Type == PlayerType.PLAYER_JACOB and Input.IsActionPressed(ButtonAction.ACTION_DROP,player_data.Controller) or (isTwin and player.Type == PlayerType.PLAYER_ESAU and not Input.IsActionPressed(ButtonAction.ACTION_DROP,player_data.Controller)));
+		
 		if not isTemporary and not isBaby then -- Don't render anything except Health for strawmen or similar player types		
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Data = {};
+			
 			-- Stats
-			mod.CoopHUD.DATA.Players[player_number].Stats.Visible = (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.stats.ghosts) and (player.Type ~= PlayerType.PLAYER_THESOUL_B or mod.Config.CoopHUD.stats.dead_weight) and CoopHUD.IsElementVisible(mod.Config.CoopHUD.stats.display) or false;
+			mod.CoopHUD.DATA.Players[player_number].Stats.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.stats.display);
 			if player_number == 1 then mod.CoopHUD.Stats.Deals.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.stats.deals.display); end
 			
 			if mod.CoopHUD.DATA.Players[player_number].Stats.Visible or (player_number == 1 and mod.CoopHUD.Stats.Deals.Visible) then
@@ -119,162 +122,151 @@ function Player.Render(player_number, screen_dimensions)
 					end
 					mod.CoopHUD.Stats.Deals = deals;
 				end
+				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_STATS_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Stats); -- Execute Post Stats data update Callbacks (player_index (Number), stats_data(table))
 			end
-			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_STATS_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Stats); -- Execute Post Stats data update Callbacks (player_index (Number), stats_data(table))
 			
 			-- Active Items
-			for slot = ActiveSlot.SLOT_PRIMARY, ActiveSlot.SLOT_SECONDARY, 1 do
-				mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].Data = {};
-				local item_id = player_entity:GetActiveItem(slot);
-				if item_id ~= CollectibleType.COLLECTIBLE_NULL then 
-					local item_scale = mod.Config.CoopHUD.active[slot].scale * player.Scale;
-					local item_size = 15 * item_scale.X;
-					local bar_scale = mod.Config.CoopHUD.active[slot].chargebar.scale * player.Scale;
-					local bar_size = 2 * bar_scale.X;
-					
-					local item_pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Active[slot] + mod.Config.CoopHUD.active[slot].offset) * player.Scale) * player_data.Edge.Multipliers);
-					
-					local bar_flip = 1;
-					if mod.Config.CoopHUD.active[slot].chargebar.mirror then bar_flip = bar_flip * player_data.Edge.Multipliers.X; end
-					if mod.Config.CoopHUD.active[slot].chargebar.invert then bar_flip = bar_flip > 0 and -bar_flip or math.abs(bar_flip); end
-					local bar_pos = item_pos + ((Vector(item_size + (bar_flip < 0 and -bar_size or 0),1) + mod.Config.CoopHUD.active[slot].chargebar.offset) * Vector(bar_flip, player_data.Edge.Multipliers.Y));
-					local current_charge = player_entity:GetActiveCharge(slot);
-					local partial_charge = player_entity:GetActiveItemDesc(slot).PartialCharge;
-					local max_charge = player_entity:GetActiveMaxCharge(slot);
-					local soul_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY and player_entity:GetSoulCharge() or 0;
-					local blood_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY_B and (player_entity:GetBloodCharge() + current_charge) or 0;
-					local extra_charge = player_entity:GetBatteryCharge(slot);
-					
-					local full_charge = not twinOpacity and current_charge + soul_charge >= max_charge and max_charge > 0;
-					
-					local book = nil
-					if slot == ActiveSlot.SLOT_PRIMARY then
-						book = Item.Active.GetBook(player_entity, item_id);
-						if book then item_pos = item_pos + mod.Config.CoopHUD.active.book_correction_offset; end
-					end
-					
-					local opacity = twinOpacity and math.max(0.1,mod.Config.CoopHUD.active[slot].opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.active[slot].opacity;
-					local color = mod.Config.CoopHUD.active.colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
-					local bar_color = mod.Config.CoopHUD.active.bar_colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
-					
-					local data = {Slot = slot, Item = {ID = item_id, Pos = item_pos, Desc = player_entity:GetActiveItemDesc(slot), Book = book}, Bar = {Display = mod.Config.CoopHUD.active[slot].chargebar.display, Flip = (bar_flip < 0), Pos = bar_pos, Charge = {Current = current_charge, Max = max_charge, Blood = blood_charge, Soul = soul_charge, Extra = extra_charge, Partial = partial_charge, Full = full_charge}, Scale = bar_scale, Color = color}, Scale = item_scale, Color = bar_color};
-					
-					mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].Data = data;
-					mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].ChargeSprite = max_charge > 0 and Item.ChargeBar.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].ChargeSprite, data.Bar) or nil;
-					mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].Sprite = Item.Active.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Active[slot].Sprite, data, player_entity);
-				end
-			end
-			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_ACTIVE_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Active); -- Execute Post Active Items data update Callbacks (player_index (Number), actives_data(table))
-			
-			-- Pocket Items
-			local pocket_items, pocket_total = Item.Pocket.GetItems(player_entity);
-			mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Total = pocket_total;
-			mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.pocket.display);
-			for slot = PillCardSlot.PRIMARY, PillCardSlot.QUATERNARY, 1 do
-				mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Data = {};
-				local item = pocket_items[slot];
-				if mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Visible and item and item.ID ~= CollectibleType.COLLECTIBLE_NULL and item.Type > -1 then
-					local item_scale = mod.Config.CoopHUD.pocket[slot].scale * player.Scale;
-					local bar_scale = mod.Config.CoopHUD.pocket.chargebar.scale * player.Scale;
-					local item_size = 14 * item_scale.X;
-					local bar_size = 2 * bar_scale.X;
-					
-					item.Pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Pocket[slot] + mod.Config.CoopHUD.pocket[slot].offset) * player.Scale) * player_data.Edge.Multipliers);
-					if isTwin then item.Pos.Y = item.Pos.Y - (25 * player.Scale.Y); end
-					
-					local bar_flip = 1;
-					if mod.Config.CoopHUD.pocket.chargebar.mirror then bar_flip = bar_flip * player_data.Edge.Multipliers.X; end
-					if mod.Config.CoopHUD.pocket.chargebar.invert then bar_flip = bar_flip > 0 and -bar_flip or math.abs(bar_flip); end
-					
-					local bar_pos = item.Pos + ((mod.Config.CoopHUD.pocket.chargebar.offset + Vector(item_size + (bar_flip < 0 and -bar_size or 0), 0)) * Vector(bar_flip, player_data.Edge.Multipliers.Y));
-					local opacity = twinOpacity and math.max(0.1,mod.Config.CoopHUD.pocket[slot].opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.pocket[slot].opacity;
-					local color = mod.Config.CoopHUD.pocket.colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
-					local bar_color = mod.Config.CoopHUD.pocket.bar_colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
-					
-					local data = {Slot = slot, Item = item, Bar = {Display = mod.Config.CoopHUD.pocket.chargebar.display, Flip = (bar_flip < 0), Pos = bar_pos, Scale = bar_scale, Color = color}, Scale = item_scale, Color = bar_color};
-					
-					if item.Type == PocketItemType.ACTIVE_ITEM then
-						local partial_charge = player_entity:GetActiveItemDesc(item.Slot).PartialCharge;
-						local current_charge = player_entity:GetActiveCharge(item.Slot);
-						local max_charge = player_entity:GetActiveMaxCharge(item.Slot) or 0;
-						local extra_charge = player_entity:GetBatteryCharge(item.Slot);
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Active.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.active.display);
+			if mod.CoopHUD.DATA.Players[player_number].Inventory.Active.Visible then
+				for slot = ActiveSlot.SLOT_PRIMARY, ActiveSlot.SLOT_SECONDARY, 1 do
+					mod.CoopHUD.DATA.Players[player_number].Inventory.Active.Data[slot].Data = {};
+					local item_id = player_entity:GetActiveItem(slot);
+					if item_id ~= CollectibleType.COLLECTIBLE_NULL then 
+						local item_scale = mod.Config.CoopHUD.active[slot].scale * player.Scale;
+						local item_size = 15 * item_scale.X;
+						local bar_scale = mod.Config.CoopHUD.active[slot].chargebar.scale * player.Scale;
+						local bar_size = 2 * bar_scale.X;
+						
+						local item_pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Active[slot] + mod.Config.CoopHUD.active[slot].offset) * player.Scale) * player_data.Edge.Multipliers);
+						
+						local bar_flip = 1;
+						if mod.Config.CoopHUD.active[slot].chargebar.mirror then bar_flip = bar_flip * player_data.Edge.Multipliers.X; end
+						if mod.Config.CoopHUD.active[slot].chargebar.invert then bar_flip = bar_flip > 0 and -bar_flip or math.abs(bar_flip); end
+						local bar_pos = item_pos + ((Vector(item_size + (bar_flip < 0 and -bar_size or 0),1) + mod.Config.CoopHUD.active[slot].chargebar.offset) * Vector(bar_flip, player_data.Edge.Multipliers.Y));
+						local current_charge = player_entity:GetActiveCharge(slot);
+						local partial_charge = player_entity:GetActiveItemDesc(slot).PartialCharge;
+						local max_charge = player_entity:GetActiveMaxCharge(slot);
 						local soul_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY and player_entity:GetSoulCharge() or 0;
 						local blood_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY_B and (player_entity:GetBloodCharge() + current_charge) or 0;
-						local full_charge = not twinOpacity and current_charge + soul_charge >= max_charge and max_charge > 0;
-						data.Bar.Charge = {Current = current_charge, Max = max_charge, Blood = blood_charge, Soul = soul_charge, Extra = extra_charge, Partial = partial_charge, Full = full_charge};
-					end
+						local extra_charge = player_entity:GetBatteryCharge(slot);
 						
-					local isTextVisible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.pocket[slot].text.display);
-					if isTextVisible then
-						local text_scale = mod.Config.CoopHUD.pocket[slot].text.scale * player.Scale;
-						local text_opacity = twinOpacity and math.max(0.1,mod.Config.CoopHUD.pocket[slot].text.opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.pocket[slot].text.opacity;
-						local text_pos = item.Pos + ((mod.Config.CoopHUD.pocket[slot].text.offset + Vector(item_size + (6 * text_scale.X) + (bar_flip > 0 and bar_size * player_data.Edge.Multipliers.X or 0), -(mod.Fonts.CoopHUD.pocket:GetBaselineHeight(item.Name) / 1.5) * text_scale.Y)) * player_data.Edge.Multipliers);
-						if player_data.Edge.Multipliers.X < 0 then text_pos.X = text_pos.X - (mod.Fonts.CoopHUD.pocket:GetStringWidth(item.Name) * text_scale.X); end
-						if player_data.Edge.Multipliers.Y < 0 then text_pos.Y = text_pos.Y - mod.Fonts.CoopHUD.pocket:GetBaselineHeight(item.Name); end
-						data.Text = {Value = item.Name,Pos = text_pos,Scale = text_scale, Color = Utils.ConvertColorToFont(color,text_opacity)};
+						local full_charge = not twinOpacity and current_charge + soul_charge >= max_charge and max_charge > 0;
+						
+						local book = nil
+						if slot == ActiveSlot.SLOT_PRIMARY then
+							book = Item.Active.GetBook(player_entity, item_id);
+							if book then item_pos = item_pos + mod.Config.CoopHUD.active.book_correction_offset; end
+						end
+						
+						local opacity = twinOpacity and math.max(0.1,mod.Config.CoopHUD.active[slot].opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.active[slot].opacity;
+						local color = mod.Config.CoopHUD.active.colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
+						local bar_color = mod.Config.CoopHUD.active.bar_colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
+						
+						local data = {Slot = slot, Item = {ID = item_id, Pos = item_pos, Desc = player_entity:GetActiveItemDesc(slot), Book = book}, Bar = {Display = mod.Config.CoopHUD.active[slot].chargebar.display, Flip = (bar_flip < 0), Pos = bar_pos, Charge = {Current = current_charge, Max = max_charge, Blood = blood_charge, Soul = soul_charge, Extra = extra_charge, Partial = partial_charge, Full = full_charge}, Scale = bar_scale, Color = bar_color}, Scale = item_scale, Color = color};
+						
+						mod.CoopHUD.DATA.Players[player_number].Inventory.Active.Data[slot].Data = data;
+						mod.CoopHUD.DATA.Players[player_number].Inventory.Active.Data[slot].ChargeSprite = max_charge > 0 and Item.ChargeBar.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Active.Data[slot].ChargeSprite, data.Bar) or nil;
+						mod.CoopHUD.DATA.Players[player_number].Inventory.Active.Data[slot].Sprite = Item.Active.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Active.Data[slot].Sprite, data, player_entity);
 					end
-					mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Data = data;
-					mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].ChargeSprite = data.Bar.Charge and Item.ChargeBar.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].ChargeSprite, data.Bar) or nil;
-					mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Sprite = Item.Pocket.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket[slot].Sprite, data, player_entity);
 				end
+				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_ACTIVE_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Active); -- Execute Post Active Items data update Callbacks (player_index (Number), actives_data(table))
 			end
-			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_POCKET_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket); -- Execute Post Pocket Items data update Callbacks (player_index (Number), pockets_data(table))
+			
+			-- Pocket Items
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.pocket.display);
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Total = 0;
+			if mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Visible then
+				for slot = PillCardSlot.PRIMARY, PillCardSlot.QUATERNARY, 1 do
+					local item = Item.Pocket.GetItem(slot, player_entity);
+					if item.ID ~= CollectibleType.COLLECTIBLE_NULL and player_data.Inventory.Pocket.Data[slot] then
+						mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Total = (player_data.Inventory.Pocket.Total or 0) + 1;
+						local item_scale = mod.Config.CoopHUD.pocket[slot].scale * player.Scale;
+						local bar_scale = mod.Config.CoopHUD.pocket.chargebar.scale * player.Scale;
+						local item_size = 14 * item_scale.X;
+						local bar_size = 2 * bar_scale.X;
+							
+						item.Pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Pocket[slot] + mod.Config.CoopHUD.pocket[slot].offset) * player.Scale) * player_data.Edge.Multipliers);
+						if isTwin then item.Pos.Y = item.Pos.Y - (25 * player.Scale.Y); end
+							
+						local bar_flip = 1;
+						if mod.Config.CoopHUD.pocket.chargebar.mirror then bar_flip = bar_flip * player_data.Edge.Multipliers.X; end
+						if mod.Config.CoopHUD.pocket.chargebar.invert then bar_flip = bar_flip > 0 and -bar_flip or math.abs(bar_flip); end
+							
+						local bar_pos = item.Pos + ((mod.Config.CoopHUD.pocket.chargebar.offset + Vector(item_size + (bar_flip < 0 and -bar_size or 0), 0)) * Vector(bar_flip, player_data.Edge.Multipliers.Y));
+						local opacity = twinOpacity and math.max(0.1,mod.Config.CoopHUD.pocket[slot].opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.pocket[slot].opacity;
+						local color = mod.Config.CoopHUD.pocket.colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
+						local bar_color = mod.Config.CoopHUD.pocket.bar_colors and Utils.ConvertColorToColorize(player.Color,opacity) or Color(1,1,1,opacity);
+						
+						local data = {Slot = slot, Item = item, Bar = {Display = mod.Config.CoopHUD.pocket.chargebar.display, Flip = (bar_flip < 0), Pos = bar_pos, Scale = bar_scale, Color = color}, Scale = item_scale, Color = bar_color};
+							
+						if item.Type == PocketItemType.ACTIVE_ITEM then
+							local partial_charge = player_entity:GetActiveItemDesc(item.Slot).PartialCharge;
+							local current_charge = player_entity:GetActiveCharge(item.Slot);
+							local max_charge = player_entity:GetActiveMaxCharge(item.Slot) or 0;
+							local extra_charge = player_entity:GetBatteryCharge(item.Slot);
+							local soul_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY and player_entity:GetSoulCharge() or 0;
+							local blood_charge = player_entity:GetPlayerType() == PlayerType.PLAYER_BETHANY_B and (player_entity:GetBloodCharge() + current_charge) or 0;
+							local full_charge = not twinOpacity and current_charge + soul_charge >= max_charge and max_charge > 0;
+							data.Bar.Charge = {Current = current_charge, Max = max_charge, Blood = blood_charge, Soul = soul_charge, Extra = extra_charge, Partial = partial_charge, Full = full_charge};
+						end
+								
+						local isTextVisible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.pocket[slot].text.display);
+						if isTextVisible then
+							local text_scale = mod.Config.CoopHUD.pocket[slot].text.scale * player.Scale;
+							local text_opacity = twinOpacity and math.max(0.1,mod.Config.CoopHUD.pocket[slot].text.opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.pocket[slot].text.opacity;
+							local text_pos = item.Pos + ((mod.Config.CoopHUD.pocket[slot].text.offset + Vector(item_size + (6 * text_scale.X) + (bar_flip > 0 and bar_size * player_data.Edge.Multipliers.X or 0), -(mod.Fonts.CoopHUD.pocket:GetBaselineHeight(item.Name) / 1.5) * text_scale.Y)) * player_data.Edge.Multipliers);
+							if player_data.Edge.Multipliers.X < 0 then text_pos.X = text_pos.X - (mod.Fonts.CoopHUD.pocket:GetStringWidth(item.Name) * text_scale.X); end
+							if player_data.Edge.Multipliers.Y < 0 then text_pos.Y = text_pos.Y - mod.Fonts.CoopHUD.pocket:GetBaselineHeight(item.Name); end
+							data.Text = {Value = item.Name,Pos = text_pos,Scale = text_scale, Color = Utils.ConvertColorToFont(color,text_opacity)};
+						end
+						mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Data[slot].Data = data;
+						mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Data[slot].ChargeSprite = data.Bar.Charge and Item.ChargeBar.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Data[slot].ChargeSprite, data.Bar) or nil;
+						mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Data[slot].Sprite = Item.Pocket.GetSprite(mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Data[slot].Sprite, data, player_entity);
+					else
+						mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket.Data[slot].Data = {};
+					end
+				end
+				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_POCKET_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket); -- Execute Post Pocket Items data update Callbacks (player_index (Number), pockets_data(table))
+			end
 			
 			-- Trinket Items
-			for slot = mod.TrinketSlot.PRIMARY, mod.TrinketSlot.SECONDARY, 1 do
-				mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket[slot].Data = {};
-				local item_id = player_entity:GetTrinket(slot);
-				if item_id ~= TrinketType.TRINKET_NULL then
-					local scale = mod.Config.CoopHUD.trinket[slot].scale * player.Scale;
-					local extra_offset = pocket_total ~= nil and pocket_total > 0 and (mod.Config.CoopHUD.trinket[slot].offset_w_pockets and Vector(0,pocket_total * (20 * mod.Config.CoopHUD.pocket[(pocket_total - 1)].scale.Y))) or Vector.Zero;
-					local pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Trinket[slot] + mod.Config.CoopHUD.trinket[slot].offset + extra_offset) * player.Scale) * player_data.Edge.Multipliers);
-					if isTwin then pos.Y = pos.Y - (25 * player.Scale.Y); end
-					if player_data.Edge.Multipliers.Y < 0 then pos.Y = pos.Y + 20; end
-					local opacity = twinOpacity and mod.Config.CoopHUD.players.twins.esau_display > 1 and math.max(0.1,mod.Config.CoopHUD.trinket[slot].opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.trinket[slot].opacity;
-					local color = Utils.ColorOpacity((mod.Config.CoopHUD.trinket.colors and player.Color or Color.Default),opacity);
-					local data = {Item = {ID = item_id, Pos = pos}, Scale = scale, Color = color};
-					mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket[slot].Data = data;
-					mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket[slot].Sprite = Item.Trinket.GetSprite(player_data.Inventory.Trinket[slot].Sprite, data);
-				end
-			end
-			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_TRINKET_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket); -- Execute Post Trinket Items data update Callbacks (trinkets_data(table))
-			
-			-- Special/Crafting Inventory
-			local GetInfo = Item.Inventory.GetInfo[player.Type];
-			mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Visible = GetInfo ~= nil and CoopHUD.IsElementVisible(mod.Config.CoopHUD.inventory.special.display);
-			mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Data = {};
-			if mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Visible then
-				local max_slots, row_size, inventory = GetInfo(player_data);
-				local scale = mod.Config.CoopHUD.inventory.special.scale * player.Scale;
-				local screen_edge = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Special + mod.Config.CoopHUD.inventory.special.offset) * player.Scale) * player_data.Edge.Multipliers);
-				local offset = Vector(0,mod.Config.CoopHUD.inventory.special.offset_w_pockets and player_data.Inventory.Pocket.Total > 0 and player_data.Inventory.Pocket.Total * ((32 + (player_entity:GetTrinket(mod.TrinketSlot.PRIMARY) ~= TrinketType.TRINKET_NULL and (18 * mod.Config.CoopHUD.trinket[mod.TrinketSlot.PRIMARY].scale.X) or 2)) * (mod.Config.CoopHUD.pocket[(player_data.Inventory.Pocket.Total - 1)].scale.Y * scale.Y)) or 0);
-				
-				local data = {};
-				local row = 0;
-				local total = 0;
-				for i = 1, max_slots, 1 do
-					if i % (row_size + 1) == 0 and i ~= 1 then
-						row = row + 1;
-						offset.X = 0;
-						offset.Y = offset.Y + (mod.Config.CoopHUD.inventory.special.space.Y * scale.Y);
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.trinket.display);
+			if mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket.Visible then
+				for slot = mod.TrinketSlot.PRIMARY, mod.TrinketSlot.SECONDARY, 1 do
+					mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket.Data[slot].Data = {};
+					local item_id = player_entity:GetTrinket(slot);
+					local pocket_total = player_data.Inventory.Pocket.Total;
+					if item_id ~= TrinketType.TRINKET_NULL then
+						local scale = mod.Config.CoopHUD.trinket[slot].scale * player.Scale;
+						local extra_offset = pocket_total > 0 and (mod.Config.CoopHUD.trinket[slot].offset_w_pockets and Vector(0,pocket_total * (20 * mod.Config.CoopHUD.pocket[(pocket_total - 1)].scale.Y))) or Vector.Zero;
+						local pos = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Trinket[slot] + mod.Config.CoopHUD.trinket[slot].offset + extra_offset) * player.Scale) * player_data.Edge.Multipliers);
+						if isTwin then pos.Y = pos.Y - (25 * player.Scale.Y); end
+						if player_data.Edge.Multipliers.Y < 0 then pos.Y = pos.Y + 20; end
+						local opacity = twinOpacity and mod.Config.CoopHUD.players.twins.esau_display > 1 and math.max(0.1,mod.Config.CoopHUD.trinket[slot].opacity - mod.Config.CoopHUD.players.twins.esau_opacity) or mod.Config.CoopHUD.trinket[slot].opacity;
+						local color = Utils.ColorOpacity((mod.Config.CoopHUD.trinket.colors and player.Color or Color.Default),opacity);
+						local data = {Item = {ID = item_id, Pos = pos}, Scale = scale, Color = color};
+						mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket.Data[slot].Data = data;
+						mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket.Data[slot].Sprite = Item.Trinket.GetSprite(player_data.Inventory.Trinket.Data[slot].Sprite, data);
 					end
-					local item = inventory and inventory[i] or nil;
-					data[i] = {Item = item, Pos = (screen_edge + (offset * player_data.Edge.Multipliers))};
-					offset.X = offset.X + (mod.Config.CoopHUD.inventory.special.space.X * scale.X);
-					if item ~= nil then total = total + 1; end
 				end
-				mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Sprite = mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Sprite or Sprite();
-				mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Sprite.Color = Color(1,1,1,mod.Config.CoopHUD.inventory.special.opacity);
-				mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Sprite.Scale = scale;
-				mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Total = total;
-				mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Data = data;
+				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_TRINKET_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket); -- Execute Post Trinket Items data update Callbacks (trinkets_data(table))
 			end
-			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_INVENTORY_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Special); -- Execute Post Inventory/Crafting data update Callbacks (player_index (Number), inventory_data(table))
+			
+			-- Special/Crafting Inventories
+			local special_function = Item.Inventory.Functions[player.Type];
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Visible = CoopHUD.IsElementVisible(mod.Config.CoopHUD.inventory.special.display);
+			if mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Visible and special_function ~= nil then
+				local max_slots, row_size, inventory, animation = special_function(player_data);
+				
+				local special_data = {Total = 0,Data = {}, Sprite = Sprite(animation, false), Function = Item.Inventory.SpriteFunctions[player.Type]};
+				special_data.Sprite = Item.Inventory.GetSprite(special_data.Sprite, special_data, player_data, max_slots, row_size, inventory);
+				table.insert(mod.CoopHUD.DATA.Players[player_number].Inventory.Special.Data,special_data);
+				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_INVENTORY_UPDATE, player.Index, special_data); -- Execute Post Inventory/Crafting data update Callbacks (player_index (Number), inventory_data(table))
+			end
 			
 			-- Collectible/Passive Items
-			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Data = {};
-			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible = (player.Type ~= PlayerType.PLAYER_ISAAC_B or mod.Config.CoopHUD.inventory.items.tisaac) and (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.inventory.items.dead) and CoopHUD.IsElementVisible(mod.Config.CoopHUD.inventory.items.display);
-			if mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible and (mod.Config.CoopHUD.inventory.items.anchor == 0 or not isTwin) then
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible = (player.Type ~= PlayerType.PLAYER_ISAAC_B or mod.Config.CoopHUD.inventory.items.tisaac) and (not isTwin or mod.Config.CoopHUD.inventory.items.anchor == 0) and (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.inventory.items.dead) and CoopHUD.IsElementVisible(mod.Config.CoopHUD.inventory.items.display);
+			if mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible then
 				local anchor = mod.Config.CoopHUD.inventory.items.anchor;
 				local offset = mod.Config.CoopHUD.inventory.items.offset;
 				local scale = mod.Config.CoopHUD.inventory.items.scale * player.Scale;
@@ -293,6 +285,7 @@ function Player.Render(player_number, screen_dimensions)
 					local hasTwin = (mainTwin ~= nil or Utils.IsMainTwin(player_entity));
 					local twin_offset = (isTwin and ((mod.Config.CoopHUD.players.twins.offset * -1) + mod.Config.CoopHUD.inventory.items.twin_offset) or Vector.Zero);
 					local twins_offset = (mod.Config.CoopHUD.inventory.items.offset_w_twins and hasTwin and (mod.Config.CoopHUD.inventory.items.twins_offset * mod.Config.CoopHUD.players.twins.scale) or Vector.Zero);
+					local pocket_total = player_data.Inventory.Pocket.Total;
 					local pocket_offset = (mod.Config.CoopHUD.inventory.items.offset_w_pockets and not hasTwin and pocket_total > 0 and (Vector(0,pocket_total * (20 * mod.Config.CoopHUD.pocket[(pocket_total - 1)].scale.Y))) or Vector.Zero);
 					local player_offset = Vector(((player.Index % 2) == 0 and (0 - mod.Config.CoopHUD.players.mirrored_offset.X) or 0),(player.Index > 2 and (25 - mod.Config.CoopHUD.players.mirrored_offset.Y) or 0));
 					local extra_offset = not player_entity:IsCoopGhost() and (pocket_offset + twins_offset + twin_offset + player_offset) or Vector.Zero;
@@ -304,19 +297,18 @@ function Player.Render(player_number, screen_dimensions)
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Sprite.Scale = scale;
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Sprite.Color = mod.Config.CoopHUD.inventory.items.colors and color or Color(1, 1, 1, opacity);
 					
-				local inventory = player_data.Inventory.Passive.Images or {};
+				local inventory = player_data.Inventory.Passive.Data or {};
 				if #inventory > 0 then
-					local data = {};
 					local direction = mod.Config.CoopHUD.inventory.items.direction;
 					local dir_multi = Vector(direction == Direction.LEFT and -1 or 1,direction == Direction.UP and -1 or 1);
 					dir_multi = dir_multi * Vector(mod.Config.CoopHUD.inventory.items.invert_direction.X == 1 and -1 or 1, mod.Config.CoopHUD.inventory.items.invert_direction.Y == 1 and -1 or 1);
 					local max_grid = mod.Config.CoopHUD.inventory.items.max_grid;
+					player_data.Inventory.Passive.Maximum = player.Type == PlayerType.PLAYER_ISAAC_B and special_function(player_data) or mod.Config.CoopHUD.inventory.items.max;
 					local grid = Vector.One;
 					local item_offset = Vector.Zero;
-					for i = 1, #inventory, 1 do
-						if i > mod.Config.CoopHUD.inventory.items.max then break; end
-						local item = inventory[(#inventory - (i - 1))];
-						data[i] = {Item = item, Pos = (pos + item_offset)};
+					for i = 1, math.min(#inventory,player_data.Inventory.Passive.Maximum), 1 do
+						player_data.Inventory.Passive.Data[i].Pos = (pos + item_offset);
+						if i == player_data.Inventory.Passive.Maximum then break; end
 						if direction == Direction.LEFT or direction == Direction.RIGHT then
 							grid.X = grid.X + 1;
 							if grid.X <= max_grid.X then
@@ -335,7 +327,6 @@ function Player.Render(player_number, screen_dimensions)
 							end
 						end
 					end
-					mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Data = data;
 				end
 				CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_PASSIVE_UPDATE, player.Index, mod.CoopHUD.DATA.Players[player_number].Inventory.Passive); -- Execute Post Inventory/Crafting data update Callbacks (player_index (Number), passives_data(table))
 			end
@@ -392,8 +383,8 @@ function Player.Render(player_number, screen_dimensions)
 				health_pos.Y = health_pos.Y + 1 - mod.Config.CoopHUD.health.space.Y;
 			end
 			mod.CoopHUD.DATA.Players[player_number].Health = {Pos = health_pos, Flip = flip, Scale = scale, Color = color};
+			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_HEALTH_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Health); -- Execute Post Health data update Callbacks (player_index (Number), health_data(table))
 		end
-		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_POST_HEALTH_UPDATE, player_number, mod.CoopHUD.DATA.Players[player_number].Health); -- Execute Post Health data update Callbacks (player_index (Number), health_data(table))
 	end
 	
 	if not isTwin then

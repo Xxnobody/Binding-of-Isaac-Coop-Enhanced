@@ -6,15 +6,16 @@ local Utils = mod.Utils;
 -- Init Functions
 -- Functions ran when Twins are first initialized. Only runs once to setup Twins data and only one per PlayerType. [PlayerType / Function Array] (Main_twin (EntityPlayer), Second Player ControllerIndex (Number))
 CoopTwins.InitFunctions = {
-	[PlayerType.PLAYER_JACOB] = CoopTwins.InitJacobEsau,
 	[PlayerType.PLAYER_THEFORGOTTEN] = CoopTwins.InitForgottenSoul,
 	[PlayerType.PLAYER_THESOUL] = CoopTwins.InitForgottenSoul,
+	[PlayerType.PLAYER_JACOB] = CoopTwins.InitJacobEsau,
 };
 
 -- Start Functions
 -- Functions ran when a game starts or is restarted. [PlayerType / Function Array] (Main_twin (EntityPlayer), Other_twin (EntityPlayer))
 CoopTwins.StartFunctions = {
 	[PlayerType.PLAYER_THEFORGOTTEN] = {CoopTwins.StartForgottenSoul},
+	[PlayerType.PLAYER_JACOB] = {CoopTwins.StartJacobEsau},
 };
 
 -- Continuous Functions

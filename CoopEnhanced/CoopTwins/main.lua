@@ -70,6 +70,11 @@ function CoopTwins.InitJacobEsau(main_twin,controller_index)
 	mod.RefreshFrameCount();
 end
 
+local bomb_cooldown = 0;
+function CoopTwins.StartJacobEsau(main_twin,other_twin)
+	bomb_cooldown = main_twin:GetBombPlaceDelay();
+end
+
 function CoopTwins.BirthrightJacobEsau(birth_twin,isRemoved)
 	if isRemoved then return; end
 	local other_twin = CoopTwins.GetTwin(birth_twin);
@@ -85,13 +90,13 @@ function CoopTwins.BirthrightJacobEsau(birth_twin,isRemoved)
 	end
 end
 
-local bomb_cooldown = 0;
 function CoopTwins.BombJacobEsau(bomb_twin,input_hook)
 	if input_hook ~= InputHook.IS_ACTION_TRIGGERED or bomb_twin:GetNumBombs() <= 0 or game:GetFrameCount() < bomb_cooldown then return; end
-	bomb_cooldown = game:GetFrameCount() + bomb_twin:GetBombPlaceDelay();
 	local other_twin = CoopTwins.GetTwin(bomb_twin);
 	if not other_twin then return; end
-	other_twin:FireBomb(other_twin.Position,Vector.Zero,other_twin);
+	bomb_cooldown = game:GetFrameCount() + bomb_twin:GetBombPlaceDelay();
+	local new_bomb = other_twin:FireBomb(other_twin.Position,Vector.Zero,other_twin);
+	new_bomb:AddTearFlags(other_twin:GetBombFlags());
 end
 
 function CoopTwins.SpeedJacobEsau(speed_twin)
@@ -383,10 +388,10 @@ function CoopTwins.onRender(_)
 		local other_twin = Utils.GetPlayerByID(twin_id);
 		if main_twin and other_twin then
 			if mod.Config.CoopTwins.twin_death then
-				if (main_twin:IsCoopGhost() or Utils.IsPlayerDying(main_twin)) or (other_twin:IsCoopGhost() or  Utils.IsPlayerDying(other_twin)) then
-					if not main_twin:IsCoopGhost() then main_twin:Die(); end
-					if not other_twin:IsCoopGhost() then other_twin:Die(); end
-					mod.Debug("Twin died, killing the other twin.",CoopTwins.Name);
+				if main_twin:IsCoopGhost() then
+					other_twin:Die();
+				elseif other_twin:IsCoopGhost() then
+					main_twin:Die();
 				end
 			end
 			if (Input.IsActionPressed(ButtonAction.ACTION_DROP,other_twin.ControllerIndex) and Input.IsActionTriggered(ButtonAction.ACTION_MAP,other_twin.ControllerIndex)) and other_twin.Position:Distance(main_twin.Position) > (mod.Config.CoopTwins.tp_distance * mod.GridSize) then
@@ -402,6 +407,17 @@ function CoopTwins.onRender(_)
 	end
 end
 mod:AddPriorityCallback(ModCallbacks.MC_POST_RENDER, CallbackPriority.IMPORTANT, CoopTwins.onRender);
+
+function CoopTwins.onDeath(_,entity)
+	if not CoopTwins.DATA.Twins then return; end
+	local dead_twin = entity:ToPlayer();
+	if not mod.Config.CoopTwins.twin_death or not CoopTwins.IsTwin(dead_twin) then return; end
+	local other_twin = CoopTwins.GetTwin(dead_twin);
+	if not other_twin or other_twin:IsCoopGhost() or Utils.IsPlayerDying(other_twin) or dead_twin:WillPlayerRevive() then return; end
+	other_twin:Die();
+	mod.Debug("Twin died, killing the other twin.",CoopTwins.Name);
+end
+mod:AddPriorityCallback(ModCallbacks.MC_POST_ENTITY_KILL, mod.Priorities[5], CoopTwins.onDeath, EntityType.ENTITY_PLAYER);
 
 function CoopTwins.onRoom()
 	if not CoopTwins.DATA.Twins then return; end

@@ -93,10 +93,9 @@ local ModuleRegistry = {
 		mod.Registry.Commands.Auto[(mod.Config[module_name].CMD)] = "Co-op Labels commands and configuration settings";
 	end,
 	CoopMarks = function(module_name)
-		if not REPENTOGON then return; end
 		local dir = mod.Directory .. module_name .. ".";
 		CoopEnhanced[module_name] = {Directory = dir,DATA = {}};
-		if not mod.Config.modules[module_name] then return; end
+		if not REPENTOGON or not mod.Config.modules[module_name] then return; end
 		CoopEnhanced.Registry:RegisterCallback("MARKS_POST_DATA");
 		CoopEnhanced.Registry:RegisterCallback("MARKS_PRE_RENDER");
 		require(dir .. "enums");
@@ -150,7 +149,7 @@ local ModuleRegistry = {
 	end,
 	CoopHUD = function(module_name)
 		local dir = mod.Directory .. module_name .. ".";
-		CoopEnhanced[module_name] = {Directory = dir,IsVisible = true,IsMapDown = false,IsMapToggled = false,IsPlayerMapDown = {},Refresh = false,DATA = {Players = {},Joining = {},Score = {},Timer = {},Banner = {}},Player = {},Item = {Active = {},Trinket = {},Pocket = {},ChargeBar = {},Inventory = {}},Stats = {Deals = {}, Stat = {}},Misc = {Pickups = {}, Difficulty = {[0] = {},[1] = {}}, Wave = {[0] = {}}, Extra = {[0] = {}}}};
+		CoopEnhanced[module_name] = {Directory = dir,Visible = true,IsMapDown = false,IsMapToggled = false,IsPlayerMapDown = {},Refresh = false,DATA = {Players = {},Joining = {},Score = {},Timer = {},Banner = {}},Player = {},Item = {Active = {},Trinket = {},Pocket = {},ChargeBar = {},Inventory = {}},Stats = {Deals = {}, Stat = {}},Misc = {Pickups = {}, Difficulty = {[0] = {},[1] = {}}, Wave = {[0] = {}}, Extra = {[0] = {}}}};
 		if not REPENTOGON or not mod.Config.modules[module_name] then return; end
 		CoopEnhanced.Registry:RegisterCallback("HUD_PLAYER_INIT");
 		CoopEnhanced.Registry:RegisterCallback("HUD_PRE_COOP_MENU_RENDER");
@@ -571,11 +570,15 @@ local function modCompats()
 			end
 		end
 	end
+	
 	-- Character Adds
 	local anim2 = "gfx/ui/coop_menu.anm2";
 	if EdithRestored then
 		Utils.AddCharacter("Edith",EdithRestored.Enums.PlayerType.EDITH,EdithRestored.Enums.Achievements.Characters.EDITH,false,false,nil,{Anm2 = anim2,Animation = "Edith",Frame = 0});
 		Utils.AddCharacter("The Restored",EdithRestored.Enums.PlayerType.EDITH_B,EdithRestored.Enums.Achievements.Characters.TAINTED,false,true,EdithRestored.Enums.PlayerType.EDITH,{Anm2 = anim2,Animation = "Edith",Frame = 1});
+	elseif EdithMod then
+		Utils.AddCharacter("Edith",EdithMod.Enums.PlayerType.EDITH,EdithMod.Enums.Achievements.Characters.EDITH,false,false,nil,{Anm2 = anim2,Animation = "Edith",Frame = 0});
+		Utils.AddCharacter("The Restored",EdithMod.Enums.PlayerType.EDITH_B,EdithMod.Enums.Achievements.Characters.TAINTED,false,true,EdithMod.Enums.PlayerType.EDITH,{Anm2 = anim2,Animation = "Edith",Frame = 1});
 	end
 	if XMLData.GetModById("2501339433") and XMLData.GetModById("2501339433").enabled == "true" then
 		Utils.AddCharacter("Nemesis",Isaac.GetPlayerTypeByName("Nemesis"),nil,false,false,nil,{Anm2 = anim2,Animation = "Nemesis",Frame = 0});

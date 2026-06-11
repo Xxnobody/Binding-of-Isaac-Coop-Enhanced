@@ -44,7 +44,7 @@ function CoopHUD.FancyBossBar()
 	end
 
 	local function handleBossBarSprite()
-		if not CoopHUD.IsVisible() then return; end
+		if not CoopHUD.Visible then return; end
 		local bossBarSprite = GetFancyBossBar();
 
 		if not shouldRestrictBossCount() then
@@ -113,10 +113,10 @@ function CoopHUD.FancyBossBar()
 	mod:AddPriorityCallback(ModCallbacks.MC_POST_UPDATE, CallbackPriority.LATE, handleBossBarSprite);
 	
 	FancyBossBar:RemoveCallback(ModCallbacks.MC_POST_HUD_RENDER, FancyBossBar.onRender)
-	FancyBossBar:AddCallback(ModCallbacks.MC_POST_HUD_RENDER, function(shadername) if not CoopHUD.IsVisible() then FancyBossBar.onRender(shadername); end end)
+	FancyBossBar:AddCallback(ModCallbacks.MC_POST_HUD_RENDER, function(shadername) if not CoopHUD.Visible then FancyBossBar.onRender(shadername); end end)
 	
 	local function onRender()
-		if CoopHUD.IsVisible() and not FancyBossBar.forceBossBarDisable and FancyBossBar.renderBossBar then
+		if CoopHUD.Visible and not FancyBossBar.forceBossBarDisable and FancyBossBar.renderBossBar then
 			local screenSize = Utils.GetScreenDimensions().Max;
 			local isTop = not FancyBossBar.Config["BossBarOnBottom"] and not FancyBossBar.forceBottomBossBarPosition;
 			local yOffset = isTop and 10 or -14;

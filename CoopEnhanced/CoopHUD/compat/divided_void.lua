@@ -19,16 +19,16 @@ function CoopHUD.DividedVoid()
 	local SubChargeSprite = nil;
 
 	local function RenderVoid(sprite,item_data,sprite_data,player_entity)
-		DIVIDED_VOID.MaxCharge = valid_charges[mod.Config.CoopHUD.compat.DIVOID.max_charge];
+		--DIVIDED_VOID.MaxCharge = valid_charges[mod.Config.CoopHUD.compat.DIVOID.max_charge];
 
 		local void_data = DIVIDED_VOID.PlayerswithVoid and DIVIDED_VOID.PlayerswithVoid[player_entity.Index];
 		if void_data then
 			--item_data.Bar.Charge.Max = DIVIDED_VOID.MaxCharge;
 			SubChargeSprite = CoopHUD.Item.ChargeBar.GetSprite(SubChargeSprite, item_data.Bar);
 			local isPocket = item_data.Item.Slot ~= nil;
-			local player_data = CoopHUD.getDataFromEntity(player_entity);
-			local COOP_DATA = player_data and (not isPocket and player_data.Inventory.Active[item_data.Slot] or player_data.Inventory.Pocket[item_data.Slot]) or nil;
-			if not COOP_DATA or not COOP_DATA.Data then return; end
+			local player_data = CoopHUD.GetPlayerDataFromEntity(player_entity);
+			local COOP_DATA = player_data and (not isPocket and player_data.Inventory.Active.Data[item_data.Slot] or player_data.Inventory.Pocket.Data[item_data.Slot]) or nil;
+			if not COOP_DATA or not COOP_DATA.ChargeSprite then return; end
 
 			sprite_data.Anm2 = "gfx/items/collectibles/DIV_VOID/div_void.anm2";
 			sprite_data.Animation = void_data.full and "mode" .. void_data.mode .. "_full" or "mode" .. void_data.mode;
@@ -73,10 +73,10 @@ function CoopHUD.DividedVoid()
 		end
 	end
 
-	CoopEnhanced.CoopHUD.Item.Active.Special[VOID_ID] = function(sprite,item_data,sprite_data,player_entity)
+	CoopEnhanced.CoopHUD.Item.Active.Functions[VOID_ID] = function(sprite,item_data,sprite_data,player_entity)
 		RenderVoid(sprite,item_data,sprite_data,player_entity);
 	end
-	CoopEnhanced.CoopHUD.Item.Active.Special[DIV_VOID_ID] = function(sprite,item_data,sprite_data,player_entity)
+	CoopEnhanced.CoopHUD.Item.Active.Functions[DIV_VOID_ID] = function(sprite,item_data,sprite_data,player_entity)
 		RenderVoid(sprite,item_data,sprite_data,player_entity);
 	end
 end

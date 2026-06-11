@@ -412,12 +412,16 @@ function Utils.GetUnlockedCharacters(no_mods,no_random)
 	local characters = {};
 	for i,character in pairs(mod.Characters) do
 		if no_mods and i >= PlayerType.NUM_PLAYER_TYPES then break; end
-		if not character.Hidden and (not character.Achievement or (character.Achievement > 0 and Isaac.GetPersistentGameData():Unlocked(character.Achievement))) then
-			table.insert(characters,character);
-		end
+		if Utils.IsCharacterUnlocked(character) then table.insert(characters,character); end
 	end
-	if not no_random and #characters > 1 then table.insert(characters,{Name = "Random", Type = PlayerType.PLAYER_POSSESSOR, Achievement = nil, Sprite = {Anm2 = mod.Animations.Coop, Animation = "Main", Frame = 0,Sheets = {[1] = mod.Images.Blank}}}); end -- Insert Random player last
+	if not no_random and #characters > 0 then table.insert(characters,{Name = "Random", Type = PlayerType.PLAYER_POSSESSOR, Achievement = nil, Sprite = {Anm2 = mod.Animations.Coop, Animation = "Main", Frame = 0,Sheets = {[1] = mod.Images.Blank}}}); end -- Insert Random player last
 	return characters;
+end
+function Utils.IsCharacterUnlocked(character)
+	if not character.Hidden and (not character.Achievement or (character.Achievement > 0 and REPENTOGON and Isaac.GetPersistentGameData():Unlocked(character.Achievement))) then
+		return true;
+	end
+	return false;
 end
 
 -- Player Utils
@@ -507,8 +511,9 @@ function Utils.GetPlayerName(player_entity, player_index, name_type, custom_name
 	if name_type == mod.NameTypes.CHARACTER then
 		local player_type = player_entity:GetPlayerType();
 		local character = Utils.GetCharacterByType(player_type);
-		char_name = Utils.IsTainted(player_type) and player_entity and (full_tainted and character and character.Name or "T. " .. player_entity:GetName()) or (character ~= nil and character.Name or (player_entity and player_entity:GetName() or ""));
-		char_name = char_name:len() > 0 and Utils.GetLocalizedString("players", char_name, Language.ENGLISH) or "";
+		char_name = Utils.IsTainted(player_type) and (full_tainted and character and character.Name or (player_entity and "T." .. player_entity:GetName() or "")) or (character and character.Name or (player_entity and player_entity:GetName() or ""));
+		local lang = Language ~= nil and Language.ENGLISH or -1;
+		char_name = char_name:len() > 0 and Utils.GetLocalizedString("players", char_name, lang) or "";
 	end
 	return name_type == mod.NameTypes.PLAYER and "P" .. player_index or (name_type == mod.NameTypes.CHARACTER and char_name or custom_name);
 end

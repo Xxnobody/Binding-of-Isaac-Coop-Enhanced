@@ -43,6 +43,7 @@ mod.CoopLabels.DefaultConfig = {
 	scale_sync = false,
 	tear_colors = false,
 	player_colors = false,
+	target_colors = false,
 	player_sync = "Global",
 	fonts = {labels = "terminus",}
 };
@@ -129,6 +130,16 @@ ModConfigMenu.AddSetting(
 		CurrentSetting = function() return tonumber(string.format("%.0f", mod.Config.CoopLabels.tear_tint_amount * 100)); end,
 		Display = function() return "Tint Amount: " .. string.format("%.0f", mod.Config.CoopLabels.tear_tint_amount * 100) .. "%"; end,
 		OnChange = function(n) mod.Config.CoopLabels.tear_tint_amount = n / 100; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopLabels.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopLabels.target_colors; end,
+		Display = function() return "Target Colors: " .. (mod.Config.CoopLabels.target_colors and "on" or "off"); end,
+		OnChange = function(b) mod.Config.CoopLabels.target_colors = b; end,
+		Info = {"Enable to Tint Target reticle colors from items such as Epic Fetus."},
 	}
 );
 ModConfigMenu.AddSetting(

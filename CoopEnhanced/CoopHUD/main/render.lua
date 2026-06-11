@@ -28,7 +28,6 @@ local function refreshTimer(timer_value)
 	return timer_value;
 end
 
-local map_frames = 0;
 function CoopHUD.RenderPlayers(screen_dimensions)
 	if game:GetNumPlayers() > 0 then
 		local players = {};
@@ -53,18 +52,10 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 				end
 			else
 				player_index = i - num_twins;
-				local map_down = Input.IsActionPressed(ButtonAction.ACTION_MAP, player_entity.ControllerIndex);
-				CoopHUD.IsMapDown = CoopHUD.IsMapDown or map_down;
-				CoopHUD.IsPlayerMapDown[player_entity.ControllerIndex] = map_down;
-				if map_down then
-					map_frames = map_frames + 1;
-				else
-					if map_frames > 1 and map_frames <= mod.Config.CoopHUD.toggle_hud.frames then CoopHUD.IsMapToggled = not CoopHUD.IsMapToggled; end
-					map_frames = 0;
-				end
-				if not game:IsPaused() and Input.IsActionTriggered(ButtonAction.ACTION_DROP, player_entity.ControllerIndex) then
+				if CoopHUD.Item.Inventory.ShiftQueue[player_index] > 0 then
 					local player_data = mod.CoopHUD.DATA.Players[index];
-					if player_data then CoopHUD.Item.Inventory.Shift(player_data); end
+					if player_data then CoopHUD.Item.Inventory.Shift(player_data,CoopHUD.Item.Inventory.ShiftQueue[player_index]); end
+					CoopHUD.Item.Inventory.ShiftQueue[player_index] = 0;
 				end
 			end
 			
@@ -90,7 +81,7 @@ function CoopHUD.RenderPlayers(screen_dimensions)
 			if not mod.CoopHUD.DATA.Players[index] then
 				mod.CoopHUD.DATA.Players[index] = {
 					ID = Utils.GetPlayerID(player_entity),
-					Inventory = {Active = {[0] = {},[1] = {},},Trinket = {[0] = {},[1] = {}},Pocket = {[0] = {},[1] = {},[2] = {},[3] = {},Total = 0},Passive = {},Special = {}},
+					Inventory = {Active = {Data = {[0] = {},[1] = {}}},Trinket = {Data = {[0] = {},[1] = {}}},Pocket = {Data = {[0] = {},[1] = {},[2] = {},[3] = {}},Total = 0},Passive = {Data = {}},Special = {Data = {}}},
 					Stats = {Current = {},Updates = {},Data = {}},
 					Label = {Sprite = Utils.GetHeadSprite(nil,player_entity)},
 					Health = {}

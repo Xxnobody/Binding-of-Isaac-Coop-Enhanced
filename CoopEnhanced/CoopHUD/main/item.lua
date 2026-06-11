@@ -10,171 +10,6 @@ local Pocket = CoopHUD.Item.Pocket;
 local game = Game();
 local Utils = mod.Utils;
 
-CoopHUD.Item.Active.Special = { -- taken from coopHUD+ (Konoca)
-	[CollectibleType.COLLECTIBLE_D_INFINITY] = function(_,item_data,sprite_data,_)
-		local tmpFrame = 0;
-		local varData = item_data.Item.Desc.VarData;
-		local path = mod.Images.DInfinity;
-		if varData then -- Requires checking a range since every use results in a different varData depending on die chosen
-			if varData >= Active.D_INFINITY.D4 and varData <= Active.D_INFINITY.D4 + 20 then tmpFrame = 2;
-			elseif varData >= Active.D_INFINITY.D6 and varData <= Active.D_INFINITY.D6 + 20 then tmpFrame = 4;
-			elseif varData >= Active.D_INFINITY.E6 and varData <= Active.D_INFINITY.E6 + 20 then tmpFrame = 6;
-			elseif varData >= Active.D_INFINITY.D7 and varData <= Active.D_INFINITY.D7 + 20 then tmpFrame = 8;
-			elseif varData >= Active.D_INFINITY.D8 and varData <= Active.D_INFINITY.D8 + 20 then tmpFrame = 10;
-			elseif varData >= Active.D_INFINITY.D10 and varData <= Active.D_INFINITY.D10 + 20 then tmpFrame = 12;
-			elseif varData >= Active.D_INFINITY.D12 and varData <= Active.D_INFINITY.D12 + 20 then tmpFrame = 14;
-			elseif varData >= Active.D_INFINITY.D20 and varData <= Active.D_INFINITY.D20 + 20 then tmpFrame = 16;
-			elseif varData >= Active.D_INFINITY.D100 and varData <= Active.D_INFINITY.D100 + 20 then tmpFrame = 18;
-			end
-		end
-		sprite_data.Animation = "DInfinity";
-		sprite_data.Frame = (tmpFrame + sprite_data.Frame);
-		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
-	end,
-	[CollectibleType.COLLECTIBLE_THE_JAR] = function(_,_,sprite_data,player_entity)
-		local path = mod.Images.TheJar;
-		sprite_data.Animation = "Jar";
-		sprite_data.Frame = math.ceil(player_entity:GetJarHearts() / 2);
-		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
-	end,
-	[CollectibleType.COLLECTIBLE_JAR_OF_FLIES] = function(_,_,sprite_data,player_entity)
-		local path = mod.Images.JarOfFlies;
-		sprite_data.Animation = "Jar";
-		sprite_data.Frame = player_entity:GetJarFlies();
-		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
-	end,
-	[CollectibleType.COLLECTIBLE_JAR_OF_WISPS] = function(_,item_data,sprite_data,_)
-		local path = mod.Images.JarOfWisps;
-		sprite_data.Animation = "WispJar";
-		sprite_data.Frame = ((item_data.Item.Desc.VarData - 1) + (15 * sprite_data.Frame));
-		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
-	end,
-	[CollectibleType.COLLECTIBLE_EVERYTHING_JAR] = function(_,item_data,sprite_data,_)
-		local path = mod.Images.EverythingJar;
-		sprite_data.Animation = "EverythingJar";
-		sprite_data.Frame = (item_data.Bar.Charge.Current + 1);
-		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
-	end,
-	[CollectibleType.COLLECTIBLE_MAMA_MEGA] = function(_,_,sprite_data,player_entity)
-		local path = mod.Images.MamaMega;
-		sprite_data.Frame = (player_entity:HasGoldenBomb() and sprite_data.Frame + 1 or sprite_data.Frame);
-		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
-	end,
-	[CollectibleType.COLLECTIBLE_SMELTER] = function(_,_,sprite_data,_)
-		sprite_data.Frame = (3 * sprite_data.Frame);
-	end,
-	[CollectibleType.COLLECTIBLE_GLOWING_HOUR_GLASS] = function(_,item_data,sprite_data,_)
-		local path = mod.Images.GlowingHourGlass;
-		sprite_data.Animation = "GlowingHourGlass";
-		sprite_data.Frame = math.max(0,(3 - item_data.Item.Desc.VarData));
-		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
-	end,
-	[CollectibleType.COLLECTIBLE_URN_OF_SOULS] = function(_,_,sprite_data,player_entity) -- currently player_entity:GetUrnSouls() is broken and returns the number 1065353216
-		local path = mod.Images.UrnOfSouls;
-		local jar_state = player_entity:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_URN_OF_SOULS); -- Returns 1 for closed, 2 for opened
-		sprite_data.Animation = "SoulUrn";
-		--print(player_entity:GetUrnSouls())
-		--sprite_data.Frame = ((21 * jar_state) + (player_entity:GetUrnSouls() + 1))
-		sprite_data.Frame = (0);
-		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
-	end,
-	[CollectibleType.COLLECTIBLE_FLIP] = function(_,_,sprite_data,player_entity)
-		local path = mod.Images.Flip;
-		sprite_data.Animation = "Flip";
-		sprite_data.Frame = (player_entity:GetType() == PlayerType.PLAYER_LAZARUS2_B and 1 or 0);
-		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
-	end,
-};
-CoopHUD.Item.Inventory.GetInfo = { -- taken from coopHUD+ (Konoca)
-	[PlayerType.PLAYER_ISAAC_B] = function (player_data)
-		local max_slots, row_size = 8, 4;
-		if player_data.Player.Entity.Ref:ToPlayer():HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) then
-			max_slots = 12;
-			row_size = 6;
-		end
-		return max_slots, row_size, player_data.Inventory.Passive.Images;
-	end,
-	[PlayerType.PLAYER_CAIN_B] = function (player_data)
-		return 8, 4, player_data.Player.Entity.Ref:ToPlayer():GetBagOfCraftingContent();
-	end,
-	[PlayerType.PLAYER_BLUEBABY_B] = function (player_data)
-		local inv = {};
-		for i = 0, 6, 1 do
-			table.insert(inv, player_data.Player.Entity.Ref:ToPlayer():GetPoopSpell(i));
-		end
-		return 6, 6, inv;
-	end
-};
-
-CoopHUD.Item.Inventory.GetSprite = { -- taken from coopHUD+ (Konoca)
-	[PlayerType.PLAYER_ISAAC_B] = function(sprite, item, i)
-		sprite = sprite or Sprite();
-		sprite:Load(mod.Animations.Inventory, false);
-		sprite:SetFrame("Idle", i - 1);
-		if item then sprite:ReplaceSpritesheet(2, item); end
-		sprite:LoadGraphics();
-		return sprite;
-	end,
-	[PlayerType.PLAYER_CAIN_B] = function(sprite, item, i)
-		sprite = sprite or Sprite();
-		sprite:Load(mod.Animations.Crafting, false);
-		sprite:SetFrame("Idle", (item or 0));
-		sprite:LoadGraphics();
-		return sprite;
-	end,
-	[PlayerType.PLAYER_BLUEBABY_B] = function(sprite, item, i)
-		sprite = sprite or Sprite();
-		sprite:Load(mod.Animations.Poops, false);
-		sprite:SetFrame(i == 1 and "Idle" or "IdleSmall", item);
-		sprite:LoadGraphics();
-		return sprite;
-	end
-};
-
-CoopHUD.Item.Inventory.ExtraFunctions = { -- taken from coopHUD+ (Konoca)
-	[PlayerType.PLAYER_CAIN_B] = function(player_data)
-		local function GetResult()
-			local id = player_data.Player.Entity.Ref:ToPlayer():GetBagOfCraftingOutput();
-			if player_data.Inventory.Special.Total ~= 8 or id == 0 then return nil; end
-			local item = Isaac:GetItemConfig():GetCollectible(id);
-			if (game:GetLevel():GetCurses() & 64) == 64 and not mod.Config.CoopHUD.inventory.special.ignore_curse then return (ReworkedCOB ~= nil and ("gfx/items/collectibles/questionmark_Q" .. item.Quality .. ".png") or mod.Images.QuestionMark); end
-			return item.GfxFileName;
-		end
-		local result = GetResult();
-		local sprite = player_data.Inventory.Special.Sprite;
-		if not sprite or not player_data.Inventory.Special.Data[1] then return; end
-		if result or mod.Config.CoopHUD.inventory.special.result_display then 
-			local result_pos = player_data.Inventory.Special.Data[#player_data.Inventory.Special.Data].Pos + (((Vector(((mod.Config.CoopHUD.inventory.special.space.X * 3) * mod.Config.CoopHUD.inventory.special.scale.X), ((mod.Config.CoopHUD.inventory.special.space.Y / -1.5) * mod.Config.CoopHUD.inventory.special.scale.Y)) + mod.Config.CoopHUD.inventory.special.result_offset) * mod.Config.CoopHUD.inventory.special.result_scale) * player_data.Edge.Multipliers);
-			
-			sprite.Color = Color(1, 1, 1, mod.Config.CoopHUD.inventory.special.result_opacity);
-			sprite.Scale = mod.Config.CoopHUD.inventory.special.result_scale;
-			
-			sprite.FlipX = player_data.Edge.Multipliers.X < 0;
-			sprite:SetFrame("Result", 0);
-			
-			sprite:LoadGraphics();
-			sprite:Render(result_pos);
-			
-			if result then
-				local result_sprite = player_data.Inventory.Special.ResultSprite or Sprite(mod.Animations.Item, false);
-				result_sprite.Scale = sprite.Scale;
-				result_sprite.Color = sprite.Color;
-				result_sprite:ReplaceSpritesheet(0, result);
-				result_sprite:ReplaceSpritesheet(1, result);
-				result_sprite:ReplaceSpritesheet(2, result);
-				result_sprite:SetFrame("Idle", 0);
-				result_sprite:LoadGraphics();
-				result_sprite:Render((result_pos + Vector(0,22 * result_sprite.Scale.Y)));
-				player_data.Inventory.Special.ResultSprite = result_sprite;
-			end
-		end
-		sprite.Color = Color(1, 1, 1, mod.Config.CoopHUD.inventory.special.opacity);
-		sprite.Scale = mod.Config.CoopHUD.inventory.special.scale;
-		sprite.FlipX = false;
-		sprite:LoadGraphics();
-	end
-};
-
 function Active.GetBook(player_entity, id)
 	local hasVirtues = player_entity:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES) and id ~= CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES;
 	local hasBelial = (player_entity:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_BELIAL) or player_entity:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_BELIAL_PASSIVE)) and player_entity:GetActiveItem(ActiveSlot.SLOT_SECONDARY) ~= CollectibleType.COLLECTIBLE_BOOK_OF_BELIAL and id ~= CollectibleType.COLLECTIBLE_BOOK_OF_BELIAL;
@@ -185,20 +20,48 @@ function Active.GetBook(player_entity, id)
 	return nil;
 end
 
-function Pocket.GetItems(player_entity)
-	local items = {};
-	local total = 0;
-	local item_pool = game:GetItemPool();
-	for slot = PillCardSlot.PRIMARY, PillCardSlot.QUATERNARY, 1 do
-		local pocket_item = player_entity:GetPocketItem(slot);
-		local type = pocket_item:GetSlot() > 0 and pocket_item:GetType() or -1;
-		local id = type == PocketItemType.ACTIVE_ITEM and player_entity:GetActiveItemDesc((pocket_item:GetSlot() - 1)).Item or (type > -1 and pocket_item:GetSlot() or 0);
-		if type == PocketItemType.PILL and id > 2048 then id = (id - 2032); end -- convert horse pill ID to match anm2
-		local name = id > 0 and type > -1 and ((type == PocketItemType.PILL and (id > PillColor.PILL_NULL and item_pool:IsPillIdentified(id) and XMLData.GetEntryById(XMLNode.PILL, item_pool:GetPillEffect(id,player_entity)).name or "???")) or (XMLData.GetEntryById((type == PocketItemType.CARD and XMLNode.CARD or XMLNode.ITEM),id).name or "")) or "";
-		items[slot] = {ID = id, Type = type, Name = name, Slot = (pocket_item:GetSlot() - 1)};
-		if type > -1 then total = total + 1; end
+function Pocket.GetCardType(id)
+	local card = Isaac.GetItemConfig():GetCard(id);
+	local card_type = -1;
+	if card and card.CardType then 
+		card_type = CoopHUD.Item.CardBacks[id] ~= nil and CoopHUD.Item.CardBacks[id] or (card.CardType == ItemConfig.CARDTYPE_SUIT and CoopHUD.CardType.SUIT or (card.CardType == ItemConfig.CARDTYPE_TAROT and CoopHUD.CardType.TAROT or (card.CardType == ItemConfig.CARDTYPE_TAROT_REVERSE and CoopHUD.CardType.REVERSE or card_type)));
 	end
-	return items, total;
+	return card_type;
+end
+
+function Pocket.GetPillType(id)
+	local pill_type = -1;
+	if id and id > PillColor.PILL_NULL then
+		pill_type = id < PillColor.NUM_PILLS and CoopHUD.PillType.VANILLA or (id < PillColor.PILL_GIANT_FLAG and CoopHUD.PillType.MODDED or (id < (PillColor.NUM_PILLS + PillColor.PILL_GIANT_FLAG) and CoopHUD.PillType.VANILLA_HORSE or CoopHUD.PillType.MODDED_HORSE));
+	end
+	return pill_type;
+end
+
+function Pocket.GetPillAnm2(id)
+	local pill = XMLData.GetEntityByTypeVarSub(EntityType.ENTITY_PICKUP,PickupVariant.PICKUP_PILL,id); -- Get Pill entity to get custom pill anm2
+	if Pocket.GetPillType(id) > CoopHUD.PillType.VANILLA_HORSE and pill and pill.anm2root then
+		return (pill.anm2root .. pill.anm2path);
+	end
+	return nil;
+end
+
+function Pocket.GetItem(slot, player_entity)
+	local pocket_item = player_entity:GetPocketItem(slot);
+	local type = pocket_item:GetSlot() > 0 and pocket_item:GetType() or -1;
+	local id = type == PocketItemType.ACTIVE_ITEM and player_entity:GetActiveItemDesc((pocket_item:GetSlot() - 1)).Item or (type > -1 and pocket_item:GetSlot() or CollectibleType.COLLECTIBLE_NULL);
+	local name = id > CollectibleType.COLLECTIBLE_NULL and type > -1 and ((type == PocketItemType.PILL and (id > PillColor.PILL_NULL and game:GetItemPool():IsPillIdentified(id) and XMLData.GetEntryById(XMLNode.PILL, game:GetItemPool():GetPillEffect(id,player_entity)).name or "???")) or (XMLData.GetEntryById((type == PocketItemType.CARD and XMLNode.CARD or XMLNode.ITEM),id).name or "")) or "";
+	local extra_data = type == PocketItemType.ACTIVE_ITEM and player_entity:GetActiveItemDesc((pocket_item:GetSlot() - 1)).VarData or (type == PocketItemType.CARD and Pocket.GetCardType(id) or (type == PocketItemType.PILL and Pocket.GetPillAnm2(id)));
+	return {ID = id, Type = type, Name = name, Slot = (pocket_item:GetSlot() - 1), Extra = extra_data};
+end
+
+function Pocket.GetItems(player_entity)
+	local pocket_items = {};
+	local pocket_total = 0;
+	for slot = PillCardSlot.PRIMARY, PillCardSlot.QUATERNARY, 1 do
+		pocket_items[slot] = Pocket.GetItem(slot, player_entity);
+		if pocket_items[slot].Type > -1 then pocket_total = pocket_total + 1; end
+	end
+	return pocket_items, pocket_total;
 end
 
 function ChargeBar.GetCharge(current_charge, max_charge, partial_charge);
@@ -219,40 +82,48 @@ function ChargeBar.GetCharge(current_charge, max_charge, partial_charge);
 end
 
 function Inventory.Add(player_data, item)
-	local display, max_slots = Inventory.GetInfo[player_data.Player.Type];
-	if display and max_slots ~= nil and #player_data.Inventory.Passive.Images == max_slots then
-		player_data.Inventory.Passive.Images[1] = item.GfxFileName;
+	if player_data.Player.Type == PlayerType.PLAYER_ISAAC_B and CoopHUD.Item.Inventory.IgnoredCollectibles[item.ID] then return; end
+	local max_slots = Inventory.Functions[player_data.Player.Type] and Inventory.Functions[player_data.Player.Type](player_data);
+	if max_slots and #player_data.Inventory.Passive.Data >= max_slots then
+		player_data.Inventory.Passive.Data[1] = {Slot = 1, Item = {ID = item.ID, GfxFileName = item.GfxFileName}};
 		return;
 	end
-	table.insert(player_data.Inventory.Passive.Images, item.GfxFileName);
+	table.insert(player_data.Inventory.Passive.Data, {Slot = (#player_data.Inventory.Passive.Data + 1), Item = {ID = item.ID, GfxFileName = item.GfxFileName}});
 end
 
 function Inventory.Remove(player_data, item)
-	for i,gfx in pairs(player_data.Inventory.Passive.Images) do
-		if gfx:sub(-15) == item.GfxFileName:sub(-15) then
-			table.remove(player_data.Inventory.Passive.Images, i);
+	for i = #player_data.Inventory.Passive.Data, 1, -1 do
+		local item_data = player_data.Inventory.Passive.Data[i];
+		if item_data and item_data.ID == item.ID then
+			table.remove(player_data.Inventory.Passive.Data, i);
 			break;
 		end
 	end
 end
 
-function Inventory.Shift(player_data)
+function Inventory.Shift(player_data, amount)
 	if mod.Config.CoopHUD.inventory.items.cycling or player_data.Player.Type == PlayerType.PLAYER_ISAAC_B then
-		for _ = 1, #player_data.Inventory.Passive.Images - 1, 1 do
-			table.insert(player_data.Inventory.Passive.Images, 1, table.remove(player_data.Inventory.Passive.Images, #player_data.Inventory.Passive.Images));
+		player_data.Inventory.Passive.Slot = player_data.Inventory.Passive.Slot or 1;
+		amount = amount ~= nil and amount > 0 and amount or 1;
+		for i = 1, amount, 1 do
+			player_data.Inventory.Passive.Slot = player_data.Inventory.Passive.Slot >= #player_data.Inventory.Passive.Data and 1 or (player_data.Inventory.Passive.Slot + 1);
+			for ii = 1, #player_data.Inventory.Passive.Data - 1, 1 do
+				table.insert(player_data.Inventory.Passive.Data, 1, table.remove(player_data.Inventory.Passive.Data, #player_data.Inventory.Passive.Data));
+			end
 		end
 	end
 end
 
 function Inventory.Reload(player_data, player_entity)
-	local item_config = Isaac.GetItemConfig();
 	if player_data and player_data.Inventory then
-		player_data.Inventory.Passive.Images = {};
+		local item_config = Isaac.GetItemConfig();
+		player_data.Inventory.Passive.Data = {};
 		local history_items = player_entity:GetHistory():GetCollectiblesHistory();
 		for i,history in pairs(history_items) do
 			local item = item_config:GetCollectible(history:GetItemID());
-			if item and item.Type ~= ItemType.ITEM_ACTIVE and item.Type ~= ItemType.ITEM_TRINKET then table.insert(player_data.Inventory.Passive.Images,item.GfxFileName); end
-		end																																	
+			if item and item.Type ~= ItemType.ITEM_ACTIVE and item.Type ~= ItemType.ITEM_TRINKET and (player_entity:GetPlayerType() ~= PlayerType.PLAYER_ISAAC_B or not CoopHUD.Item.Inventory.IgnoredCollectibles[item.ID]) then table.insert(player_data.Inventory.Passive.Data,{Slot = (#player_data.Inventory.Passive.Data + 1), Item = {ID = item.ID, GfxFileName = item.GfxFileName}}); end
+		end
+		player_data.Inventory.Passive.Slot = 1;
 	end
 end
 
@@ -270,7 +141,7 @@ function Active.GetSprite(sprite, active_data, player_entity)
 		if mod.Config.CoopHUD.active.book_charge_outline then sprite_data.Sheets[5] = active_data.Item.Book; end
 	end
 	
-	local special_func = CoopHUD.Item.Active.Special[active_data.Item.ID];
+	local special_func = CoopHUD.Item.Active.Functions[active_data.Item.ID];
 	if special_func then
 		special_func(sprite, active_data, sprite_data, player_entity);
 		if not sprite_data then return sprite; end
@@ -306,23 +177,15 @@ function Pocket.GetSprite(sprite, pocket_data, player_entity)
 		sprite_data.Frame = pocket_data.Item.ID;
 		sprite_data.Sheets[0] = mod.Images.CardsPills;
 		sprite_data.Sheets[1] = mod.Images.CardFronts;
+		sprite_data.Sheets[2] = mod.Images.Blank;
 		
 		if pocket_data.Item.Type == PocketItemType.CARD then
 			local card = item_config:GetCard(pocket_data.Item.ID);
-			if not mod.Config.CoopHUD.pocket[pocket_data.Slot].cardfronts and not card:IsRune() and card.CardType ~= ItemConfig.CARDTYPE_SPECIAL_OBJECT and card.ID ~= Card.CARD_EMERGENCY_CONTACT then
+			if not mod.Config.CoopHUD.pocket[pocket_data.Slot].cardfronts and (type(pocket_data.Item.Extra) == "number" and pocket_data.Item.Extra >= 0) and (not card:IsRune() and card.CardType ~= ItemConfig.CARDTYPE_SPECIAL_OBJECT) then
+				sprite_data.Sheets[0] = mod.Images.Blank;
 				sprite_data.Sheets[1] = mod.Images.Blank;
 				sprite_data.Sheets[2] = mod.Images.CardsPills;
-				sprite_data.Frame = 0;
-
-				if card.CardType == ItemConfig.CARDTYPE_TAROT then sprite_data.Frame = CoopHUD.CardBacks.TAROT;
-				elseif card.CardType == ItemConfig.CARDTYPE_SUIT or card.ID == Card.CARD_RULES or card.ID == Card.CARD_SUICIDE_KING or card.ID == Card.CARD_QUESTIONMARK or card.ID == Card.CARD_QUEEN_OF_HEARTS then sprite_data.Frame = CoopHUD.CardBacks.SUIT;
-				elseif card.CardType == ItemConfig.CARDTYPE_TAROT_REVERSE then sprite_data.Frame = CoopHUD.CardBacks.REVERSE;
-				elseif card.ID == Card.CARD_CREDIT then sprite_data.Frame = CoopHUD.CardBacks.CREDIT;
-				elseif card.ID == Card.CARD_HUMANITY then sprite_data.Frame = CoopHUD.CardBacks.HUMANITY;
-				elseif card.ID == Card.CARD_GET_OUT_OF_JAIL then sprite_data.Frame = CoopHUD.CardBacks.MONOPOLY;
-				elseif card.ID == Card.CARD_HOLY then sprite_data.Frame = CoopHUD.CardBacks.HOLY;
-				elseif card.ID == Card.CARD_WILD then sprite_data.Frame = CoopHUD.CardBacks.UNO;
-				elseif card.ID == Card.CARD_CHAOS or card.ID == Card.CARD_HUGE_GROWTH or card.ID == Card.CARD_ANCIENT_RECALL or card.ID == Card.CARD_ERA_WALK then sprite_data.Frame = CoopHUD.CardBacks.MAGIC; end
+				sprite_data.Frame = pocket_data.Item.Extra;
 			elseif card.ModdedCardFront then
 				local card_front = card.ModdedCardFront;
 				sprite_data.Anm2 = card_front:GetFilename();
@@ -332,19 +195,20 @@ function Pocket.GetSprite(sprite, pocket_data, player_entity)
 					sprite_data.Sheets[layer:GetLayerID()] = layer:GetSpritesheetPath();
 				end
 			end
-		elseif pocket_data.Item.Type == PocketItemType.PILL then
-			if pocket_data.Item.ID > PillColor.NUM_PILLS then
-				local pill = XMLData.GetEntityByTypeVarSub(EntityType.ENTITY_PICKUP,PickupVariant.PICKUP_PILL,pocket_data.Item.ID); -- Get Pill entity to get custom pill anm2
-				if pill and pill.id then
-					sprite_data.Sheets = {};
-					sprite_data.Anm2 = pill.anm2root .. pill.anm2path;
-					sprite_data.Animation = nil;
-					sprite_data.Frame = 0;
+		else --if pocket_data.Item.Type == PocketItemType.PILL then
+			if type(pocket_data.Item.Extra) == "string" then -- Modded Pills
+				sprite_data.Sheets = {};
+				sprite_data.Anm2 = pocket_data.Item.Extra;
+				sprite_data.Animation = nil;
+				sprite_data.Frame = 0;
+			else
+				if Pocket.GetPillType(pocket_data.Item.ID) == CoopHUD.PillType.VANILLA_HORSE then  -- convert horse pill ID to match anm2
+					sprite_data.Frame = (pocket_data.Item.ID - (PillColor.PILL_GIANT_FLAG - PillColor.NUM_PILLS));
 				end
 			end
 		end
 	else
-		local special_func = CoopHUD.Item.Active.Special[pocket_data.Item.ID];
+		local special_func = CoopHUD.Item.Active.Functions[pocket_data.Item.ID];
 		local item_image = Isaac.GetItemConfig():GetCollectible(pocket_data.Item.ID).GfxFileName;
 		sprite_data.Anm2 = mod.Animations.Active;
 		sprite_data.Animation = "Idle";
@@ -425,11 +289,43 @@ function ChargeBar.GetSprite(sprite, charge_data);
 	return sprite;
 end
 
+function Inventory.GetSprite(sprite, special_data, player_data, max_slots, row_size, inventory, extra_offset);
+	sprite = sprite or Sprite();
+	extra_offset = extra_offset or (mod.Config.CoopHUD.inventory.special.space_extra * #player_data.Inventory.Special.Data);
+	
+	local scale = mod.Config.CoopHUD.inventory.special.scale * player_data.Player.Scale;
+	local screen_edge = player_data.Edge.Pos + player_data.Edge.Offset + (((CoopHUD.Positions.Special + mod.Config.CoopHUD.inventory.special.offset) * player_data.Player.Scale) * player_data.Edge.Multipliers);
+	local offset = Vector(0,mod.Config.CoopHUD.inventory.special.offset_w_pockets and player_data.Inventory.Pocket.Total > 0 and player_data.Inventory.Pocket.Total * ((32 + (player_entity:GetTrinket(mod.TrinketSlot.PRIMARY) ~= TrinketType.TRINKET_NULL and (18 * mod.Config.CoopHUD.trinket[mod.TrinketSlot.PRIMARY].scale.X) or 2)) * (mod.Config.CoopHUD.pocket[(player_data.Inventory.Pocket.Total - 1)].scale.Y * scale.Y)) or 0);
+				
+	local data = {};
+	local row = 0;
+	local total = 0;
+	for i = 1, max_slots, 1 do
+		if i % (row_size + 1) == 0 and i ~= 1 then
+			row = row + 1;
+			offset.X = 0;
+			offset.Y = offset.Y + (mod.Config.CoopHUD.inventory.special.space.Y * scale.Y);
+		end
+		data[i] = {Item = inventory[i], Pos = (screen_edge + ((offset + extra_offset) * player_data.Edge.Multipliers))};
+		offset.X = offset.X + (mod.Config.CoopHUD.inventory.special.space.X * scale.X);
+		if inventory[i] ~= nil then total = total + 1; end
+	end
+	
+	sprite.Color = Color(1,1,1,mod.Config.CoopHUD.inventory.special.opacity);
+	sprite.Scale = scale;
+	special_data.Total = total;
+	special_data.Data = data;
+	
+	return sprite;
+end
+
 function Active.Render(player_number);
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_ACTIVE_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Active); -- Execute Pre Active Render Callbacks (actives_data(table))
 	
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
-	local actives = player_data.Inventory.Active;
+	if not player_data.Inventory.Active.Visible then return; end
+	
+	local actives = player_data.Inventory.Active.Data;
 	for slot = #actives, ActiveSlot.SLOT_PRIMARY, -1 do -- Run in reverse to have the secondary active render behind the primary
 		if actives[slot] == nil then goto continue end
 		local d = actives[slot].Data;
@@ -450,6 +346,7 @@ function Active.Render(player_number);
 			actives[slot].ChargeSprite.extra:Render(d.Bar.Pos, ChargeBar.GetCharge(d.Bar.Charge.Extra, d.Bar.Charge.Max));
 			if ChargeBar.Charge[d.Bar.Charge.Max] ~= nil then actives[slot].ChargeSprite.overlay:Render(d.Bar.Pos); end
 		end
+		if d.Function then d.Function(player_data,slot); end
 		::continue::
 	end
 end
@@ -457,10 +354,13 @@ end
 function Trinket.Render(player_number);
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_TRINKET_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Trinket); -- Execute Pre Trinket Render Callbacks (trinkets_data(table))
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
-	local trinkets = player_data.Inventory.Trinket;
+	if not player_data.Inventory.Trinket.Visible then return; end
+	
+	local trinkets = player_data.Inventory.Trinket.Data;
 	for slot,trinket in pairs(trinkets) do
 		local d = trinket.Data;
 		if d and d.Item and trinket.Sprite then 
+			if d.Function then d.Function(player_data,slot); end
 			trinket.Sprite:Render(d.Item.Pos);
 		end
 	end
@@ -469,8 +369,9 @@ end
 function Pocket.Render(player_number);
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_POCKET_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Pocket); -- Execute Pre Pocket Render Callbacks (pockets_data(table))
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
-	local pockets = player_data.Inventory.Pocket;
+	local pockets = player_data.Inventory.Pocket.Data;
 	
+	if not player_data.Inventory.Pocket.Visible then return; end
 	for slot = PillCardSlot.QUATERNARY, PillCardSlot.PRIMARY, -1 do
 		local d = pockets[slot] and pockets[slot].Data or nil;
 		if d and d.Item and pockets[slot].Sprite then 
@@ -497,6 +398,7 @@ function Pocket.Render(player_number);
 				pockets[slot].ChargeSprite.extra:Render(d.Bar.Pos, ChargeBar.GetCharge(d.Bar.Charge.Extra, d.Bar.Charge.Max));
 				if ChargeBar.Charge[d.Bar.Charge.Max] ~= nil then pockets[slot].ChargeSprite.overlay:Render(d.Bar.Pos); end
 			end
+			if d.Function then d.Function(player_data,slot); end
 		end
 	end
 end
@@ -504,25 +406,29 @@ end
 function Inventory.Render(player_number) 
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_INVENTORY_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Special); -- Execute Pre Inventory Render Callbacks (inventory_data(table))
 	local player_data = mod.CoopHUD.DATA.Players[player_number];
-	local sprite_func = Inventory.GetSprite[player_data.Player.Type];
 	
-	if sprite_func then
-		local sprite = player_data.Inventory.Special.Sprite;
-		local extra_func = Inventory.ExtraFunctions[player_data.Player.Type];
-		
-		for i,data in pairs(player_data.Inventory.Special.Data) do
-			sprite = sprite_func(sprite,data.Item,i);
-			sprite:Render(data.Pos);
+	if player_data.Inventory.Special.Visible and #player_data.Inventory.Special.Data > 0 then
+		for i, special_data in pairs(player_data.Inventory.Special.Data) do
+			if special_data.Sprite then
+				for i,data in pairs(special_data.Data) do
+					if data.Pos then 
+						if special_data.Function then special_data.Sprite = special_data.Function(special_data.Sprite,data,i); end
+						special_data.Sprite:Render(data.Pos);
+					end
+				end
+			end
 		end
-		if extra_func then extra_func(player_data); end
 	end
 	
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.HUD_PRE_PASSIVE_RENDER, player_number, mod.CoopHUD.DATA.Players[player_number].Inventory.Passive); -- Execute Pre Passives Render Callbacks (passives_data(table))
-	if player_data.Inventory.Passive.Sprite and player_data.Inventory.Passive and player_data.Inventory.Passive.Data and #player_data.Inventory.Passive.Data > 0 then
+	if player_data.Inventory.Passive.Visible and player_data.Inventory.Passive.Sprite then
 		for i,data in pairs(player_data.Inventory.Passive.Data) do
-			player_data.Inventory.Passive.Sprite:ReplaceSpritesheet(1, data.Item);
-			player_data.Inventory.Passive.Sprite:LoadGraphics();
-			player_data.Inventory.Passive.Sprite:Render(data.Pos);
+			if i > player_data.Inventory.Passive.Maximum then break; end
+			if data.Item and data.Pos then
+				player_data.Inventory.Passive.Sprite:ReplaceSpritesheet(1, data.Item.GfxFileName);
+				player_data.Inventory.Passive.Sprite:LoadGraphics();
+				player_data.Inventory.Passive.Sprite:Render(data.Pos);
+			end
 		end
 	end
 end

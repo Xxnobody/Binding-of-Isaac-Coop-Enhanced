@@ -16,6 +16,7 @@ mod.CoopFixes.DefaultConfig = {
 	},
 	rejoin = true,
 	rewind = false,
+	trapdoor = false,
 };
 	
 function mod.CoopFixes.ResetConfig()
@@ -40,24 +41,26 @@ ModConfigMenu.AddSetting(
 		Info = {"Enable to fix an issue where fullscreen makes the window offset. Screen will flash momentarily."},
 	}
 );
-ModConfigMenu.AddSetting(
-	CoopFixes.MCM.category,
-	{
-		Type = ModConfigMenu.OptionType.NUMBER,
-		CurrentSetting = function() return CoopEnhanced.Config.CoopFixes.fullscreen.pos.X; end,
-		Display = function() return "Window Position (X): " .. CoopEnhanced.Config.CoopFixes.fullscreen.pos.X; end,
-		OnChange = function(n) CoopEnhanced.Config.CoopFixes.fullscreen.pos.X = n; end,
-	}
-);
-ModConfigMenu.AddSetting(
-	CoopFixes.MCM.category,
-	{
-		Type = ModConfigMenu.OptionType.NUMBER,
-		CurrentSetting = function() return CoopEnhanced.Config.CoopFixes.fullscreen.pos.Y; end,
-		Display = function() return "Window Position (Y): " .. CoopEnhanced.Config.CoopFixes.fullscreen.pos.Y; end,
-		OnChange = function(n) CoopEnhanced.Config.CoopFixes.fullscreen.pos.Y = n; end,
-	}
-);
+if REPENTOGON then
+	ModConfigMenu.AddSetting(
+		CoopFixes.MCM.category,
+		{
+			Type = ModConfigMenu.OptionType.NUMBER,
+			CurrentSetting = function() return CoopEnhanced.Config.CoopFixes.fullscreen.pos.X; end,
+			Display = function() return "Window Position (X): " .. CoopEnhanced.Config.CoopFixes.fullscreen.pos.X; end,
+			OnChange = function(n) CoopEnhanced.Config.CoopFixes.fullscreen.pos.X = n; end,
+		}
+	);
+	ModConfigMenu.AddSetting(
+		CoopFixes.MCM.category,
+		{
+			Type = ModConfigMenu.OptionType.NUMBER,
+			CurrentSetting = function() return CoopEnhanced.Config.CoopFixes.fullscreen.pos.Y; end,
+			Display = function() return "Window Position (Y): " .. CoopEnhanced.Config.CoopFixes.fullscreen.pos.Y; end,
+			OnChange = function(n) CoopEnhanced.Config.CoopFixes.fullscreen.pos.Y = n; end,
+		}
+	);
+end
 
 ModConfigMenu.AddSpace(CoopFixes.MCM.category);
 ModConfigMenu.AddTitle(CoopFixes.MCM.category, "Join Fix");
@@ -106,6 +109,19 @@ ModConfigMenu.AddSetting(
 		Display = function() return "Rewind Fix: " .. (CoopEnhanced.Config.CoopFixes.rewind and "on" or "off"); end,
 		OnChange = function(b) CoopEnhanced.Config.CoopFixes.rewind = b; end,
 		Info = {"Enable to fix a bug that causes player controller indexes to shuffle when the Rewind command or similar is used."},
+	}
+);
+
+ModConfigMenu.AddSpace(CoopFixes.MCM.category)
+ModConfigMenu.AddTitle(CoopFixes.MCM.category, "Trapdoor Fix");
+ModConfigMenu.AddSetting(
+	CoopFixes.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return CoopEnhanced.Config.CoopFixes.trapdoor; end,
+		Display = function() return "Trapdoor Fix: " .. (CoopEnhanced.Config.CoopFixes.trapdoor and "on" or "off"); end,
+		OnChange = function(b) CoopEnhanced.Config.CoopFixes.trapdoor = b; end,
+		Info = {"Enable to fix a bug that can happen when one player enters a next floor trapdoor and the other(s) get stuck in a looping animation."},
 	}
 );
 

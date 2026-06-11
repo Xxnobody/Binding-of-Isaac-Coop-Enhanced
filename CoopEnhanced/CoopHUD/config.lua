@@ -21,6 +21,7 @@ mod.CoopHUD.DefaultConfig = {
 		refresh = 3,
 	},
 	active = {
+		display = 0,
 		colors = false,
 		bar_colors = false,
 		book_correction_offset = Vector(0,-3),
@@ -51,6 +52,7 @@ mod.CoopHUD.DefaultConfig = {
 		},
 	},
 	trinket = {
+		display = 0,
 		colors = false,
 		[0] = {
 			offset_w_pockets = true,
@@ -299,11 +301,12 @@ mod.CoopHUD.DefaultConfig = {
 			offset = Vector(0, 0),
 			scale = Vector(0.75,0.75),
 			space = Vector(12, 12),
+			space_extra = Vector(15, 20),
 			offset_w_pockets = false,
 			ignore_curse = false,
 			result_display = true,
 			result_opacity = 1,
-			result_offset = Vector(0, 0),
+			result_offset = Vector(0, -3),
 			result_scale = Vector(0.5,0.5),
 		},
 		items = {
@@ -488,7 +491,7 @@ ModConfigMenu.AddSetting(
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopHUD.toggle_hud.pause_display; end,
 		Display = function() return "Enable HUD on pause: " .. (mod.Config.CoopHUD.toggle_hud.pause_display and "on" or "off"); end,
-		OnChange = function(b) CoopHUD.isVisible = (b and Utils.IsPauseMenuOpen()) mod.Config.CoopHUD.toggle_hud.pause_display = b; end,
+		OnChange = function(b) CoopHUD.Visible = (b and Utils.IsPauseMenuOpen()) mod.Config.CoopHUD.toggle_hud.pause_display = b; end,
 		Info = {"Sets whether the HUD renders when a pause menu is loaded. Useful for tweaking HUD values."},
 	}
 );

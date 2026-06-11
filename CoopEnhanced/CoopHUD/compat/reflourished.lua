@@ -54,7 +54,7 @@ function CoopHUD.Reflourished()
 		timer:SetFrame("Default", 0);
 		
 		local function RenderTimer(player_entity)
-			local player_data = CoopHUD.getDataFromEntity(player_entity);
+			local player_data = CoopHUD.GetPlayerDataFromEntity(player_entity);
 			if not mod.Config.CoopHUD.compat.REFLOURISHED.excited_timer.enabled or not player_data then return; end
 			local controller_index = player_entity.ControllerIndex;
 			local cooldown = playerTimers[controller_index];

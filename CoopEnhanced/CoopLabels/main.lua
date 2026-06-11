@@ -7,6 +7,8 @@ local Utils = mod.Utils;
 local game = Game();
 local hud = game:GetHUD();
 
+require(mod.Directory .. "CoopLabels.compat");
+
 function CoopLabels.RenderLabels(_)
 	if (not mod.Config.modules.CoopLabels or mod.Config.CoopLabels.display == 0 or (mod.Config.CoopLabels.coop_only and mod.Players.Total <= 1) or Utils.IsPauseMenuOpen() or (game:GetRoom():GetType() == RoomType.ROOM_BOSS and game:GetRoom():IsFirstVisit() and game:GetRoom():GetFrameCount() < 5)) then return;
 	elseif mod.Fonts.CoopLabels == nil then
@@ -15,7 +17,6 @@ function CoopLabels.RenderLabels(_)
 	end
 	
 	local player_sync = mod.Config.CoopLabels.player_sync;
-	local num_twins = 0;
 	local screen_dimensions = Utils.GetScreenDimensions();
 	for i = 1, game:GetNumPlayers(), 1 do
 		local player_entity = Isaac.GetPlayer(i - 1);
@@ -26,13 +27,7 @@ function CoopLabels.RenderLabels(_)
 				goto continue;
 			end
 			CoopLabels.DATA[i].Data = {};
-			local player_index = i;
-			if mod.Players.Twins[i] then
-				player_index = mod.Players.Twins[i];
-				num_twins = num_twins + 1;
-			else
-				player_index = i - num_twins;
-			end
+			local player_index = Utils.GetMainPlayerIndex(player_entity);
 			local player_config = player_sync == "Global" and mod.Config.players[player_index] or (mod.Config[player_sync] and mod.Config[player_sync].players[player_index] or mod.Config.CoopLabels.players[player_index]);
 			if player_config == nil then goto continue; end
 			
@@ -95,6 +90,17 @@ function CoopLabels.RenderLabels(_)
 		::continue::
 	end
 end
-mod:AddPriorityCallback(ModCallbacks.MC_POST_RENDER, CallbackPriority.LATE, CoopLabels.RenderLabels);
+mod:AddPriorityCallback(ModCallbacks.MC_POST_RENDER, CallbackPriority.IMPORTANT, CoopLabels.RenderLabels);
 
-require(mod.Directory .. "CoopLabels.compat");
+function CoopLabels.RenderTargets(_, effect_entity)
+	if not mod.Config.CoopLabels.target_colors or (effect_entity.Variant ~= EffectVariant.TARGET and not CoopLabels.TargetTypes[effect_entity.Variant]) then return; end
+	local player_entity = effect_entity.SpawnerEntity:ToPlayer()
+    if not player_entity then return; end
+	local player_index = Utils.GetMainPlayerIndex(player_entity);
+	local player_sync = mod.Config.CoopLabels.player_sync;
+	local player_config = player_sync == "Global" and mod.Config.players[player_index] or (mod.Config[player_sync] and mod.Config[player_sync].players[player_index] or mod.Config.CoopLabels.players[player_index]);
+    if not player_config then return; end
+	local player_color = Colors[(player_config.color)].Value;
+	effect_entity:SetColor(Utils.ConvertColorToColorize(player_color,1,1,mod.Config.CoopLabels.tint_amount), 30, 1, false, true);
+end
+mod:AddCallback(ModCallbacks.MC_POST_EFFECT_RENDER, CoopLabels.RenderTargets);

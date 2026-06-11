@@ -8,18 +8,18 @@ local hud = game:GetHUD();
 
 -- Coop HUD Functions
 function CoopHUD.IsVisible()
-	return CoopHUD.isVisible;
+	return CoopHUD.Visible;
 end
 
 function CoopHUD.SetVisible(force)
-	local toggle = not CoopHUD.isVisible;
+	local toggle = not CoopHUD.Visible;
 	if type(force) == "boolean" then toggle = force; end
 	if toggle then
 		game:GetHUD():SetVisible(false);
-		CoopHUD.isVisible = true;
+		CoopHUD.Visible = true;
 	else
 		game:GetHUD():SetVisible(true);
-		CoopHUD.isVisible = false;
+		CoopHUD.Visible = false;
 	end
 end
 
@@ -32,7 +32,7 @@ function CoopHUD.gameStart(isCont, data)
 	CoopEnhanced.CoopHUD.Misc.Difficulty = {[1] = {}};
 	CoopEnhanced.CoopHUD.Misc.Wave = {[1] = {}};
 	CoopEnhanced.CoopHUD.Misc.Extra = {[1] = {},[2] = {}};
-	CoopHUD.isVisible = true;
+	CoopHUD.Visible = true;
 	if isCont and data.CoopHUD then
 		if CoopEnhanced and CoopEnhanced.CoopHUD then CoopEnhanced.CoopHUD.DATA.Players = data.CoopHUD.players; end
 	end
@@ -55,7 +55,7 @@ function CoopHUD.createBanner(name, desc, banner_type, display_bottom_paper)
 	CoopHUD.DATA.Banner = {Sprite = sprite, Name = (name or ""), Desc = (desc or ""), Curse = display_bottom_paper, Type = banner_type, Timer = banner_timer};
 end
 
-function CoopHUD.getDataFromController(controller_index)
+function CoopHUD.GetPlayerDataFromController(controller_index)
 	for i = #CoopHUD.DATA.Players, (#CoopHUD.DATA.Players * -1), -1 do
 		if CoopHUD.DATA.Players[i] and CoopHUD.DATA.Players[i].Controller == controller_index then
 			return CoopHUD.DATA.Players[i];
@@ -63,7 +63,7 @@ function CoopHUD.getDataFromController(controller_index)
 	end
 	return nil, 0;
 end
-function CoopHUD.getDataFromIndex(player_index)
+function CoopHUD.GetPlayerDataFromIndex(player_index)
 	for i = #CoopHUD.DATA.Players, (#CoopHUD.DATA.Players * -1), -1 do
 		if CoopHUD.DATA.Players[i] and CoopHUD.DATA.Players[i].Index == player_index then
 			return CoopHUD.DATA.Players[i], i;
@@ -71,7 +71,7 @@ function CoopHUD.getDataFromIndex(player_index)
 	end
 	return nil, 0;
 end
-function CoopHUD.getDataFromEntity(player_entity)
+function CoopHUD.GetPlayerDataFromEntity(player_entity)
 	if player_entity then
 		local player_id = Utils.GetPlayerID(player_entity);
 		for i = #CoopHUD.DATA.Players, (#CoopHUD.DATA.Players * -1), -1 do
@@ -93,7 +93,7 @@ function CoopHUD.InitNewPlayers(screen_dimensions)
 		CoopHUD.RenderCoopMenuSprite(joining);
 	end
 end
-function CoopHUD.getCoopMenuSprites(joininig)
+function CoopHUD.getCoopMenuSprites(joining)
 	local scale = mod.Config.CoopHUD.players.menu.scale;
 	local opacity = mod.Config.CoopHUD.players.menu.opacity;
 	local rel_offset = mod.Config.CoopHUD.players.menu.rel_offset;
@@ -131,7 +131,7 @@ function CoopHUD.RenderCoopMenuSprite(joining)
 	local max = #mod.Players.Unlocked;
 	local edge_multipliers = Vector(((joining.Index % 2 == 0) and -1 or 1),(joining.Index > 2 and -1 or 1));
 	local main_pos = (joining.Pos + (mod.Config.CoopHUD.players.menu.offset * edge_multipliers));
-	if CoopHUD.Refresh then joining.Sprites = CoopEnhanced.CoopHUD.getCoopMenuSprites(joininig); end
+	if CoopHUD.Refresh then joining.Sprites = CoopEnhanced.CoopHUD.getCoopMenuSprites(joining); end
 	if #joining.Sprites > 1 then
 		-- Render Extra Heads on the left/right
 		for i = #joining.Sprites, 2, -1 do
@@ -221,7 +221,7 @@ require(mod.Directory .. "CoopHUD.main.render");
 -- Add Collectible
 local function addCollectible(_, collectible_type, _, _, _, _, player_entity)
 	local item = Isaac.GetItemConfig():GetCollectible(collectible_type);
-	local player_data = CoopEnhanced.CoopHUD.getDataFromEntity(player_entity);
+	local player_data = CoopEnhanced.CoopHUD.GetPlayerDataFromEntity(player_entity);
 	if not player_data or not player_data.Inventory.Passive or item.Type == ItemType.ITEM_ACTIVE or item.Type == ItemType.ITEM_TRINKET or CoopHUD.Item.Inventory.IgnoredCollectibles[item.ID] then return; end
 	
 	CoopHUD.Item.Inventory.Add(player_data, item);
@@ -231,7 +231,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_ADD_COLLECTIBLE, addCollectible);
 -- Remove Collectible
 local function removeCollectible(_, player_entity, collectible_type)
 	local item = Isaac.GetItemConfig():GetCollectible(collectible_type);
-	local player_data = CoopEnhanced.CoopHUD.getDataFromEntity(player_entity);
+	local player_data = CoopEnhanced.CoopHUD.GetPlayerDataFromEntity(player_entity);
 	if not player_data or not player_data.Inventory.Passive or item.Type == ItemType.ITEM_ACTIVE or item.Type == ItemType.ITEM_TRINKET or CoopHUD.Item.Inventory.IgnoredCollectibles[item.ID] then return; end
 	
 	CoopHUD.Item.Inventory.Remove(player_data, item);
@@ -241,7 +241,7 @@ mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, removeCollecti
 -- Display Fortune banner
 local function fortuneDisplay(_, name, description)
 	local fortunesprite = game:GetHUD():GetFortuneSprite();
-	if not CoopHUD.isVisible then return; end
+	if not CoopHUD.Visible then return; end
 	CoopEnhanced.CoopHUD.createBanner(name, description, CoopHUD.BannerType.FORTUNE, IsCurse);
 	CoopHUD.DATA.Banner.Sprite = fortunesprite;
 end
@@ -249,7 +249,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_FORTUNE_DISPLAY, fortuneDisplay);
 
 -- Display Floor/Item banner
 local function displayBanner(_, name, description, isSticky, IsCurse)
-	if not CoopHUD.isVisible or name == CoopHUD.DATA.Banner.Name then return; end
+	if not CoopHUD.Visible or name == CoopHUD.DATA.Banner.Name then return; end
 	local banner_type = isSticky and CoopHUD.BannerType.FLOOR or CoopHUD.BannerType.ITEM;
 	CoopEnhanced.CoopHUD.createBanner(name, description, banner_type, IsCurse);
 	return false;
@@ -257,11 +257,12 @@ end
 mod:AddCallback(ModCallbacks.MC_PRE_ITEM_TEXT_DISPLAY, displayBanner);
 
 
+local map_frames = 0;
 local hotkey_timer = 0;
 local function onRender()
 	-- Renderer Checks
 	if not mod.Config.modules.CoopHUD or game:GetSeeds():HasSeedEffect(SeedEffect.SEED_NO_HUD) or (not Utils.CanStartTrueCoop() and mod.Config.CoopHUD.toggle_hud.coop_only and not Utils.IsCoopPlay()) then -- Check if HUD can be rendered at all
-		CoopHUD.isVisible = false;
+		CoopHUD.Visible = false;
 		CoopHUD.Refresh = false;
 		return;
 	elseif (mod.Config.CoopHUD.toggle_hud.coop_only and not Utils.IsCoopPlay()) or (not mod.Config.CoopHUD.toggle_hud.pause_display and Utils.IsPauseMenuOpen()) then -- Check for Coop play and pause screens
@@ -281,11 +282,11 @@ local function onRender()
 			hud:SetVisible(true);
 			return;
 		end
-	elseif Utils.CanStartTrueCoop() and not game:IsPaused() and CoopHUD.isVisible then 
+	elseif Utils.CanStartTrueCoop() and not game:IsPaused() and CoopHUD.Visible then 
 		CoopHUD.InitNewPlayers(screen_dimensions);
 		if mod.Config.CoopHUD.players.menu.display == 0 and CoopHUD.IsPlayerJoining() then hud:SetVisible(true); return; end
 	elseif game:GetRoom():GetType() == RoomType.ROOM_BOSS and game:GetRoom():IsFirstVisit() and game:GetRoom():GetFrameCount() < 5 then -- Hide all HUDs when entering a boss cutscene
-		hud:SetVisible(false);
+		if CoopHUD.Visible then hud:SetVisible(false); end
 		return;
 	end
 	
@@ -305,6 +306,23 @@ local function onRender()
 		hotkey_timer = 0;
 	end
 	
+	CoopHUD.IsMapDown = false;
+	CoopHUD.IsPlayerMapDown = {};
+	
+	for i,player_entity in ipairs(Utils.GetMainPlayers()) do
+		if Input.IsActionTriggered(ButtonAction.ACTION_DROP, player_entity.ControllerIndex) and not game:IsPaused() and (player_entity:IsItemQueueEmpty() or player_entity.QueuedItem.Item.Type == ItemType.ITEM_ACTIVE or player_entity.QueuedItem.Item.Type == ItemType.ITEM_TRINKET) then -- Shifting Passive inventory even when HUD is off with the Hotkey
+			CoopHUD.Item.Inventory.ShiftQueue[i] = (CoopHUD.Item.Inventory.ShiftQueue[i] or 0) + 1;
+		end
+		if Input.IsActionPressed(ButtonAction.ACTION_MAP, player_entity.ControllerIndex) then -- Is Map down and/or toggled
+			CoopHUD.IsMapDown = CoopHUD.IsMapDown or true;
+			CoopHUD.IsPlayerMapDown[player_entity.ControllerIndex] = true;
+			map_frames = map_frames + 1;
+		else
+			if map_frames > 1 and map_frames <= mod.Config.CoopHUD.toggle_hud.frames then CoopHUD.IsMapToggled = not CoopHUD.IsMapToggled; end
+			map_frames = 0;
+		end
+	end
+	
 	-- mAPI
 	if CoopHUD.Refresh and MinimapAPI then
 		local minimapAPIConfig = {
@@ -314,18 +332,16 @@ local function onRender()
 			['MapFrameWidth'] = mod.Config.CoopHUD.compat.mAPI.frame.X,
 			['MapFrameHeight'] = mod.Config.CoopHUD.compat.mAPI.frame.Y
 		};
-		if not mod.Config.CoopHUD.compat.mAPI.enabled or not CoopHUD.isVisible then
+		if not mod.Config.CoopHUD.compat.mAPI.enabled or not CoopHUD.Visible then
 			for setting,value in pairs(minimapAPIConfig) do MinimapAPI.OverrideConfig[setting] = MinimapAPI.Config[setting]; end
 		else
 			for setting,value in pairs(minimapAPIConfig) do MinimapAPI.OverrideConfig[setting] = value; end
 		end
 	end
 	
-	if not CoopHUD.isVisible then return; end
+	if not CoopHUD.Visible then return; end
 	hud:SetVisible(false);
 	
-	CoopHUD.IsMapDown = false;
-	CoopHUD.IsPlayerMapDown = {};
 	
 	if CoopHUD.Refresh then		
 		-- CustomHealthAPI

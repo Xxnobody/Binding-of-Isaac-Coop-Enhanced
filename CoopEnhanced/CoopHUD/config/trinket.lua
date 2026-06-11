@@ -5,6 +5,18 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.title,
 	CoopHUD.MCM.categories.trinket,
 	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.trinket.display; end,
+		Minimum = 0,
+		Maximum = 4,
+		Display = function() return "Display: " .. (mod.Config.CoopHUD.trinket.display == 0 and "Always" or (mod.Config.CoopHUD.trinket.display == 1 and "Map" or (mod.Config.CoopHUD.trinket.display == 2 and "No Map" or (mod.Config.CoopHUD.trinket.display == 3 and "Toggle" or "Never")))); end,
+		OnChange = function(n) mod.Config.CoopHUD.trinket.display = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.trinket,
+	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopHUD.trinket.colors; end,
 		Display = function() return "Player Colors: " .. (mod.Config.CoopHUD.trinket.colors and "on" or "off"); end,

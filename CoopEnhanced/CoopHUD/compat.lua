@@ -102,7 +102,7 @@ local function configSetup()
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.DIVOID.color; end,
 				Minimum = 1,
 				Maximum = #mod.Colors,
-				Display = function() return "Charge Color: " .. mod.Colors[mod.Config.CoopHUD.compat.DIVOID.color].Name; end,
+				Display = function() return "Sub-Bar Charge Color: " .. mod.Colors[mod.Config.CoopHUD.compat.DIVOID.color].Name; end,
 				OnChange = function(n) mod.Config.CoopHUD.compat.DIVOID.color = n; end,
 				Info = "Set the charge bar color.",
 			}
@@ -115,7 +115,7 @@ local function configSetup()
 				CurrentSetting = function() return mod.Config.CoopHUD.compat.DIVOID.color_extra; end,
 				Minimum = 1,
 				Maximum = #mod.Colors,
-				Display = function() return "Extra Charge Color: " .. mod.Colors[mod.Config.CoopHUD.compat.DIVOID.color_extra].Name; end,
+				Display = function() return "Sub-Bar Extra Charge Color: " .. mod.Colors[mod.Config.CoopHUD.compat.DIVOID.color_extra].Name; end,
 				OnChange = function(n) mod.Config.CoopHUD.compat.DIVOID.color_extra = n; end,
 				Info = "Set the extra charge color.",
 			}
@@ -298,7 +298,6 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
-	
 	
 	if IsaacReflourished then
 		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, "Isaac Reflourished");
@@ -623,6 +622,11 @@ local function configSetup()
 		);
 		ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat);
 	end
+	
+	if RepentancePlusMod then
+		CoopHUD.Item.CardBacks[RepentancePlusMod.CustomConsumables.UNO_REVERSE_CARD] = CoopHUD.CardType.UNO;
+	end
+	
 	if VoidedItems then
 		ModConfigMenu.AddTitle(CoopHUD.MCM.title, CoopHUD.MCM.categories.compat, "Voided Items");
 		ModConfigMenu.AddSetting(

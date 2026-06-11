@@ -77,7 +77,7 @@ function CoopHUD.Epiphany()
 	end
 
 	local function EpiphanySamsonCharge(_, player, offset)
-		if not mod.CoopHUD.isVisible or player:GetPlayerType() ~= Epiphany.PlayerType.SAMSON then return end
+		if not mod.CoopHUD.Visible or player:GetPlayerType() ~= Epiphany.PlayerType.SAMSON then return end
 
 		local mainChargeBar = player:GetData().EP_Samson_MainChargeBar
 		if not mainChargeBar then
@@ -103,7 +103,7 @@ function CoopHUD.Epiphany()
 	local epsilon = 0.0001
 
 	local function EpiphanyCainCharge(_, player, offset)
-		if not mod.CoopHUD.isVisible
+		if not mod.CoopHUD.Visible
 		or player:HasCollectible(Epiphany.Item.SHARP_ROCK.ID)
 		or player:HasCurseMistEffect() and player:GetPlayerType() ~= Epiphany.PlayerType.CAIN then
 			return
@@ -232,7 +232,7 @@ function CoopHUD.Epiphany()
 	end
 
 	local function EpiphanyLostHealth(hearts, pEntity, _)
-		if not CoopHUD.isVisible or Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_THE_UNKNOWN > 0 then return end
+		if not CoopHUD.Visible or Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_THE_UNKNOWN > 0 then return end
 		if pEntity:IsDead() or pEntity:IsCoopGhost() or pEntity:GetPlayerType() ~= Epiphany.PlayerType.LOST then return end
 
 		hearts[1].heart:Load("gfx/ui/lost_health_hud.anm2", true)
@@ -244,7 +244,7 @@ function CoopHUD.Epiphany()
 	end
 
 	local function EpiphanyKeeperHealth(hearts, pEntity, _)
-		if not CoopHUD.isVisible or Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_THE_UNKNOWN > 0 then return end
+		if not CoopHUD.Visible or Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_THE_UNKNOWN > 0 then return end
 		if pEntity:IsDead() or pEntity:IsCoopGhost() or pEntity:GetPlayerType() ~= Epiphany.PlayerType.KEEPER then return end
 
 		local function createSprite()

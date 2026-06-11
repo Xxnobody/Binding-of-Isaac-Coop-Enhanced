@@ -1,5 +1,5 @@
 CoopEnhanced = RegisterMod("Co-Op Enhanced", 1);
-CoopEnhanced.Version = 1.0;
+CoopEnhanced.Version = 1.55;
 
 -- TO-DO
 -- - Animated Pickups Support ?
@@ -69,15 +69,15 @@ local function onUpdate()
 		CoopEnhanced.Players.Unlocked = CoopEnhanced.Utils.GetUnlockedCharacters();
 	end
 	CoopEnhanced.FrameCount = CoopEnhanced.FrameCount > 60 and 1 or CoopEnhanced.FrameCount + 1;
-	if not Game():IsPaused() and CoopEnhanced.Utils.CanStartTrueCoop() and CoopEnhanced.Challenge.ID == Challenge.CHALLENGE_NULL then
+	if not Game():IsPaused() and CoopEnhanced.Utils.CanStartTrueCoop() and CoopEnhanced.Challenge.ID == Challenge.CHALLENGE_NULL and #CoopEnhanced.Players.Unlocked > 1 then
 		local joining_total = CoopEnhanced.GetJoiningTotal();
 		for i = 1, CoopEnhanced.MaxControllers, 1 do
 			local controller_index = (i - 1);
 			if joining_total < 4 and CoopEnhanced.Players.Joining[i] == nil and CoopEnhanced.Utils.GetMainPlayerByController(controller_index) == nil and Input.IsActionPressed(ButtonAction.ACTION_JOINMULTIPLAYER, controller_index) and CoopEnhanced.Utils.CanStartTrueCoop() then
 				local screen_dimensions = CoopEnhanced.Utils.GetScreenDimensions();
 				local player_index = CoopEnhanced.Players.Total + 1;
-				for i, joining in pairs(CoopEnhanced.Players.Joining) do if joining.Index == player_index then player_index = player_index + 1; else break; end end
-				local joining = {Index = player_index, Controller = controller_index, Selected = 1};
+				for _, joining in pairs(CoopEnhanced.Players.Joining) do if joining.Index == player_index then player_index = player_index + 1; else break; end end
+				local joining = {Index = player_index, Controller = controller_index, Selected = 1, Character = CoopEnhanced.Players.Unlocked[1]};
 				local menu_pos = Vector(100, 10);
 				
 				joining.Pos = Vector((joining.Index % 2) == 0 and (screen_dimensions.Max.X - menu_pos.X) or menu_pos.X, joining.Index > 2 and (screen_dimensions.Max.Y - menu_pos.Y) or menu_pos.Y);
@@ -92,6 +92,7 @@ local function onUpdate()
 				if Input.IsActionTriggered(ButtonAction.ACTION_MENULEFT, controller_index) then joining.Selected = joining.Selected - 1; --joining.Move = joining.Move + 24;
 				elseif Input.IsActionTriggered(ButtonAction.ACTION_MENURIGHT, controller_index) then joining.Selected = joining.Selected + 1; end --joining.Move = joining.Move - 24;
 				joining.Selected = CoopEnhanced.Utils.ClampFlow(1, #CoopEnhanced.Players.Unlocked, joining.Selected);
+				joining.Character = CoopEnhanced.Players.Unlocked[joining.Selected];
 			end
 		end
 	end
@@ -124,7 +125,7 @@ function CoopEnhanced.RemoveJoiningByController(controller_index)
 	end
 end
 
-function CoopEnhanced.RefreshFrameCount();
+function CoopEnhanced.RefreshFrameCount()
 	CoopEnhanced.FrameCount = 0;
 	onUpdate();
 end
@@ -145,6 +146,7 @@ function CoopEnhanced.Render(sprite,sprite_data,text_data);
 	if sprite and sprite_data.Pos then sprite:Render(sprite_data.Pos); end
 	if text_data and text_data.Value then 
 		local font = text_data.Font or CoopEnhanced.Fonts.CoopHUD.misc;
+		if not text_data.Scale then text_data.Scale = Vector.One; end
 		font:DrawStringScaled(
 			text_data.Value,
 			(text_data.Pos.X or 0), (text_data.Pos.Y or 0),
@@ -211,4 +213,4 @@ local function onNewFloor(_)
 end
 CoopEnhanced:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, onNewFloor);
 
-print("Co-op Enhanced Mod - v"..CoopEnhanced.Version);
+print("Co-op Enhanced Mod - v" .. CoopEnhanced.Version);

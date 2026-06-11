@@ -343,6 +343,29 @@ ModConfigMenu.AddSetting(
 	}
 );
 
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.special.space_extra.X; end,
+		Display = function() return "Extra Spacing (X): " .. mod.Config.CoopHUD.inventory.special.space_extra.X; end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.special.space_extra.X = n; end,
+		Info = {"Extra spacing between special inventories (if there's more than one)."},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.inventory,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.inventory.special.space_extra.Y; end,
+		Display = function() return "Extra Spacing (Y): " .. mod.Config.CoopHUD.inventory.special.space_extra.Y; end,
+		OnChange = function(n) mod.Config.CoopHUD.inventory.special.space_extra.Y = n; end,
+		Info = {"Extra spacing between special inventories (if there's more than one)."},
+	}
+);
+
 ModConfigMenu.AddSpace(CoopHUD.MCM.title, CoopHUD.MCM.categories.inventory);
 ModConfigMenu.AddText(CoopHUD.MCM.title, CoopHUD.MCM.categories.inventory, "Bag of Crafting");
 ModConfigMenu.AddSetting(

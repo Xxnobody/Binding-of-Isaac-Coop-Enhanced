@@ -23,7 +23,7 @@ function CoopHUD.LibraryExpanded()
 		sprite_data.Sheets[0],sprite_data.Sheets[1],sprite_data.Sheets[2] = path,path,path;
 	end
 
-	CoopHUD.Item.Active.Special[WEIRD_BOOK.ID] = function(sprite,item_data,sprite_data,player_entity)
+	CoopHUD.Item.Active.Functions[WEIRD_BOOK.ID] = function(sprite,item_data,sprite_data,player_entity)
 		RenderWeirdbook(sprite,item_data,sprite_data,player_entity);
 	end
 end

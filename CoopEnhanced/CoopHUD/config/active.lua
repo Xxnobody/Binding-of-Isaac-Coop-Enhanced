@@ -5,6 +5,18 @@ ModConfigMenu.AddSetting(
 	CoopHUD.MCM.title,
 	CoopHUD.MCM.categories.active,
 	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.CoopHUD.active.display; end,
+		Minimum = 0,
+		Maximum = 4,
+		Display = function() return "Display: " .. (mod.Config.CoopHUD.active.display == 0 and "Always" or (mod.Config.CoopHUD.active.display == 1 and "Map" or (mod.Config.CoopHUD.active.display == 2 and "No Map" or (mod.Config.CoopHUD.active.display == 3 and "Toggle" or "Never")))); end,
+		OnChange = function(n) mod.Config.CoopHUD.active.display = n; end,
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopHUD.MCM.title,
+	CoopHUD.MCM.categories.active,
+	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
 		CurrentSetting = function() return mod.Config.CoopHUD.active.book_charge_outline; end,
 		Display = function() return "Book Charge Outline: " .. (mod.Config.CoopHUD.active.book_charge_outline and "on" or "off"); end,

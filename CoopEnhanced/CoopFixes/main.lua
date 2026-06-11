@@ -58,27 +58,6 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CoopFixes.Join.Fix);
 
 
--- Rewind Fix
--- Fixes players 2+ losing control of their characters after a rewind command or similar
-if REPENTOGON then
-	function CoopFixes.Rewind.Fix()
-		if not mod.Config.CoopFixes.rewind then CoopFixes.DATA.Controllers = {}; return; end
-		if CoopFixes.DATA.Controllers then
-			for player_id,controller_index in pairs(CoopFixes.DATA.Controllers) do
-				local player_entity = Utils.GetPlayerByID(player_id);
-				if player_entity and controller_index >= 0 and controller_index <= mod.MaxControllers then player_entity:SetControllerIndex(controller_index); end
-			end
-		else
-			CoopFixes.DATA.Controllers = {};
-		end
-		for i,player_entity in pairs(Utils.GetPlayers()) do
-			local player_id = Utils.GetPlayerID(player_entity);
-			CoopFixes.DATA.Controllers[player_id] = player_entity.ControllerIndex;
-		end
-	end
-	mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CoopFixes.Rewind.Fix);
-end
-
 --Rejoin Fix
 -- Fixes Characters changing type on rejoin when controller order changes
 function CoopFixes.Rejoin.Fix() 
@@ -288,3 +267,37 @@ local function onNewPlayer(_) -- Backup New Players
 	if Utils.CanStartTrueCoop() then CoopFixes.BackupPlayer(0,player_entity); else mod:RemoveCallback(ModCallbacks.MC_POST_PLAYER_INIT, onNewPlayer); end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, onNewPlayer);
+
+-- Repentogon Fixes
+if REPENTOGON then
+	-- Trapdoor Fix
+	-- Fixes an issue where sometimes when entering a trapdoor, other players get stuck in a looping walk animation and the floor cannot finish.
+	function CoopFixes.TrapdoorFix(_,trapdoor_entity)
+		if not mod.Config.CoopFixes.trapdoor then return; end
+		local players = Isaac.FindInRadius(trapdoor_entity.Position, (mod.GridSize / 2),EntityPartition.PLAYER);
+		for i,player_entity in pairs(players) do
+			local sprite = player_entity:GetSprite();
+			sprite:SetFrame(sprite:GetDefaultAnimation(),0);
+		end
+	end
+	mod:AddCallback(ModCallbacks.MC_POST_GRID_ENTITY_TRAPDOOR_RENDER, CoopFixes.TrapdoorFix);
+
+	-- Rewind Fix
+	-- Fixes players 2+ losing control of their characters after a rewind command or similar
+	function CoopFixes.Rewind.Fix()
+		if not mod.Config.CoopFixes.rewind then CoopFixes.DATA.Controllers = {}; return; end
+		if CoopFixes.DATA.Controllers then
+			for player_id,controller_index in pairs(CoopFixes.DATA.Controllers) do
+				local player_entity = Utils.GetPlayerByID(player_id);
+				if player_entity and controller_index >= 0 and controller_index <= mod.MaxControllers then player_entity:SetControllerIndex(controller_index); end
+			end
+		else
+			CoopFixes.DATA.Controllers = {};
+		end
+		for i,player_entity in pairs(Utils.GetPlayers()) do
+			local player_id = Utils.GetPlayerID(player_entity);
+			CoopFixes.DATA.Controllers[player_id] = player_entity.ControllerIndex;
+		end
+	end
+	mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CoopFixes.Rewind.Fix);
+end

@@ -2103,6 +2103,77 @@ local function ModCompat()
 			room_data.Safe.Enable = false;
 		end;
 	end
+	if RepentancePlusMod then
+		CoopEnhanced.CoopTreasure.RepentancePlusMod = {Angel = {},Devil = {},Library = {},Planetarium = {},Secret = {},Super = {},Ultra = {},Treasure = {}};
+		local set = RoomConfig.GetStage(StbType.SPECIAL_ROOMS):GetRoomSet(0);
+		for i = 1, set.Size, 1 do
+			local room_config = set:Get(i);
+			if room_config and room_config.Name:sub(1,7) == "[Rep+] " then
+				if room_config.Type == RoomType.ROOM_ANGEL then
+					table.insert(CoopEnhanced.CoopTreasure.RepentancePlusMod.Angel,room_config.Variant);
+				elseif room_config.Type == RoomType.ROOM_DEVIL then
+					table.insert(CoopEnhanced.CoopTreasure.RepentancePlusMod.Devil,room_config.Variant);
+				elseif room_config.Type == RoomType.ROOM_LIBRARY then
+					table.insert(CoopEnhanced.CoopTreasure.RepentancePlusMod.Library,room_config.Variant);
+				elseif room_config.Type == RoomType.ROOM_PLANETARIUM then
+					table.insert(CoopEnhanced.CoopTreasure.RepentancePlusMod.Planetarium,room_config.Variant);
+				elseif room_config.Type == RoomType.ROOM_SECRET then
+					table.insert(CoopEnhanced.CoopTreasure.RepentancePlusMod.Secret,room_config.Variant);
+				elseif room_config.Type == RoomType.ROOM_SUPERSECRET then
+					table.insert(CoopEnhanced.CoopTreasure.RepentancePlusMod.Super,room_config.Variant);
+				elseif room_config.Type == RoomType.ROOM_ULTRASECRET then
+					table.insert(CoopEnhanced.CoopTreasure.RepentancePlusMod.Ultra,room_config.Variant);
+				elseif room_config.Type == RoomType.ROOM_TREASURE then
+					table.insert(CoopEnhanced.CoopTreasure.RepentancePlusMod.Treasure,room_config.Variant);
+				end
+			end
+		end
+		
+		local RPV = CoopEnhanced.CoopTreasure.RepentancePlusMod;
+		
+		local roomConfigs = mod.CoopTreasure.RoomConfigs[RoomType.ROOM_DEVIL];
+		roomConfigs[RPV.Devil[5]] = function(room,room_data) -- move for fire, disable safe spawn
+			room_data.Positions[1] = room:GetGridPosition(65);
+			room_data.Positions[2] = room:GetGridPosition(69);
+			room_data.Safe.Enable = false;
+		end;
+		roomConfigs[RPV.Devil[6]] = function(room,room_data) -- move for fire, disable safe spawn
+			room_data.Positions[1] = room:GetGridPosition(63);
+			room_data.Positions[2] = room:GetGridPosition(71);
+			room_data.Safe.Enable = false;
+		end;
+		
+		roomConfigs = mod.CoopTreasure.RoomConfigs[RoomType.ROOM_LIBRARY];
+		roomConfigs[RPV.Library[3]] = function(room,room_data) -- move for blocks, reduce maxiumum, disable safe spawn
+			room_data.Positions[1] = room:GetGridPosition(18);
+			room_data.Positions[2] = room:GetGridPosition(26);
+			room_data.Positions[3] = room:GetGridPosition(108);
+			room_data.Positions[4] = room:GetGridPosition(116);
+			room_data.Safe.Enable = false;
+			room_data.Spawn.Maximum = 1;
+		end;
+		roomConfigs[RPV.Library[6]] = function(room,room_data) -- move for rocks, disable safe spawn
+			room_data.Positions[1] = room:GetGridPosition(19);
+			room_data.Positions[3] = room:GetGridPosition(109);
+			room_data.Safe.Enable = false;
+		end;
+		roomConfigs[RPV.Library[7]] = function(room,room_data) -- move for rocks, disable safe spawn
+			room_data.Positions[1] = room:GetGridPosition(19);
+			room_data.Positions[3] = room:GetGridPosition(109);
+			room_data.Safe.Enable = false;
+		end;
+		
+		roomConfigs = mod.CoopTreasure.RoomConfigs[RoomType.ROOM_PLANETARIUM];
+		roomConfigs[RPV.Planetarium[1]] = function(room,room_data) -- move beggar, disable safe spawn
+			Isaac.FindByType(EntityType.ENTITY_SLOT)[1].Position = room:GetGridPosition(67);
+			room_data.Safe.Enable = false;
+		end;
+		roomConfigs[RPV.Planetarium[2]] = function(room,room_data) -- move beggar, disable safe spawn
+			Isaac.FindByType(EntityType.ENTITY_SLOT)[1].Position = room:GetGridPosition(52);
+			room_data.Safe.Enable = false;
+		end;
+		
+	end
 	if CCO and CCO.ZodiacPlanetariums then
 		mod.CoopTreasure.ZodiacPlanetariums = {};
 		for i,item in pairs(CCO.ZodiacPlanetariums.Items) do table.insert(mod.CoopTreasure.ZodiacPlanetariums,item.ID); end
