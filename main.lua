@@ -1,5 +1,5 @@
 CoopEnhanced = RegisterMod("Co-Op Enhanced", 1);
-CoopEnhanced.Version = 1.55;
+CoopEnhanced.Version = 1.60;
 
 -- TO-DO
 -- - Animated Pickups Support ?
@@ -71,7 +71,7 @@ local function onUpdate()
 	CoopEnhanced.FrameCount = CoopEnhanced.FrameCount > 60 and 1 or CoopEnhanced.FrameCount + 1;
 	if not Game():IsPaused() and CoopEnhanced.Utils.CanStartTrueCoop() and CoopEnhanced.Challenge.ID == Challenge.CHALLENGE_NULL and #CoopEnhanced.Players.Unlocked > 1 then
 		local joining_total = CoopEnhanced.GetJoiningTotal();
-		for i = 1, CoopEnhanced.MaxControllers, 1 do
+		for i = 1, CoopEnhanced.Config.MaxControllers, 1 do
 			local controller_index = (i - 1);
 			if joining_total < 4 and CoopEnhanced.Players.Joining[i] == nil and CoopEnhanced.Utils.GetMainPlayerByController(controller_index) == nil and Input.IsActionPressed(ButtonAction.ACTION_JOINMULTIPLAYER, controller_index) and CoopEnhanced.Utils.CanStartTrueCoop() then
 				local screen_dimensions = CoopEnhanced.Utils.GetScreenDimensions();

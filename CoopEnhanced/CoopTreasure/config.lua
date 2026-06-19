@@ -35,6 +35,8 @@ mod.CoopTreasure.DefaultConfig = {
 	extras = 0,
 	safe = 1,
 	radius = 0,
+	centered = false,
+	offset = 1,
 	max = 1,
 	modes = {
 		normal = 3,
@@ -91,13 +93,11 @@ ModConfigMenu.AddSetting(
 	CoopTreasure.MCM.title,
 	CoopTreasure.MCM.categories.general,
 	{
-		Type = ModConfigMenu.OptionType.NUMBER,
-		Minimum = 0,
-		Maximum = 3,
-		CurrentSetting = function() return mod.Config.CoopTreasure.assign.global; end,
-		Display = function() return "Global Assignment: " .. CoopTreasure.AssignmentTypes[mod.Config.CoopTreasure.assign.global]; end,
-		OnChange = function(n) mod.Config.CoopTreasure.assign.global = n; end,
-		Info = {"DISABLED: Vanilla. - FREE: Take Any/All. - AUTO - Assigned Items. - SELF: Player Choice."},
+		Type = ModConfigMenu.OptionType.BOOLEAN,
+		CurrentSetting = function() return mod.Config.CoopTreasure.coop_only; end,
+		Display = function() return "Coop Only: " .. (mod.Config.CoopTreasure.coop_only and "on" or "off"); end,
+		OnChange = function(b) mod.Config.CoopTreasure.coop_only = b; end,
+		Info = {"Disable to spawn extra pedestals in non-Coop games. (You Cheater!)"},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -153,10 +153,23 @@ ModConfigMenu.AddSetting(
 	CoopTreasure.MCM.categories.general,
 	{
 		Type = ModConfigMenu.OptionType.BOOLEAN,
-		CurrentSetting = function() return mod.Config.CoopTreasure.coop_only; end,
-		Display = function() return "Coop Only: " .. (mod.Config.CoopTreasure.coop_only and "on" or "off"); end,
-		OnChange = function(b) mod.Config.CoopTreasure.coop_only = b; end,
-		Info = {"Disable to spawn extra pedestals in non-Coop games. (You Cheater!)"},
+		CurrentSetting = function() return mod.Config.CoopTreasure.centered; end,
+		Display = function() return "Central Spawning: " .. (mod.Config.CoopTreasure.centered and "on" or "off"); end,
+		OnChange = function(b) mod.Config.CoopTreasure.centered = b; end,
+		Info = {"Enable to have pedestals spawn from the center of rooms instead."},
+	}
+);
+ModConfigMenu.AddSetting(
+	CoopTreasure.MCM.title,
+	CoopTreasure.MCM.categories.general,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0,
+		Maximum = 2,
+		CurrentSetting = function() return mod.Config.CoopTreasure.offset; end,
+		Display = function() return "Spawn Offset: " .. mod.Config.CoopTreasure.offset; end,
+		OnChange = function(n) mod.Config.CoopTreasure.offset = n; end,
+		Info = {"Sets how far away from the spawning origin in normal sized rooms pedestals will spawn."},
 	}
 );
 ModConfigMenu.AddSetting(
@@ -413,6 +426,22 @@ ModConfigMenu.AddSetting(
 );
 
 local room_info = "DISABLED: Vanilla - FREE: Take Any/All - AUTO - Assigned Items - SELF: Player Choice - GLOBAL: Use Global setting";
+
+ModConfigMenu.AddSetting(
+	CoopTreasure.MCM.title,
+	CoopTreasure.MCM.categories.rooms,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		Minimum = 0,
+		Maximum = 3,
+		CurrentSetting = function() return mod.Config.CoopTreasure.assign.global; end,
+		Display = function() return "Global Assignment: " .. CoopTreasure.AssignmentTypes[mod.Config.CoopTreasure.assign.global]; end,
+		OnChange = function(n) mod.Config.CoopTreasure.assign.global = n; end,
+		Info = {room_info},
+	}
+);
+ModConfigMenu.AddSpace(CoopTreasure.MCM.title,CoopTreasure.MCM.categories.rooms);
+
 ModConfigMenu.AddSetting(
 	CoopTreasure.MCM.title,
 	CoopTreasure.MCM.categories.rooms,

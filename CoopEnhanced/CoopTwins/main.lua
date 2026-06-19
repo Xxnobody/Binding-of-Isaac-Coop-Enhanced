@@ -349,7 +349,7 @@ function CoopTwins.onRender(_)
 			end
 		end
 		if not mod.GetJoiningByController then return; end
-		for i = 1, CoopEnhanced.MaxControllers, 1 do
+		for i = 1, CoopEnhanced.Config.MaxControllers, 1 do
 			local controller_index = (i - 1);
 			local player_entity = Utils.GetPlayerByController(controller_index);
 			local twin_joining = CoopTwins.DATA.Joining[i];

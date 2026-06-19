@@ -67,21 +67,23 @@ function CoopTreasure.ClearGridSpace(position,radius) -- Clear Grid entities aro
 			if REPENTOGON then room:RemoveGridEntityImmediate(room:GetGridIndex(position),1,false); end
 		end
 	end
+	--room:Update();
 end
 
 function CoopTreasure.GetRoomData()
 	return CoopTreasure.DATA[Utils.GetRoomID()];
 end
 
-function CoopTreasure.CanPickup(player_index,pedestal_entity)
+function CoopTreasure.CanPickup(player_entity,pedestal_entity,ignore_price)
 	local room_data = CoopTreasure.DATA[Utils.GetRoomID()];
-	if not room_data then return true; end
+	if not room_data or pedestal_entity.SubType == CollectibleType.COLLECTIBLE_NULL then return true; end
+	local player_index = Utils.GetMainPlayerIndex(player_entity);
 	local pedestal_index,_ = CoopTreasure.GetPedestalIndex(pedestal_entity);
-	local owner_index = CoopTreasure.GetOwnerIndex(pedestal_entity);
-	if owner_index == 0 then
-		if CoopTreasure.GetOwnedAmount(player_index) < mod.Config.CoopTreasure.max and (pedestal_entity.Price == 0 or Utils.CanPayPrice(Utils.GetMainPlayerByIndex(player_index),pedestal_entity.Price)) then return true; end
+	local assigned_index = room_data.Treasure.Assignments[pedestal_index];
+	if assigned_index == 0 then
+		if CoopTreasure.GetOwnedAmount(player_index) < mod.Config.CoopTreasure.max and (not ignore_price or (pedestal_entity.Price == 0 or Utils.CanPayPrice(Utils.GetMainPlayerByIndex(player_index),pedestal_entity.Price))) then return true; end
 	else
-		return CoopTreasure.IsOwner(player_index,pedestal_index);
+		return assigned_index == player_index;
 	end
 	return false;
 end
@@ -95,10 +97,15 @@ function CoopTreasure.IsOwner(player_index,pedestal_index)
 	return false;
 end
 
-function CoopTreasure.GetOwnerIndex(pedestal_entity)
+function CoopTreasure.GetAssignedIndex(pedestal_index)
+	local room_data = CoopTreasure.DATA[Utils.GetRoomID()];
+	if not room_data then return 0; end;
+	return room_data.Treasure.Assignments[pedestal_index];
+end
+
+function CoopTreasure.GetOwnerIndex(pedestal_index)
 	local room_data = CoopTreasure.DATA[Utils.GetRoomID()];
 	if not room_data then return 0; end
-	local pedestal_index = CoopTreasure.GetPedestalIndex(pedestal_entity);
 	for i,indexes in ipairs(room_data.Treasure.Owned) do
 		for ii,index in ipairs(indexes) do
 			if index == pedestal_index then return i; end
@@ -109,36 +116,37 @@ end
 
 function CoopTreasure.GetOwnedIndexes(player_index)
 	local room_data = CoopTreasure.DATA[Utils.GetRoomID()];
-	if not room_data then return 0; end
+	if not room_data then return {}; end
 	return room_data.Treasure.Owned[player_index];
 end
 
 function CoopTreasure.GetOwnedAmount(player_index)
 	local room_data = CoopTreasure.DATA[Utils.GetRoomID()];
 	if not room_data then return 0; end
-	return #room_data.Treasure.Owned[player_index];
+	local num_owned = 0;
+	for i,index in ipairs(room_data.Treasure.Owned[player_index]) do
+		num_owned = num_owned + 1;
+	end
+	return num_owned;
+end
+
+function CoopTreasure.GetPedestalByIndex(pedestal_index,pedestal_sub_index)
+	local room_data = CoopTreasure.DATA[Utils.GetRoomID()];
+	if not room_data then return 0; end
+	pedestal_sub_index = pedestal_sub_index or 1;
+	local pedestal_data = room_data.Treasure.Items[pedestal_index][pedestal_sub_index];
+	return pedestal_data ~= nil and ((pedestal_data.Pointer.Ref ~= nil and pedestal_data.Pointer.Ref:ToPickup()) or Isaac.FindInRadius(pedestal_data.Position, 15, EntityPartition.PICKUP)[1]:ToPickup());
 end
 
 function CoopTreasure.GetPedestalIndex(pedestal_entity)
 	local room_data = CoopTreasure.DATA[Utils.GetRoomID()];
 	if not room_data then return 0; end
 	for i,items in ipairs(room_data.Treasure.Items) do
-		local owned_amount = CoopTreasure.GetOwnedAmount(i);
 		for ii,item in ipairs(items) do
 			if pedestal_entity.Position:Distance(item.Position) <= 10 then return i, ii; end -- Corner, More Options
 		end
 	end
 	return 0, 0;
-end
-
-function CoopTreasure.GetAssignedIndex(player_index,ignore_owned)
-	local room_data = CoopTreasure.DATA[Utils.GetRoomID()];
-	if not room_data then return 0; end
-	local assignments = room_data.Treasure.Assignments;
-	for i = 1, #assignments, 1 do
-		if assignments[i] == math.abs(player_index) and (not ignore_owned or not CoopTreasure.IsOwner(player_index,i)) then return i; end
-	end
-	return 0;
 end
 
 function CoopTreasure.CheckComplete()
@@ -154,8 +162,8 @@ function CoopTreasure.GetRoomAssignment(room_type)
 	local room_ID = Utils.GetRoomID();
 	if CoopTreasure.DATA[room_ID] and CoopTreasure.DATA[room_ID].Assign then return CoopTreasure.DATA[room_ID].Assign; end
 	for name,data in pairs(CoopTreasure.RoomTypes) do
-		if room_type == data.Type and mod.Config.CoopTreasure.assign.rooms[name:gsub(" ","")] and (not data.Function or data.Function()) then
-			assignment = mod.Config.CoopTreasure.assign.rooms[name:gsub(" ","")];
+		if room_type == data.Type and (not data.Function or data.Function()) then
+			assignment = mod.Config.CoopTreasure.assign.rooms[name:gsub(" ","")] or data.Assign;
 			break;
 		end
 	end
@@ -174,7 +182,7 @@ function CoopTreasure:onPedestal(pedestal_entity, entity)
 	local room_data = CoopTreasure.DATA[room_ID];
 	local player_entity = entity.ToPlayer and entity:ToPlayer() or entity;
 	
-	if not CoopEnhanced.Config.modules.CoopTreasure or pedestal_entity.SubType == CollectibleType.COLLECTIBLE_NULL or not room_data or room_data.Assign < CoopTreasure.AssignmentTypes.Auto or not player_entity or player_entity.Type ~= EntityType.ENTITY_PLAYER or not player_entity:CanPickupItem() or player_entity:IsHoldingItem() or not pedestal_entity or room_data.Spawn.Total == 1 then return; end
+	if not CoopEnhanced.Config.modules.CoopTreasure or pedestal_entity.SubType == CollectibleType.COLLECTIBLE_NULL or not room_data or room_data.Assign < CoopTreasure.AssignmentTypes.Free or not player_entity or player_entity.Type ~= EntityType.ENTITY_PLAYER or not player_entity:CanPickupItem() or player_entity:IsHoldingItem() or not pedestal_entity or room_data.Spawn.Total == 1 then return; end
 	
 	local player_index = Utils.GetMainPlayerIndex(player_entity);
 	local pedestal_index,pedestal_sub_index = CoopTreasure.GetPedestalIndex(pedestal_entity);
@@ -182,17 +190,23 @@ function CoopTreasure:onPedestal(pedestal_entity, entity)
 	local pedestal_data = room_data.Treasure.Items[pedestal_index][pedestal_sub_index];
 	local owned_amount = CoopTreasure.GetOwnedAmount(player_index);
 	local assigned_index = room_data.Treasure.Assignments[pedestal_index];
-	local owner_index = CoopTreasure.GetOwnerIndex(pedestal_entity);
 	
 	if pedestal_entity.Price ~= 0 and not Utils.CanPayPrice(player_entity,pedestal_entity.Price) then return true;
 	elseif assigned_index == 0 and owned_amount < mod.Config.CoopTreasure.max then 
-		if (owned_amount + 1) >= mod.Config.CoopTreasure.max then room_data.Treasure.Assignments[CoopTreasure.GetAssignedIndex(player_index,true)] = 0; end
 		room_data.Treasure.Assignments[pedestal_index] = player_index;
 	elseif assigned_index ~= math.abs(player_index) then
 		return pedestal_entity.Price ~= 0;
+	elseif pedestal_data.Ignore then
+		return;
 	end
-	if pedestal_data.Ignore then return; end
 	
+	if (owned_amount + 1) >= mod.Config.CoopTreasure.max and room_data.Assign == CoopTreasure.AssignmentTypes.Auto then
+		for i,p in pairs(room_data.Treasure.Assignments) do
+			if p == player_index and not CoopTreasure.IsOwner(p,i) then
+				room_data.Treasure.Assignments[i] = 0; -- Remove any ownership for extra pedestals if they can't take anymore
+			end
+		end
+	end
 	table.insert(room_data.Treasure.Owned[player_index],pedestal_index);
 	if mod.Config.CoopTreasure.single_mode and not CoopTreasure.CheckComplete() and room_data.Spawn.Current < room_data.Spawn.Total then
 		room_data.Spawn.Current = (room_data.Spawn.Current or 0) + 1;
@@ -252,11 +266,13 @@ function CoopTreasure:onUpdate()
 				pedestal_data.CollectibleType = item_pool:GetCollectible(room_pool, true, room_seed); -- Gets seed accurate Collectible Type
 				if pedestal_entity and (pedestal_data.OptionsPickupIndex == 0 or pedestal_entity.SubType == CollectibleType.COLLECTIBLE_NULL) then
 					pedestal_entity = pedestal_entity:ToPickup();
+					if pedestal_data.IsBlind then pedestal_entity:SetForceBlind(isBlind); end -- Set blind (usually alt floor treasure)
 					pedestal_entity.SubType = pedestal_data.CollectibleType;
 					pedestal_entity.OptionsPickupIndex = pedestal_data.OptionsPickupIndex;
 					pedestal_entity:ReloadGraphics();
 				else
 					local new_pedestal_entity = game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, pedestal_data.Position, Vector.Zero, nil, pedestal_data.CollectibleType, room_seed):ToPickup();
+					if pedestal_data.IsBlind then new_pedestal_entity:SetForceBlind(isBlind); end -- Set blind (usually alt floor treasure)
 					new_pedestal_entity.OptionsPickupIndex = pedestal_data.OptionsPickupIndex;
 					pedestal_data.Pointer = EntityPtr(new_pedestal_entity);
 				end
@@ -277,7 +293,7 @@ function CoopTreasure:onRender()
 	
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_RENDER, room_data, display); -- Execute Pre Owner Label Render Callbacks (room_data(table),display(boolean))
 	
-	if not CoopEnhanced.Config.modules.CoopTreasure or display == 0 or room_data.Assign < CoopTreasure.AssignmentTypes.Auto or #room_data.Treasure.Items < 1 or (mod.Config.CoopTreasure.coop_only and mod.Players.Total <= 1) or Utils.IsPauseMenuOpen() or room:IsMirrorWorld() or room:GetFrameCount() < 5 or not Isaac.GetPlayer().ControlsEnabled or (not game:GetHUD():IsVisible() and not CoopEnhanced.CoopHUD.isVisible) then return; end
+	if not mod.Config.modules.CoopTreasure or display == 0 or room_data.Assign < CoopTreasure.AssignmentTypes.Free or #room_data.Treasure.Items < 1 or (mod.Config.CoopTreasure.coop_only and mod.Players.Total <= 1) or Utils.IsPauseMenuOpen() or room:IsMirrorWorld() or room:GetFrameCount() < 5 or not Isaac.GetPlayer().ControlsEnabled or (not game:GetHUD():IsVisible() and not CoopEnhanced.CoopHUD.IsVisible()) then return; end
 		
 	-- Display Pedestal Owner Markers
 	local player_sync = mod.Config.CoopTreasure.player_sync;
@@ -336,8 +352,13 @@ function CoopTreasure:onRoom(reCaching)
 	local room = game:GetRoom();
 	local room_type = room:GetType();
 	local room_assign = CoopTreasure.GetRoomAssignment(room_type);
+	
+	if not CoopEnhanced.Config.modules.CoopTreasure or room_assign < CoopTreasure.AssignmentTypes.Free or not CoopTreasure.CheckMode() or room:IsMirrorWorld() then return; end
+	
 	local room_desc = game:GetLevel():GetCurrentRoomDesc();
-	local spawn_total = (mod.Config.CoopTreasure.dead and mod.Players.Total or mod.Players.Alive) + (mod.Config.CoopTreasure.coop_only and 0 or mod.Config.CoopTreasure.extras);
+	local spawn_total = (mod.Config.CoopTreasure.dead and mod.Players.Total or mod.Players.Alive) + ((not mod.Config.CoopTreasure.coop_only or Utils.IsCoopPlay()) and mod.Config.CoopTreasure.extras or 0);
+	
+	if (not room_desc or room_desc.Data == nil) or (room_desc.VisitedCount > 1 and not reCaching) or spawn_total <= 1 then return; end
 	
 	if mod.Debug and room_desc.Data then 
 		mod.Debug("Room Type is " .. room_type);
@@ -345,8 +366,6 @@ function CoopTreasure:onRoom(reCaching)
 		mod.Debug("Room SubType is " .. room_desc.Data.Subtype);
 		mod.Debug("Room Stage is " .. room_desc.Data.StageID);
 	end
-	
-	if not CoopEnhanced.Config.modules.CoopTreasure or (not room_desc or room_desc.Data == nil) or spawn_total <= 1 or room_assign < CoopTreasure.AssignmentTypes.Free or not CoopTreasure.CheckMode() or room_desc.VisitedCount > 1 or room:IsMirrorWorld() then return; end
 	
 	local original_pedestals = Isaac.FindByType(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, -1);
 	local room_data = {Assign = room_assign, Config = room_desc.Data, Positions = {}, Safe = {}, MoreOptions = {}, Spawn = {}, Treasure = {Assignments = {0,0,0,0}, Owned = {{},{},{},{}}, Prices = {0,0,0,0}, Items = {{},{},{},{}}, Ignored = {}}, Render = {}};
@@ -380,25 +399,31 @@ function CoopTreasure:onRoom(reCaching)
 		CoopTreasure.DATA[room_ID] = room_data;
 		return;
 	end
-	for i,pedestal in ipairs(original_pedestals) do if pedestal:ToPickup().Price > 0 then table.remove(original_pedestals,i); end end
-	if not original_pedestals or #original_pedestals == 0 then return; end
 	
 	local isSkinny = room:GetRoomShape() == RoomShape.ROOMSHAPE_IV or room:GetRoomShape() == RoomShape.ROOMSHAPE_IH or room:GetRoomShape() == RoomShape.ROOMSHAPE_IIV or room:GetRoomShape() == RoomShape.ROOMSHAPE_IIH;
-	local pedestal_offset = Utils.VectorFrom(((mod.GridSize) * (isSkinny and 1 or 3)) / 2);
-	room_data.Positions[1] = room:GetTopLeftPos() + pedestal_offset;
-	room_data.Positions[4] = room:GetBottomRightPos() - pedestal_offset;
-	room_data.Positions[2] = Vector(room_data.Positions[4].X,room_data.Positions[1].Y);
-	room_data.Positions[3] = Vector(room_data.Positions[1].X,room_data.Positions[4].Y);
+	local pedestal_offset = Utils.VectorFrom(((mod.GridSize) * (isSkinny and 1 or 3)) / 2) * mod.Config.CoopTreasure.offset;
+	if mod.Config.CoopTreasure.centered and not isSkinny then
+		room_data.Positions[1] = room:GetCenterPos() - Vector(pedestal_offset.X - (mod.GridSize / 2),0);
+		room_data.Positions[2] = room:GetCenterPos() + Vector(pedestal_offset.X - (mod.GridSize / 2),0);
+		room_data.Positions[3] = room:GetCenterPos() - Vector(0,pedestal_offset.Y - (mod.GridSize / 2));
+		room_data.Positions[4] = room:GetCenterPos() + Vector(0,pedestal_offset.Y - (mod.GridSize / 2));
+	else
+		room_data.Positions[1] = room:GetTopLeftPos() + pedestal_offset;
+		room_data.Positions[4] = room:GetBottomRightPos() - pedestal_offset;
+		room_data.Positions[2] = Vector(room_data.Positions[4].X,room_data.Positions[1].Y);
+		room_data.Positions[3] = Vector(room_data.Positions[1].X,room_data.Positions[4].Y);
+	end
 	
 	room_data.Spawn = {Maximum = 2, Total = math.min(4,spawn_total), Vertical = (room:GetRoomShape() == RoomShape.ROOMSHAPE_IV or room:GetRoomShape() == RoomShape.ROOMSHAPE_IIV or room:GetRoomShape() == RoomShape.ROOMSHAPE_1x2), Radius = mod.Config.CoopTreasure.radius, Restock = true};
 	room_data.Safe = {Enable = (mod.Config.CoopTreasure.safe > 0), Mode = mod.Config.CoopTreasure.safe};
 	room_data.MoreOptions = {Enabled = (#original_pedestals > 1), Offset = (room_data.Spawn.Vertical and Vector(0,2 * mod.GridSize) or Vector(2 * mod.GridSize,0))};
+	if mod.Config.CoopTreasure.centered then room_data.MoreOptions.Offset = room_data.MoreOptions.Offset * -1; end
 	
 	-- Get Room Specific Data, Run Room Specific Methods
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_ROOM_DATA, room_data); -- Execute Pre Room Data update Callbacks (room_data(table))
 	local room_function = CoopTreasure.RoomConfigs[room_type] and CoopTreasure.RoomConfigs[room_type][room_variant] or nil;
 	if room_function then room_function(room,room_data); end
-	if room_data == nil or room_data.Spawn.Maximum == 0 or room_data.Assign <= CoopTreasure.AssignmentTypes.Disabled then return; end
+	if room_data == nil or room_data.Spawn.Maximum == 0 or room_data.Assign < CoopTreasure.AssignmentTypes.Free then return; end
 	for i,ignore_pos in pairs(room_data.Treasure.Ignored) do 
 		for ii,pedestal in ipairs(original_pedestals) do if pedestal.Position:Distance(ignore_pos) <= (mod.GridSize / 3) then table.remove(original_pedestals,ii); end end
 	end
@@ -436,7 +461,7 @@ function CoopTreasure:onRoom(reCaching)
 			local new_pedestal_entity = game:Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, item_pos, Vector.Zero, nil, pedestal_entity.SubType, room_seed):ToPickup(); -- Spawn new one to remove extra items from coop (e.g. Boss Item Pedestals)
 			if REPENTOGON then new_pedestal_entity:SetForceBlind(isBlind); end -- Set blind (usually alt floor treasure)
 			if room_data.MoreOptions.Enabled then new_pedestal_entity.OptionsPickupIndex = 1; else new_pedestal_entity.OptionsPickupIndex = 0; end
-			if room_data.Assign > CoopTreasure.AssignmentTypes.Free and players[1]:GetPlayerType() == PlayerType.PLAYER_KEEPER_B or isDevilDeal then new_pedestal_entity.Price = Utils.GetPrice(players[1],new_pedestal_entity.SubType,isDevilDeal); else new_pedestal_entity.Price = room_data.Treasure.Prices[1] or 0; end
+			if (room_data.Assign == CoopTreasure.AssignmentTypes.Auto and players[1]:GetPlayerType() == PlayerType.PLAYER_KEEPER_B) or isDevilDeal then new_pedestal_entity.Price = Utils.GetPrice(players[1],new_pedestal_entity.SubType,isDevilDeal); else new_pedestal_entity.Price = room_data.Treasure.Prices[1] or 0; end
 			pedestal_entity:Remove();
 			item_pos = Utils.Clone(new_pedestal_entity.Position);
 			local pedestal_data = {Pointer = EntityPtr(new_pedestal_entity), Position = item_pos, OptionsPickupIndex = new_pedestal_entity.OptionsPickupIndex, Price = new_pedestal_entity.Price, CollectibleType = new_pedestal_entity.SubType, IsBlind = isBlind};
@@ -450,7 +475,13 @@ function CoopTreasure:onRoom(reCaching)
 		local edge_multipliers = Vector((i % 2 == 0) and -1 or 1, i > 2 and -1 or 1);
 		item_pos = room_data.Positions[i];
 		for ii = 1, #room_data.Treasure.Items[1], 1 do
-			if ii > 1 then item_pos = item_pos + ((room_data.MoreOptions.Offset / (#room_data.Treasure.Items[1] >= 3 and 2 or 1)) * edge_multipliers); end
+			if ii > 1 then
+				if mod.Config.CoopTreasure.centered and i > 2 then
+					item_pos = item_pos + Vector(0,(room_data.MoreOptions.Offset.X / (#room_data.Treasure.Items[1] >= 3 and 2 or 1)) * edge_multipliers.X);
+				else
+					item_pos = item_pos + ((room_data.MoreOptions.Offset / (#room_data.Treasure.Items[1] >= 3 and 2 or 1)) * edge_multipliers);
+				end
+			end
 			CoopTreasure.ClearGridSpace(item_pos, room_data.Spawn.Radius); -- Clear grid entities from around pedestals
 			if room_data.Safe.Enable and room_data.Safe.Mode > 0 then item_pos = Utils.GetSafeSpawnPosition(players[1].Position, item_pos, {safe_args[1] * edge_multipliers.X,safe_args[2] * edge_multipliers.Y, safe_args[3]}); end -- Safe Pos Check
 			CoopTreasure.ClearGridSpace(item_pos, 0);
@@ -459,7 +490,7 @@ function CoopTreasure:onRoom(reCaching)
 			if REPENTOGON then pedestal_entity:SetForceBlind(room_data.Treasure.Items[1][ii].IsBlind); end
 			CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_PEDESTAL, i, pedestal_entity); -- Execute Pre Pedestal updates for player X Callbacks (player_index, pedestal_entity(EntityPickup))
 			
-			if room_data.Assign > CoopTreasure.AssignmentTypes.Free and (players[i] and players[i]:GetPlayerType() == PlayerType.PLAYER_KEEPER_B) or isDevilDeal then pedestal_entity.Price = Utils.GetPrice(players[i],collectible_type,isDevilDeal); else pedestal_entity.Price = room_data.Treasure.Prices[i] or 0; end -- Set price
+			if (room_data.Assign == CoopTreasure.AssignmentTypes.Auto and (players[i] and players[i]:GetPlayerType() == PlayerType.PLAYER_KEEPER_B)) or isDevilDeal then pedestal_entity.Price = Utils.GetPrice(players[i],collectible_type,isDevilDeal); else pedestal_entity.Price = room_data.Treasure.Prices[i] or 0; end -- Set price
 			if room_data.MoreOptions.Enabled then pedestal_entity.OptionsPickupIndex = i; end -- Set OptionsPickupIndex
 			item_pos = Utils.Clone(pedestal_entity.Position);
 			local pedestal_data = {Pointer = EntityPtr(pedestal_entity), Position = item_pos, OptionsPickupIndex = pedestal_entity.OptionsPickupIndex, Price = pedestal_entity.Price, CollectibleType = pedestal_entity.SubType, IsBlind = (REPENTOGON and pedestal_entity:IsBlind() or false)};
@@ -473,6 +504,7 @@ function CoopTreasure:onRoom(reCaching)
 end
 mod:AddPriorityCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.Priorities[4], CoopTreasure.onRoom);
 
+-- Void/Abyss Callbnacks
 if not REPENTOGON then return; end
 local void_player = nil;
 local function onVoidItem(_,collectible_type,rng,player_entity)

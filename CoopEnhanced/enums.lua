@@ -193,7 +193,6 @@ mod.Controls = {
 	{Name = "Hold Map 3s", Buttons = Vector(ButtonAction.ACTION_MAP,180), Held = true},
 };
 mod.GridSize = 40;
-mod.MaxControllers = 6;
 
 local Achievements = Achievement or {
 	MAGDALENE = 1,

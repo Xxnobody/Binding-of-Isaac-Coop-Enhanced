@@ -16,6 +16,7 @@ mod.DefaultConfig = {
 		CoopExtras = true,
 		CoopTwins = true,
 	},
+	MaxControllers = 6,
 	players = {
 		tainted_names = false,
 		[1] = {
@@ -132,7 +133,7 @@ ModConfigMenu.AddSetting(
 );
 
 ModConfigMenu.AddSpace(mod.MCM.category)
-ModConfigMenu.AddTitle(mod.MCM.category, "Global Player Settings");
+ModConfigMenu.AddTitle(mod.MCM.category, "Global Settings");
 ModConfigMenu.AddSetting(
 	mod.MCM.category,
 	{
@@ -141,6 +142,18 @@ ModConfigMenu.AddSetting(
 		Display = function() return "Full Tainted Names: " .. (mod.Config.players.tainted_names and "on" or "off"); end,
 		OnChange = function(b) mod.Config.players.tainted_names = b; end,
 		Info = {"Enable to use full tainted names (i.e. The Baleful, The Miser, etc)."},
+	}
+);
+ModConfigMenu.AddSetting(
+	mod.MCM.category,
+	{
+		Type = ModConfigMenu.OptionType.NUMBER,
+		CurrentSetting = function() return mod.Config.MaxControllers; end,
+		Minimum = 1,
+		Maximum = 50,
+		Display = function() return "Max Controller: " .. mod.Config.MaxControllers; end,
+		OnChange = function(n) mod.Config.MaxControllers = n; end,
+		Info = "Set the limit of controller indexes the mod will check for various functions. (Warning: Increasing this number can lead to increased lag).",
 	}
 );
 
@@ -155,7 +168,7 @@ for i = 1, 4 do
 			Minimum = 0,
 			Maximum = 2,
 			Display = function() return "Player " .. tostring(i) .." Label: " .. (mod.Config.players[i].type == 0 and "P" .. i or (mod.Config.players[i].type == 1 and "Character" or (string.len(mod.Config.players[i].name) == 0 and "Custom" or mod.Config.players[i].name))); end,
-			OnChange = function(b) mod.Config.players[i].type = b; end,
+			OnChange = function(n) mod.Config.players[i].type = n; end,
 			Info = "Character displays your character's name. (i.e. Isaac, Cain, etc). Custom requires using the command 'coop name global <player_number> <player_name>'.",
 		}
 	);
@@ -172,11 +185,12 @@ for i = 1, 4 do
 			Minimum = 1,
 			Maximum = #mod.Colors,
 			Display = function() return "Player " .. tostring(i) .." Color: " .. mod.Colors[mod.Config.players[i].color].Name; end,
-			OnChange = function(b) mod.Config.players[i].color = b; end,
+			OnChange = function(n) mod.Config.players[i].color = n; end,
 			Info = "Set the player color.",
 		}
 	);
 end
+
 
 local json = require("json");
 

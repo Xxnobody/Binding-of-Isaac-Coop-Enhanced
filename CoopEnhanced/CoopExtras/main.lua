@@ -128,8 +128,8 @@ mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CoopExtras.GreedRevive);
 
 
 -- Coop Prices Updates
-function CoopExtras.CoopPrices(_,pickup)
-	if mod.Config.CoopExtras.item_prices and pickup ~= nil and pickup.SubType ~= 0 then
+function CoopExtras.CoopPrices(_,pickup_entity)
+	if mod.Config.CoopExtras.item_prices and pickup_entity ~= nil and pickup_entity.SubType ~= CollectibleType.COLLECTIBLE_NULL then
 		local room_ID = Utils.GetRoomID();
 		local room_type = game:GetRoom():GetType();
 		if CoopExtras.DATA.Pickups[room_ID] == nil then
@@ -137,10 +137,10 @@ function CoopExtras.CoopPrices(_,pickup)
 		end
 		if not CoopExtras.DATA.Pickups[room_ID] then return; end
 		local room_data = CoopExtras.DATA.Pickups[room_ID];
-		local pickup_id = CoopExtras.GetPickupID(pickup);
+		local pickup_id = CoopExtras.GetPickupID(pickup_entity);
 		if room_data[pickup_id] == nil then
-			local price = pickup.Price ~= 0 and ((room_type == RoomType.ROOM_DEVIL or room_type == RoomType.ROOM_BLACK_MARKET or (game:GetLevel():GetName() == "Dark Room" and game:GetLevel():GetCurrentRoomIndex() == game:GetLevel():GetStartingRoomIndex())) and PickupPrice.PRICE_ONE_HEART or pickup.Price) or pickup.Price;
-			room_data[pickup_id] = {Price = price, Last = nil, Item = pickup.SubType};
+			local price = pickup_entity.Price ~= 0 and ((room_type == RoomType.ROOM_DEVIL or room_type == RoomType.ROOM_BLACK_MARKET or (game:GetLevel():GetName() == "Dark Room" and game:GetLevel():GetCurrentRoomIndex() == game:GetLevel():GetStartingRoomIndex())) and PickupPrice.PRICE_ONE_HEART or pickup_entity.Price) or pickup_entity.Price;
+			room_data[pickup_id] = {Price = price, Last = nil, Item = pickup_entity.SubType};
 		end
 		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_PRE_PRICE_DATA, room_data); -- Execute Pre item Pricing Callbacks (room_data(table))
 		if room_data[pickup_id].Price == nil then return; end -- Make sure that Couponed items and old replaced actives stay free
@@ -151,21 +151,21 @@ function CoopExtras.CoopPrices(_,pickup)
 		
 		for i = 1, Game():GetNumPlayers(), 1 do
 			local temp_player = Isaac.GetPlayer(i - 1);
-			local temp_distance = temp_player.Position:Distance(pickup.Position);
-			local isOwner = (not mod.Config.modules.CoopTreasure or mod.CoopTreasure.GetRoomAssignment(room_type) < 2 or mod.CoopTreasure.CanPickup(Utils.GetMainPlayerIndex(temp_player),pickup));
-			if (not temp_player:IsCoopGhost() or isOwner) and isOwner and (not player_distance or temp_distance < player_distance) then
-				player_entity, player_distance = temp_player, temp_distance;
+			local temp_distance = temp_player.Position:Distance(pickup_entity.Position);
+			if not player_distance or temp_distance < player_distance then
+				local canPickUp = (not mod.Config.modules.CoopTreasure or (mod.CoopTreasure.GetRoomAssignment(room_type) < mod.CoopTreasure.AssignmentTypes.Auto or (mod.CoopTreasure.CanPickup(temp_player,pickup_entity))));
+				if canPickUp then player_entity, player_distance = temp_player, temp_distance; end
 			end
 		end
 		if player_entity ~= nil and (isDevilPrice or player_entity:GetPlayerType() == PlayerType.PLAYER_KEEPER_B) then
-			price = Utils.GetPrice(player_entity,pickup.SubType,isDevilPrice);
-			pickup.AutoUpdatePrice = true;
-			pickup.ShopItemId = -1;
+			price = Utils.GetPrice(player_entity,pickup_entity.SubType,isDevilPrice);
+			pickup_entity.AutoUpdatePrice = true;
+			pickup_entity.ShopItemId = -1;
 		end
-		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_PRICE_DATA, player_entity, pickup, price); -- Execute Post item Pricing Callbacks (player (EntityPlayer), pickup(EntityPickup), price(int))
-		if pickup.Price == 0 and (price ~= 0 and price == room_data[pickup_id].Last) or pickup.Touched then room_data[pickup_id].Price = nil; return; end
+		CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.EXTRAS_POST_PRICE_DATA, player_entity, pickup_entity, price); -- Execute Post item Pricing Callbacks (player (EntityPlayer), pickup_entity(EntityPickup), price(int))
+		if pickup_entity.Price == 0 and (price ~= 0 and price == room_data[pickup_id].Last) or pickup_entity.Touched then room_data[pickup_id].Price = nil; return; end
 		room_data[pickup_id].Last = price;
-		pickup.Price = price;
+		pickup_entity.Price = price;
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, CoopExtras.CoopPrices, PickupVariant.PICKUP_COLLECTIBLE);

@@ -238,6 +238,47 @@ function Utils.GetHealthType(pickup_entity,heart_subtype)
 	return nil;
 end
 
+function Utils.GetPrice(player_entity,collectible_type,isDevil)
+	local price = 0;
+	local player_type = (player_entity ~= nil and player_entity:GetPlayerType()) or PlayerType.PLAYER_POSSESSOR;
+	local item_config = Isaac.GetItemConfig():GetCollectible(collectible_type);
+	
+	if isDevil then
+		local player_health = player_entity and ((CustomHealthAPI and CustomHealthAPI.Helper.GetRedCapacity(player_entity) or (player_entity:GetEffectiveMaxHearts())) / 2) or 0;
+		local devil_price = (player_entity ~= nil and player_entity:HasTrinket(TrinketType.TRINKET_JUDAS_TONGUE) and 1) or item_config.DevilPrice;
+		if player_entity and player_entity:HasTrinket(TrinketType.TRINKET_YOUR_SOUL) or Utils.IsLost(player_type) then
+			price = PickupPrice.PRICE_SOUL;
+		elseif Utils.IsKeeper(player_type) then 
+			price = (15 * devil_price) / (Utils.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
+		elseif (player_health < 1 or player_type == PlayerType.PLAYER_THESOUL) and player_type ~= PlayerType.PLAYER_BLUEBABY then
+			price = PickupPrice.PRICE_THREE_SOULHEARTS;
+		else
+			if devil_price == 1 then
+				if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_ONE_SOUL_HEART;
+				else price = PickupPrice.PRICE_ONE_HEART; end
+			else
+				if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_TWO_SOUL_HEARTS;
+				elseif player_health < 2 then price = PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS;				
+				else price = PickupPrice.PRICE_TWO_HEARTS end
+			end
+		end
+	else
+		price = (15 * item_config.DevilPrice) / (Utils.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
+	end
+	return price;
+end
+
+function Utils.CanPayPrice(player_entity,price)
+	if price > 0 then
+		if player_entity:HasTrinket(TrinketType.TRINKET_STORE_CREDIT) or player_entity:GetNumCoins() >= price then return true; else return false; end
+	elseif price < 0 then
+		local player_health = {Red = ((CustomHealthAPI and CustomHealthAPI.Helper.GetRedCapacity(player_entity) or (player_entity:GetEffectiveMaxHearts())) / 2), Soul = ((CustomHealthAPI and CustomHealthAPI.Helper.GetTotalSoulHP(player_entity) or (player_entity:GetBlackHearts() + player_entity:GetSoulHearts())) / 2)};
+		
+		if player_health.Red > 0 and (price == PickupPrice.PRICE_ONE_HEART or price == PickupPrice.PRICE_TWO_HEARTS or price == PickupPrice.PRICE_ONE_HEART_AND_ONE_SOUL_HEART or price == PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS) or (player_health.Soul > 0 and (price == PickupPrice.PRICE_ONE_SOUL_HEART or price == PickupPrice.PRICE_TWO_SOUL_HEARTS or price == PickupPrice.PRICE_THREE_SOULHEARTS) or (price == PickupPrice.PRICE_SOUL and (Utils.IsLost(player_entity:GetPlayerType()) or player_entity:HasTrinket(TrinketType.TRINKET_YOUR_SOUL)) or (price == PickupPrice.PRICE_SPIKES))) then return true; else return false; end
+	end
+	return true;
+end
+
 -- Color Utilities
 function Utils.ColorOpacity(color,opacity)
 	return Color(color.R,color.G,color.B,(opacity or color.A));
@@ -451,7 +492,7 @@ function Utils.GetMainPlayerIndex(player_entity)
 	if player_entity == nil then return; end
 	local player_ID = Utils.GetPlayerID(player_entity);
 	for i,player in pairs(Utils.GetMainPlayers()) do
-		if Utils.GetPlayerID(player) == player_ID or Utils.GetPlayerID(Utils.GetMainTwin(player_entity)) == player_ID then return i; end
+		if Utils.GetPlayerID(player) == player_ID or Utils.GetPlayerID(Utils.GetOtherTwin(player_entity)) == player_ID then return i; end
 	end
 	return 0;
 end
@@ -466,6 +507,17 @@ function Utils.GetMainTwin(player_entity,ignoreTemp)
 	for i = 1, game:GetNumPlayers(), 1 do
 		local player = Isaac.GetPlayer(i - 1);
 		if mod.Players.Twins[i] and Utils.GetPlayerID(Isaac.GetPlayer(mod.Players.Twins[i] - 1)) == player_ID and (not ignoreTemp or not Utils.IsTemporary(player)) then return player, i; end
+	end
+	return nil,0;
+end
+function Utils.GetOtherTwin(player_entity)
+	if player_entity == nil then return; end
+	local player_ID = Utils.GetPlayerID(player_entity);
+	local player_index = player_entity:GetPlayerIndex();
+	if mod.Players.Twins[player_index] then return Isaac.GetPlayer(mod.Players.Twins[i] - 1), player_index; end
+	for i = 1, game:GetNumPlayers(), 1 do
+		local player = Isaac.GetPlayer(i - 1);
+		if mod.Players.Twins[i] == player_index then return player,i; end
 	end
 	return nil,0;
 end
@@ -570,47 +622,6 @@ function Utils.GetHeadSprite(sprite, player_entity, player_type) -- Taken from c
 	end
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.POST_HEAD_SPRITE,sprite);
 	return sprite;
-end
-
-function Utils.GetPrice(player_entity,collectible_type,isDevil)
-	local price = 0;
-	local player_type = (player_entity ~= nil and player_entity:GetPlayerType()) or PlayerType.PLAYER_POSSESSOR;
-	local item_config = Isaac.GetItemConfig():GetCollectible(collectible_type);
-	
-	if isDevil then
-		local player_health = player_entity and ((CustomHealthAPI and CustomHealthAPI.Helper.GetRedCapacity(player_entity) or (player_entity:GetEffectiveMaxHearts())) / 2) or 0;
-		local devil_price = (player_entity ~= nil and player_entity:HasTrinket(TrinketType.TRINKET_JUDAS_TONGUE) and 1) or item_config.DevilPrice;
-		if player_entity and player_entity:HasTrinket(TrinketType.TRINKET_YOUR_SOUL) or Utils.IsLost(player_type) then
-			price = PickupPrice.PRICE_SOUL;
-		elseif Utils.IsKeeper(player_type) then 
-			price = (15 * devil_price) / (Utils.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);
-		elseif (player_health < 1 or player_type == PlayerType.PLAYER_THESOUL) and player_type ~= PlayerType.PLAYER_BLUEBABY then
-			price = PickupPrice.PRICE_THREE_SOULHEARTS;
-		else
-			if devil_price == 1 then
-				if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_ONE_SOUL_HEART;
-				else price = PickupPrice.PRICE_ONE_HEART; end
-			else
-				if player_type == PlayerType.PLAYER_BLUEBABY then price = PickupPrice.PRICE_TWO_SOUL_HEARTS;
-				elseif player_health < 2 then price = PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS;				
-				else price = PickupPrice.PRICE_TWO_HEARTS end
-			end
-		end
-	else
-		price = item_config.ShopPrice / (Utils.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE) + 1);;
-	end
-	return price;
-end
-
-function Utils.CanPayPrice(player_entity,price)
-	if price > 0 then
-		if player_entity:HasTrinket(TrinketType.TRINKET_STORE_CREDIT) or player_entity:GetNumCoins() >= price then return true; else return false; end
-	elseif price < 0 then
-		local player_health = {Red = ((CustomHealthAPI and CustomHealthAPI.Helper.GetRedCapacity(player_entity) or (player_entity:GetEffectiveMaxHearts())) / 2), Soul = ((CustomHealthAPI and CustomHealthAPI.Helper.GetTotalSoulHP(player_entity) or (player_entity:GetBlackHearts() + player_entity:GetSoulHearts())) / 2)};
-		
-		if player_health.Red > 0 and (price == PickupPrice.PRICE_ONE_HEART or price == PickupPrice.PRICE_TWO_HEARTS or price == PickupPrice.PRICE_ONE_HEART_AND_ONE_SOUL_HEART or price == PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS) or (player_health.Soul > 0 and (price == PickupPrice.PRICE_ONE_SOUL_HEART or price == PickupPrice.PRICE_TWO_SOUL_HEARTS or price == PickupPrice.PRICE_THREE_SOULHEARTS) or (price == PickupPrice.PRICE_SOUL and (Utils.IsLost(player_entity:GetPlayerType()) or player_entity:HasTrinket(TrinketType.TRINKET_YOUR_SOUL)) or (price == PickupPrice.PRICE_SPIKES))) then return true; else return false; end
-	end
-	return true;
 end
 
 function Utils.IsPlayerDying(player_entity) -- Taken from LibraryExpanded
