@@ -265,6 +265,7 @@ function Player.Render(player_number, screen_dimensions)
 			end
 			
 			-- Collectible/Passive Items
+			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Maximum = 0;
 			mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible = (player.Type ~= PlayerType.PLAYER_ISAAC_B or mod.Config.CoopHUD.inventory.items.tisaac) and (not isTwin or mod.Config.CoopHUD.inventory.items.anchor == 0) and (not player_entity:IsCoopGhost() or mod.Config.CoopHUD.inventory.items.dead) and CoopHUD.IsElementVisible(mod.Config.CoopHUD.inventory.items.display);
 			if mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Visible then
 				local anchor = mod.Config.CoopHUD.inventory.items.anchor;
@@ -277,10 +278,10 @@ function Player.Render(player_number, screen_dimensions)
 				local color = Utils.ConvertColorToColorize(player_data.Player.Color,opacity);
 					
 				if anchor > 0 then
-					local edge = anchor == 1 and player_data.Edge.Pos.X or ((anchor == 3 and (screen_dimensions.Max.X - ((10 + space.X * (mod.Config.CoopHUD.inventory.items.dead and mod.Players.Total or mod.Players.Alive)) * scale.X)) or 0) + mod.Config.CoopHUD.offset.X);
+					local edge = anchor == 1 and player_data.Edge.Pos.X or ((anchor == 3 and (screen_dimensions.Max.X - (mod.Config.CoopHUD.inventory.items.max_grid.X * (10 + space.X * (mod.Config.CoopHUD.inventory.items.dead and mod.Players.Total or mod.Players.Alive) / (anchor == 1 and 2 or 1)) * scale.X)) or 0) + mod.Config.CoopHUD.offset.X);
 					local edge_indexed = Vector(edge, screen_dimensions.Max.Y - mod.Config.CoopHUD.offset.Y);
 							
-					pos = edge_indexed + (offset + Vector((((anchor == 1 and ((player.Index > 2) and 2 or 1) or player.Index) * space.X) * scale.X), (-space.Y * mod.Config.CoopHUD.inventory.items.max) - (8 * scale.Y)));
+					pos = edge_indexed + (offset + Vector((((anchor == 1 and ((player.Index > 2) and 2 or 1) or player.Index) * space.X) * scale.X), (-space.Y * (mod.Config.CoopHUD.inventory.items.max / mod.Config.CoopHUD.inventory.items.max_grid.X)) - (8 * scale.Y)));
 				else
 					local hasTwin = (mainTwin ~= nil or Utils.IsMainTwin(player_entity));
 					local twin_offset = (isTwin and ((mod.Config.CoopHUD.players.twins.offset * -1) + mod.Config.CoopHUD.inventory.items.twin_offset) or Vector.Zero);
@@ -293,6 +294,7 @@ function Player.Render(player_number, screen_dimensions)
 					pos = player_data.Edge.Pos + player_data.Edge.Offset + ((CoopHUD.Positions.Inventory + offset + extra_offset) * player_data.Edge.Multipliers);
 				end
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Sprite = player_data.Inventory.Passive.Sprite or Sprite(mod.Animations.Item, false);
+				player_data.Inventory.Passive.Sprite:Load(mod.Animations.Item);
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Sprite:SetFrame("Idle", 0);
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Sprite.Scale = scale;
 				mod.CoopHUD.DATA.Players[player_number].Inventory.Passive.Sprite.Color = mod.Config.CoopHUD.inventory.items.colors and color or Color(1, 1, 1, opacity);
