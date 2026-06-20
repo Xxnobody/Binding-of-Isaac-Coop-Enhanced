@@ -194,9 +194,9 @@ function CoopTreasure:onPedestal(pedestal_entity, entity)
 	if pedestal_entity.Price ~= 0 and not Utils.CanPayPrice(player_entity,pedestal_entity.Price) then return true;
 	elseif assigned_index == 0 and owned_amount < mod.Config.CoopTreasure.max then 
 		room_data.Treasure.Assignments[pedestal_index] = player_index;
-	elseif assigned_index ~= math.abs(player_index) then
+	elseif assigned_index ~= math.abs(player_index) and (room_data.Assign > CoopTreasure.AssignmentTypes.Free or assigned_index == 0) then
 		return pedestal_entity.Price ~= 0;
-	elseif pedestal_data.Ignore then
+	elseif pedestal_data.Ignore or room_data.Assign == CoopTreasure.AssignmentTypes.Free then
 		return;
 	end
 	
@@ -293,7 +293,7 @@ function CoopTreasure:onRender()
 	
 	CoopEnhanced.Registry:ExecuteCallback(CoopEnhanced.Callbacks.TREASURE_PRE_RENDER, room_data, display); -- Execute Pre Owner Label Render Callbacks (room_data(table),display(boolean))
 	
-	if not mod.Config.modules.CoopTreasure or display == 0 or room_data.Assign < CoopTreasure.AssignmentTypes.Free or #room_data.Treasure.Items < 1 or (mod.Config.CoopTreasure.coop_only and mod.Players.Total <= 1) or Utils.IsPauseMenuOpen() or room:IsMirrorWorld() or room:GetFrameCount() < 5 or not Isaac.GetPlayer().ControlsEnabled or (not game:GetHUD():IsVisible() and not CoopEnhanced.CoopHUD.IsVisible()) then return; end
+	if not mod.Config.modules.CoopTreasure or display == 0 or room_data.Assign < CoopTreasure.AssignmentTypes.Free or #room_data.Treasure.Items < 2 or (mod.Config.CoopTreasure.coop_only and mod.Players.Total <= 1) or Utils.IsPauseMenuOpen() or room:IsMirrorWorld() or room:GetFrameCount() < 5 or not Isaac.GetPlayer().ControlsEnabled or (not game:GetHUD():IsVisible() and not CoopEnhanced.CoopHUD.IsVisible()) then return; end
 		
 	-- Display Pedestal Owner Markers
 	local player_sync = mod.Config.CoopTreasure.player_sync;
